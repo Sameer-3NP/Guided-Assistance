@@ -1,5 +1,5 @@
-import type { CreditReport } from "../../types/credit";
-import { calculateExpirationDate } from "../../utils/dateUtils";
+import type { CreditReport } from "../../../types/credit";
+import { calculateExpirationDate } from "../../../utils/dateUtils";
 
 type Props = {
   report: CreditReport;
@@ -8,10 +8,11 @@ type Props = {
 };
 
 const CreditReportCard = ({ report, index, updateReport }: Props) => {
-  const updateField = (field: string, value: any) => {
-    const updated = { ...report, [field]: value };
-
-    updateReport(index, updated);
+  const updateField = <K extends keyof CreditReport>(
+    field: K,
+    value: CreditReport[K],
+  ) => {
+    updateReport(index, { ...report, [field]: value });
   };
 
   const handleUpdateDate = (value: string) => {
@@ -26,20 +27,24 @@ const CreditReportCard = ({ report, index, updateReport }: Props) => {
     });
   };
 
-  const handleRepositoryChange = (repo: string, value: boolean) => {
+  const handleRepositoryChange = (
+    repo: keyof CreditReport["repositories"],
+    value: boolean,
+  ) => {
     const repos = {
       ...report.repositories,
       [repo]: value,
     };
 
-    const count = Object.values(repos).filter(Boolean).length;
-
     updateReport(index, {
       ...report,
       repositories: repos,
-      repositoryCount: count,
     });
   };
+
+  const repositoryCount = Object.values(report.repositories).filter(
+    Boolean,
+  ).length;
 
   return (
     <div className="border rounded-lg p-4">
@@ -91,8 +96,9 @@ const CreditReportCard = ({ report, index, updateReport }: Props) => {
 
           {!report.overrideExpiration && (
             <button
+              type="button"
               onClick={() => updateField("overrideExpiration", true)}
-              className="text-red-600 text-sm px-2 py-1 border rounded-md hover:bg-black hover:text-white cursor-pointer"
+              className="text-red-600 text-sm px-2 py-1 border rounded-md hover:bg-black hover:text-white"
             >
               need changes?
             </button>
@@ -106,7 +112,7 @@ const CreditReportCard = ({ report, index, updateReport }: Props) => {
         <label className="block text-sm mb-1">Repositories</label>
 
         <div className="flex gap-4">
-          <label>
+          <label className="flex gap-1">
             <input
               type="checkbox"
               checked={report.repositories.eq}
@@ -115,7 +121,7 @@ const CreditReportCard = ({ report, index, updateReport }: Props) => {
             Equifax
           </label>
 
-          <label>
+          <label className="flex gap-1">
             <input
               type="checkbox"
               checked={report.repositories.ex}
@@ -124,7 +130,7 @@ const CreditReportCard = ({ report, index, updateReport }: Props) => {
             Experian
           </label>
 
-          <label>
+          <label className="flex gap-1">
             <input
               type="checkbox"
               checked={report.repositories.tu}
@@ -138,7 +144,7 @@ const CreditReportCard = ({ report, index, updateReport }: Props) => {
       {/* Repository Count */}
 
       <div className="text-sm text-gray-600">
-        Repository Count: {report.repositoryCount}
+        Repository Count: {repositoryCount}
       </div>
     </div>
   );

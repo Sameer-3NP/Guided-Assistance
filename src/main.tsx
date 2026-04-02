@@ -1,14 +1,25 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import "./index.css";
-import "./App.css";
-import App from "./App.tsx";
 import { BrowserRouter } from "react-router-dom";
 
-createRoot(document.getElementById("root")!).render(
+import App from "./App.tsx";
+import { SectionProvider } from "./store/SectionStore.tsx";
+
+import "./index.css";
+import "./App.css";
+
+const rootElement = document.getElementById("root");
+
+if (!rootElement) {
+  throw new Error("Root element not found");
+}
+
+createRoot(rootElement).render(
   <StrictMode>
     <BrowserRouter>
-      <App />
+      <SectionProvider>
+        <App />
+      </SectionProvider>
     </BrowserRouter>
   </StrictMode>,
 );

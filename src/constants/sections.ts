@@ -1,4 +1,5 @@
 export const SECTIONS = [
+  { id: "S0", label: "Initialization" },
   {
     id: "S1",
     label: "Credit Report Details",

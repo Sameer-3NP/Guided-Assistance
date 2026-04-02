@@ -1,6 +1,7 @@
 import { useForm } from "react-hook-form";
 import { useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
+import toast from "react-hot-toast";
 import {
   initializationSchema,
   type InitializationForm,
@@ -9,10 +10,10 @@ import {
 type Props = {
   onSubmit: (data: InitializationForm) => void;
   locked: boolean;
-  defaultValues?: any;
+  defaultValues?: Partial<InitializationForm>;
 };
 
-const Initialization = ({ onSubmit, locked, defaultValues }: Props) => {
+const Initialization = ({ onSubmit, defaultValues }: Props) => {
   const {
     register,
     handleSubmit,
@@ -21,32 +22,39 @@ const Initialization = ({ onSubmit, locked, defaultValues }: Props) => {
     formState: { errors },
   } = useForm<InitializationForm>({
     resolver: zodResolver(initializationSchema),
+    defaultValues,
   });
   const formValues = watch();
-
-  useEffect(() => {
-    const savedDraft = localStorage.getItem("S0_draft");
-
-    if (savedDraft) {
-      const parsedDraft = JSON.parse(savedDraft);
-
-      Object.keys(parsedDraft).forEach((key) => {
-        setValue(key as keyof InitializationForm, parsedDraft[key]);
-      });
-    }
-  }, [setValue]);
 
   useEffect(() => {
     localStorage.setItem("S0_draft", JSON.stringify(formValues));
   }, [formValues]);
 
+  useEffect(() => {
+    const savedDraft = localStorage.getItem("S0_draft");
+    const savedSession = localStorage.getItem("initializationSession");
+
+    const data = savedDraft || savedSession;
+
+    if (data) {
+      const parsed = JSON.parse(data);
+
+      Object.keys(parsed).forEach((key) => {
+        setValue(key as keyof InitializationForm, parsed[key]);
+      });
+    }
+  }, [setValue]);
+
   return (
     <div className="flex justify-center items-start">
       <div className="bg-white w-full max-w-3xl rounded-xl shadow-md border p-8">
-        <h2 className="text-xl font-semibold mb-6">S0 — Initialization</h2>
+        <h2 className="text-xl font-semibold mb-6">Start the Loan Process</h2>
 
         <form
-          onSubmit={handleSubmit(onSubmit)}
+          id="initialization-form"
+          onSubmit={handleSubmit(onSubmit, () =>
+            toast.error("Please complete all the fields."),
+          )}
           className="grid grid-cols-2 gap-6"
         >
           {/* Application Date */}

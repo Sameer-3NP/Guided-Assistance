@@ -8,16 +8,16 @@ export const initializationSchema = z
     borrowerCount: z.string().min(1, "Borrower Count is required"),
   })
   .refine(
-    (data) => new Date(data.closingDate) >= new Date(data.applicationDate),
+    (data) => new Date(data.closingDate) > new Date(data.applicationDate),
     {
-      message: "Closing Date must be after or equal to Application Date",
+      message: "Closing Date can't be same as  Application Date",
       path: ["closingDate"],
     },
   )
   .refine(
-    (data) => new Date(data.creditAsOfDate) <= new Date(data.applicationDate),
+    (data) => new Date(data.creditAsOfDate) < new Date(data.applicationDate),
     {
-      message: "Credit Date must be before or equal to Application Date",
+      message: "Credit Date must be before Application Date",
       path: ["creditAsOfDate"],
     },
   );
