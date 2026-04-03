@@ -2,57 +2,84 @@ import { useForm } from "react-hook-form";
 import { useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import toast from "react-hot-toast";
+import { useNavigate } from "react-router-dom";
+import { useFlowContext } from "../../store/FlowContext";
+import { useSectionStore } from "../../store/SectionStore";
 import {
   initializationSchema,
   type InitializationForm,
 } from "../../utils/initializationSchema";
 
-type Props = {
-  onSubmit: (data: InitializationForm) => void;
-  locked: boolean;
-  defaultValues?: Partial<InitializationForm>;
-};
+const Initialization = () => {
+  const navigate = useNavigate();
+  const { registerActions } = useFlowContext();
+  const { setS0, s0, setSectionStatus } = useSectionStore();
 
-const Initialization = ({ onSubmit, defaultValues }: Props) => {
+  const isLocked = !!s0; // 🔒 lock when data exists
+
   const {
     register,
     handleSubmit,
-    watch,
-    setValue,
     formState: { errors },
   } = useForm<InitializationForm>({
     resolver: zodResolver(initializationSchema),
-    defaultValues,
+    defaultValues: s0 || undefined,
   });
-  const formValues = watch();
+
+  /* ---------------------- Submit ---------------------- */
+
+  const doSubmit = (data: InitializationForm) => {
+    console.log("Session Created:", data);
+
+    setS0(data);
+
+    setSectionStatus((prev) => ({
+      ...prev,
+      S0: "completed",
+      S1: "active",
+    }));
+
+    navigate("/s1/inventory");
+  };
+
+  /* ---------------------- Continue Button ---------------------- */
+
+  const handleContinue = () => {
+    const form = document.getElementById(
+      "initialization-form",
+    ) as HTMLFormElement;
+
+    form?.requestSubmit();
+  };
+
+  /* ---------------------- Register Flow Actions ---------------------- */
 
   useEffect(() => {
-    localStorage.setItem("S0_draft", JSON.stringify(formValues));
-  }, [formValues]);
+    registerActions({
+      onContinue: handleContinue,
+      onBack: () => {},
+      onSave: () => {
+        toast("Draft saving disabled for this screen.");
+      },
+    });
+  }, []);
 
-  useEffect(() => {
-    const savedDraft = localStorage.getItem("S0_draft");
-    const savedSession = localStorage.getItem("initializationSession");
-
-    const data = savedDraft || savedSession;
-
-    if (data) {
-      const parsed = JSON.parse(data);
-
-      Object.keys(parsed).forEach((key) => {
-        setValue(key as keyof InitializationForm, parsed[key]);
-      });
-    }
-  }, [setValue]);
+  /* ---------------------- UI ---------------------- */
 
   return (
     <div className="flex justify-center items-start">
       <div className="bg-white w-full max-w-3xl rounded-xl shadow-md border p-8">
         <h2 className="text-xl font-semibold mb-6">Start the Loan Process</h2>
 
+        {/* {isLocked && (
+          <div className="mb-4 text-sm text-gray-600 bg-gray-100 p-3 rounded-md">
+            🔒 Initialization completed. Fields are locked.
+          </div>
+        )} */}
+
         <form
           id="initialization-form"
-          onSubmit={handleSubmit(onSubmit, () =>
+          onSubmit={handleSubmit(doSubmit, () =>
             toast.error("Please complete all the fields."),
           )}
           className="grid grid-cols-2 gap-6"
@@ -64,6 +91,7 @@ const Initialization = ({ onSubmit, defaultValues }: Props) => {
             <input
               type="date"
               {...register("applicationDate")}
+              disabled={isLocked}
               className="border rounded-md px-3 py-2"
             />
 
@@ -83,6 +111,7 @@ const Initialization = ({ onSubmit, defaultValues }: Props) => {
             <input
               type="date"
               {...register("closingDate")}
+              disabled={isLocked}
               className="border rounded-md px-3 py-2"
             />
 
@@ -102,6 +131,7 @@ const Initialization = ({ onSubmit, defaultValues }: Props) => {
             <input
               type="date"
               {...register("creditAsOfDate")}
+              disabled={isLocked}
               className="border rounded-md px-3 py-2"
             />
 
@@ -116,29 +146,20 @@ const Initialization = ({ onSubmit, defaultValues }: Props) => {
           <div className="flex flex-col">
             <label className="text-sm font-medium mb-1">Borrower Count</label>
 
-            <select
-              {...register("borrowerCount")}
+            <input
+              type="number"
+              min={1}
+              max={10}
+              {...register("borrowerCount", { valueAsNumber: true })}
+              disabled={isLocked}
               className="border rounded-md px-3 py-2"
-            >
-              <option value="">Select</option>
-              <option value="1">1 Borrower</option>
-              <option value="2">2 Borrowers</option>
-            </select>
+            />
 
             {errors.borrowerCount && (
               <span className="text-red-500 text-xs">
                 {errors.borrowerCount.message}
               </span>
             )}
-          </div>
-
-          <div className="col-span-2 flex justify-end mt-4">
-            <button
-              type="submit"
-              className="px-4 py-2 bg-black text-white rounded-md"
-            >
-              Start Process <span className="mt-1">&#10132;</span>
-            </button>
           </div>
         </form>
       </div>

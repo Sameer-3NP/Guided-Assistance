@@ -1,18 +1,22 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSectionStore } from "../../../store/SectionStore";
 import toast from "react-hot-toast";
+import { useFlowContext } from "../../../store/FlowContext";
+import { useNavigate } from "react-router-dom";
 
-type Props = {
-  onContinue: () => void;
-};
+const CreditReportValidity = () => {
+  const { registerActions } = useFlowContext();
+  const navigate = useNavigate();
 
-const CreditReportValidity = ({ onContinue }: Props) => {
-  const { s0, s1, activeCreditReport } = useSectionStore();
-
-  const [step, setStep] = useState<"pullCheck" | "expirationCheck">(
-    "pullCheck",
-  );
-  const [pullType, setPullType] = useState<string | null>(null);
+  const {
+    s0,
+    s1,
+    activeCreditReport,
+    creditValidityStep,
+    setCreditValidityStep,
+    pullType,
+    setPullType,
+  } = useSectionStore();
 
   const activeReport =
     s1.length === 1
@@ -30,13 +34,13 @@ const CreditReportValidity = ({ onContinue }: Props) => {
 
   const handleContinue = () => {
     // STEP 1 → Pull Type Check
-    if (step === "pullCheck") {
+    if (creditValidityStep === "pullCheck") {
       if (!pullType) {
         toast.error("Please select Hard Pull or Soft Pull");
         return;
       }
 
-      setStep("expirationCheck");
+      setCreditValidityStep("expirationCheck");
       return;
     }
 
@@ -48,8 +52,28 @@ const CreditReportValidity = ({ onContinue }: Props) => {
     }
 
     // STEP 2 → Expiration Check
-    onContinue();
+    navigate("/s1/source-request-integrity");
   };
+
+  useEffect(() => {
+    registerActions({
+      onContinue: handleContinue,
+      onBack: () => {
+        if (creditValidityStep === "expirationCheck") {
+          setCreditValidityStep("pullCheck");
+        } else {
+          navigate("/s1/repository-check");
+        }
+      },
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [
+    creditValidityStep,
+    pullType,
+    expirationCondition,
+    navigate,
+    registerActions,
+  ]);
 
   return (
     <div className="space-y-6">
@@ -57,7 +81,7 @@ const CreditReportValidity = ({ onContinue }: Props) => {
 
       {/* STEP 1 — Pull Type */}
 
-      {step === "pullCheck" && (
+      {creditValidityStep === "pullCheck" && (
         <>
           <div>
             <p className="mb-2">
@@ -70,6 +94,7 @@ const CreditReportValidity = ({ onContinue }: Props) => {
                   type="radio"
                   name="pullType"
                   value="hard"
+                  checked={pullType === "hard"}
                   onChange={(e) => setPullType(e.target.value)}
                 />
                 Hard Pull
@@ -100,7 +125,7 @@ const CreditReportValidity = ({ onContinue }: Props) => {
 
       {/* STEP 2 — Expiration Check */}
 
-      {step === "expirationCheck" && (
+      {creditValidityStep === "expirationCheck" && (
         <>
           <div className="border rounded-md p-4 bg-gray-50 text-sm">
             <div>
@@ -128,12 +153,12 @@ const CreditReportValidity = ({ onContinue }: Props) => {
         </>
       )}
 
-      <button
+      {/* <button
         onClick={handleContinue}
-        className="bg-black text-white px-4 py-2 rounded-md"
+        className="bg-black text-white px-4 py-2 rounded-md cursor-pointer"
       >
         Continue
-      </button>
+      </button> */}
     </div>
   );
 };

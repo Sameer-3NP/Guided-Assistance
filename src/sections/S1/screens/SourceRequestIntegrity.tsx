@@ -1,20 +1,25 @@
-import { useState } from "react";
+import { useEffect } from "react";
 import toast from "react-hot-toast";
+import { useFlowContext } from "../../../store/FlowContext";
+import { useSectionStore } from "../../../store/SectionStore";
+import { useNavigate } from "react-router-dom";
 
-type Props = {
-  onContinue: () => void;
-};
+const SourceRequestIntegrity = () => {
+  const { registerActions } = useFlowContext();
+  const navigate = useNavigate();
 
-const SourceRequestIntegrity = ({ onContinue }: Props) => {
-  const [agencyName, setAgencyName] = useState<string | null>(null);
-  const [agencyAddress, setAgencyAddress] = useState<string | null>(null);
-  const [agencyPhone, setAgencyPhone] = useState<string | null>(null);
-  const [lenderName, setLenderName] = useState<string | null>(null);
+  const { sourceRequestIntegrity, setSourceRequestIntegrity } =
+    useSectionStore();
 
-  const [requestedRole, setRequestedRole] = useState("");
-  const [lastNameMatch, setLastNameMatch] = useState<string | null>(null);
-
-  const [loanMatch, setLoanMatch] = useState<string | null>(null);
+  const {
+    agencyName,
+    agencyAddress,
+    agencyPhone,
+    lenderName,
+    requestedRole,
+    lastNameMatch,
+    loanMatch,
+  } = sourceRequestIntegrity;
 
   const allAgencyPresent =
     agencyName === "yes" &&
@@ -26,13 +31,11 @@ const SourceRequestIntegrity = ({ onContinue }: Props) => {
   const lastNameMatches = lastNameMatch === "yes";
 
   const handleContinue = () => {
-    // Group A validation
     if (!agencyName || !agencyAddress || !agencyPhone || !lenderName) {
       toast.error("Please answer all Agency Information fields");
       return;
     }
 
-    // Group B validation
     if (allAgencyPresent) {
       if (!requestedRole || !lastNameMatch) {
         toast.error("Please complete Requested By section");
@@ -40,7 +43,6 @@ const SourceRequestIntegrity = ({ onContinue }: Props) => {
       }
     }
 
-    // Group C validation
     if (allAgencyPresent && !requestedByBorrower && !lastNameMatches) {
       if (!loanMatch) {
         toast.error("Please confirm LOS loan number alignment");
@@ -49,17 +51,25 @@ const SourceRequestIntegrity = ({ onContinue }: Props) => {
     }
 
     if (loanMatch === "yes") {
-      onContinue(); // go to Screen 6
+      navigate("/s1/system-alignment-review");
       return;
     }
 
     if (loanMatch === "no") {
       toast.error("Loan number mismatch with LOS.");
-      onContinue(); // still move to screen 6
+      navigate("/s1/system-alignment-review");
+      return;
     }
 
-    onContinue();
+    navigate("/s1/system-alignment-review");
   };
+
+  useEffect(() => {
+    registerActions({
+      onContinue: handleContinue,
+      onBack: () => navigate("/s1/credit-report-validity"),
+    });
+  }, [sourceRequestIntegrity, navigate, registerActions]);
 
   return (
     <div className="space-y-6">
@@ -73,28 +83,36 @@ const SourceRequestIntegrity = ({ onContinue }: Props) => {
         <h3 className="font-medium">Agency Information</h3>
 
         {[
-          ["Agency Name present?", setAgencyName],
-          ["Agency Address present?", setAgencyAddress],
-          ["Agency Phone present?", setAgencyPhone],
-          ["Lender Name present?", setLenderName],
-        ].map(([label, setter], i) => (
-          <div key={i}>
+          ["Agency Name present?", "agencyName"],
+          ["Agency Address present?", "agencyAddress"],
+          ["Agency Phone present?", "agencyPhone"],
+          ["Lender Name present?", "lenderName"],
+        ].map(([label, field]) => (
+          <div key={field}>
             <p className="text-sm mb-1">{label}</p>
 
             <label className="mr-4">
-              <input type="radio" name={label} onChange={() => setter("yes")} />
+              <input
+                type="radio"
+                checked={sourceRequestIntegrity[field] === "yes"}
+                onChange={() => setSourceRequestIntegrity({ [field]: "yes" })}
+              />
               Yes
             </label>
 
             <label>
-              <input type="radio" name={label} onChange={() => setter("no")} />
+              <input
+                type="radio"
+                checked={sourceRequestIntegrity[field] === "no"}
+                onChange={() => setSourceRequestIntegrity({ [field]: "no" })}
+              />
               No
             </label>
           </div>
         ))}
       </div>
 
-      {/* Condition if agency missing */}
+      {/* Agency Missing */}
 
       {!allAgencyPresent &&
         agencyName &&
@@ -117,7 +135,11 @@ const SourceRequestIntegrity = ({ onContinue }: Props) => {
 
             <select
               value={requestedRole}
-              onChange={(e) => setRequestedRole(e.target.value)}
+              onChange={(e) =>
+                setSourceRequestIntegrity({
+                  requestedRole: e.target.value,
+                })
+              }
               className="border rounded-md px-3 py-2 w-full"
             >
               <option value="">Select</option>
@@ -133,37 +155,25 @@ const SourceRequestIntegrity = ({ onContinue }: Props) => {
               Does Requested By last name match borrower last name?
             </p>
 
-            <label className="mr-4">
-              <input
-                type="radio"
-                name="lastname"
-                onChange={() => setLastNameMatch("yes")}
-              />
-              Yes
-            </label>
-
-            <label className="mr-4">
-              <input
-                type="radio"
-                name="lastname"
-                onChange={() => setLastNameMatch("no")}
-              />
-              No
-            </label>
-
-            <label>
-              <input
-                type="radio"
-                name="lastname"
-                onChange={() => setLastNameMatch("unknown")}
-              />
-              Unable to determine
-            </label>
+            {["yes", "no", "unknown"].map((value) => (
+              <label key={value} className="mr-4">
+                <input
+                  type="radio"
+                  checked={lastNameMatch === value}
+                  onChange={() =>
+                    setSourceRequestIntegrity({
+                      lastNameMatch: value,
+                    })
+                  }
+                />
+                {value === "unknown"
+                  ? "Unable to determine"
+                  : value.charAt(0).toUpperCase() + value.slice(1)}
+              </label>
+            ))}
           </div>
         </div>
       )}
-
-      {/* Condition for borrower request */}
 
       {(requestedByBorrower || lastNameMatches) && (
         <div className="border border-red-400 bg-red-50 p-3 rounded text-sm text-red-700">
@@ -183,8 +193,8 @@ const SourceRequestIntegrity = ({ onContinue }: Props) => {
           <label className="mr-4">
             <input
               type="radio"
-              name="loanMatch"
-              onChange={() => setLoanMatch("yes")}
+              checked={loanMatch === "yes"}
+              onChange={() => setSourceRequestIntegrity({ loanMatch: "yes" })}
             />
             Yes
           </label>
@@ -192,28 +202,19 @@ const SourceRequestIntegrity = ({ onContinue }: Props) => {
           <label>
             <input
               type="radio"
-              name="loanMatch"
-              onChange={() => setLoanMatch("no")}
+              checked={loanMatch === "no"}
+              onChange={() => setSourceRequestIntegrity({ loanMatch: "no" })}
             />
             No
           </label>
         </div>
       )}
 
-      {/* LOS condition */}
-
       {loanMatch === "no" && (
         <div className="border border-red-400 bg-red-50 p-3 rounded text-sm text-red-700">
           Condition Required: Loan number mismatch with LOS.
         </div>
       )}
-
-      <button
-        onClick={handleContinue}
-        className="bg-black text-white px-4 py-2 rounded-md"
-      >
-        Continue
-      </button>
     </div>
   );
 };

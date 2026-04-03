@@ -93,16 +93,6 @@ const CreditReportCard = ({ report, index, updateReport }: Props) => {
             onChange={(e) => updateField("expirationDate", e.target.value)}
             className="border rounded-md px-3 py-2 w-full"
           />
-
-          {!report.overrideExpiration && (
-            <button
-              type="button"
-              onClick={() => updateField("overrideExpiration", true)}
-              className="text-red-600 text-sm px-2 py-1 border rounded-md hover:bg-black hover:text-white"
-            >
-              need changes?
-            </button>
-          )}
         </div>
       </div>
 

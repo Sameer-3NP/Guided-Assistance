@@ -1,18 +1,22 @@
-import { useState } from "react";
+import { useEffect } from "react";
 import toast from "react-hot-toast";
 import { useSectionStore } from "../../../store/SectionStore";
+import { useFlowContext } from "../../../store/FlowContext";
+import { useNavigate } from "react-router-dom";
 
-type Props = {
-  onContinue: () => void;
-};
+const SystemAlignmentReview = () => {
+  const {
+    s1,
+    activeCreditReport,
+    setSectionStatus,
+    systemAlignmentReview,
+    setSystemAlignmentReview,
+  } = useSectionStore();
 
-const SystemAlignmentReview = ({ onContinue }: Props) => {
-  const { s1, activeCreditReport } = useSectionStore();
+  const { registerActions } = useFlowContext();
+  const navigate = useNavigate();
 
-  const [ausDate, setAusDate] = useState("");
-  const [losAlign, setLosAlign] = useState<string | null>(null);
-  const [ausAlign, setAusAlign] = useState<string | null>(null);
-  const [matchingReport, setMatchingReport] = useState<string | null>(null);
+  const { ausDate, losAlign, ausAlign, matchingReport } = systemAlignmentReview;
 
   const activeReport =
     s1.length === 1 ? s1[0] : s1.find((r) => r.label === activeCreditReport);
@@ -23,25 +27,26 @@ const SystemAlignmentReview = ({ onContinue }: Props) => {
   const ausDateObj = ausDate ? new Date(ausDate) : null;
 
   const handleContinue = () => {
-    // if (!ausDate || !losAlign || !ausAlign) {
-    //   toast.error("Please complete all fields");
-    //   return;
-    // }
-
-    // ✅ PERFECT MATCH
-    if (losAlign === "yes" && ausAlign === "yes") {
-      toast.success("System alignment verified. Section 1 complete.");
-      onContinue();
+    if (!ausDate || !losAlign) {
+      toast.error("Please complete all fields");
       return;
     }
 
-    // ❗ Branch logic starts
+    /* PERFECT MATCH */
+
+    if (losAlign === "yes" && ausAlign === "yes") {
+      toast.success("System alignment verified.");
+
+      navigate("/s1/screen1-summary");
+      return;
+    }
 
     if (!ausDateObj) return;
 
-    // CASE A
+    /* CASE A */
+
     if (creditUpdateDate > ausDateObj) {
-      toast("Credit report is newer than AUS submission.", {
+      toast("Credit report newer than AUS submission.", {
         icon: "⚠️",
       });
 
@@ -49,11 +54,12 @@ const SystemAlignmentReview = ({ onContinue }: Props) => {
         "AUS must be re-run using the latest credit report before closing.",
       );
 
-      onContinue();
+      navigate("/s1/screen1-summary");
       return;
     }
 
-    // CASE B
+    /* CASE B */
+
     if (ausDateObj > creditUpdateDate) {
       if (!matchingReport) {
         toast.error("Please confirm if matching credit report is available");
@@ -69,20 +75,26 @@ const SystemAlignmentReview = ({ onContinue }: Props) => {
           "Update system records to align with the matching credit report.",
         );
 
-        onContinue();
+        navigate("/s1/screen1-summary");
         return;
       }
 
       if (matchingReport === "no") {
         toast.error("AUS alignment issue. Credit report must be revalidated.");
-
-        onContinue();
+        navigate("/s1/screen1-summary");
         return;
       }
     }
 
-    onContinue();
+    navigate("/s1/screen1-summary");
   };
+
+  useEffect(() => {
+    registerActions({
+      onContinue: handleContinue,
+      onBack: () => navigate("/s1/source-request-integrity"),
+    });
+  }, [ausDate, losAlign, ausAlign, matchingReport, navigate, registerActions]);
 
   return (
     <div className="space-y-6">
@@ -98,7 +110,9 @@ const SystemAlignmentReview = ({ onContinue }: Props) => {
         <input
           type="date"
           value={ausDate}
-          onChange={(e) => setAusDate(e.target.value)}
+          onChange={(e) =>
+            setSystemAlignmentReview({ ausDate: e.target.value })
+          }
           className="border rounded-md px-3 py-2"
         />
       </div>
@@ -114,7 +128,8 @@ const SystemAlignmentReview = ({ onContinue }: Props) => {
           <input
             type="radio"
             name="losAlign"
-            onChange={() => setLosAlign("yes")}
+            checked={losAlign === "yes"}
+            onChange={() => setSystemAlignmentReview({ losAlign: "yes" })}
           />
           Yes
         </label>
@@ -123,7 +138,8 @@ const SystemAlignmentReview = ({ onContinue }: Props) => {
           <input
             type="radio"
             name="losAlign"
-            onChange={() => setLosAlign("no")}
+            checked={losAlign === "no"}
+            onChange={() => setSystemAlignmentReview({ losAlign: "no" })}
           />
           No
         </label>
@@ -131,7 +147,7 @@ const SystemAlignmentReview = ({ onContinue }: Props) => {
 
       {/* CASE B PROMPT */}
 
-      {ausDateObj > creditUpdateDate && (
+      {ausDateObj && ausDateObj > creditUpdateDate && (
         <div className="border p-3 rounded-md bg-gray-50">
           <p className="mb-2">Is a matching credit report available?</p>
 
@@ -139,7 +155,10 @@ const SystemAlignmentReview = ({ onContinue }: Props) => {
             <input
               type="radio"
               name="matchingReport"
-              onChange={() => setMatchingReport("yes")}
+              checked={matchingReport === "yes"}
+              onChange={() =>
+                setSystemAlignmentReview({ matchingReport: "yes" })
+              }
             />
             Yes
           </label>
@@ -148,19 +167,15 @@ const SystemAlignmentReview = ({ onContinue }: Props) => {
             <input
               type="radio"
               name="matchingReport"
-              onChange={() => setMatchingReport("no")}
+              checked={matchingReport === "no"}
+              onChange={() =>
+                setSystemAlignmentReview({ matchingReport: "no" })
+              }
             />
             No
           </label>
         </div>
       )}
-
-      <button
-        onClick={handleContinue}
-        className="bg-black text-white px-4 py-2 rounded-md"
-      >
-        Complete Section 1
-      </button>
     </div>
   );
 };

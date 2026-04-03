@@ -1,39 +1,39 @@
-import { useState } from "react";
 import { useSectionStore } from "../../../store/SectionStore";
 import toast from "react-hot-toast";
+import { useFlowContext } from "../../../store/FlowContext";
+import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
-type Props = {
-  onContinue: () => void;
-};
-
-const MultipleReports = ({ onContinue }: Props) => {
-  const { s1, setActiveCreditReport } = useSectionStore();
-
-  const [selectedReport, setSelectedReport] = useState<string | null>(null);
+const MultipleReports = () => {
+  const { s1, activeCreditReport, setActiveCreditReport } = useSectionStore();
+  const { registerActions } = useFlowContext();
+  const navigate = useNavigate();
 
   const handleConfirm = () => {
-    if (!selectedReport) {
-      toast.error("Please select the credit report used for qualification");
-      return;
-    }
+    // if (!activeCreditReport) {
+    //   toast.error("Please select the credit report used for qualification");
+    //    return;
+    // }
 
-    // Identify junk reports
-    const junkReports = s1.filter((report) => report.label !== selectedReport);
+    const junkReports = s1.filter(
+      (report) => report.label !== activeCreditReport,
+    );
 
-    // Set active report
-    setActiveCreditReport(selectedReport);
-
-    // Notify junk reports
     junkReports.forEach((report) => {
-      toast(`Move ${report.label} to junk`, {
-        icon: "🗑️",
-      });
+      toast(`Move ${report.label} to junk`, { icon: "🗑️" });
     });
 
-    toast.success(`${selectedReport} selected as Active Credit Report`);
+    toast.success(`${activeCreditReport} selected as Active Credit Report`);
 
-    onContinue();
+    navigate("/s1/repository-check");
   };
+
+  useEffect(() => {
+    registerActions({
+      onContinue: handleConfirm,
+      onBack: () => navigate("/s1/inventory"),
+    });
+  }, [navigate, registerActions]);
 
   return (
     <div className="space-y-6">
@@ -41,9 +41,9 @@ const MultipleReports = ({ onContinue }: Props) => {
         Multiple Credit Reports Detected
       </h2>
 
-      <p className="text-sm text-gray-500">
-        Select the credit report to be used for qualification
-      </p>
+      <h2 className="text-md text-gray-500">
+        Select the credit report to be used for qualification.
+      </h2>
 
       {s1.map((report) => (
         <label
@@ -63,22 +63,22 @@ const MultipleReports = ({ onContinue }: Props) => {
           <input
             type="radio"
             name="creditReport"
-            checked={selectedReport === report.label}
-            onChange={() => setSelectedReport(report.label)}
+            checked={activeCreditReport === report.label}
+            onChange={() => setActiveCreditReport(report.label)}
           />
         </label>
       ))}
 
-      <p className="text-sm text-gray-400">
+      <p className="text-sm text-black">
         Ensure the most recent qualifying credit report is selected.
       </p>
 
-      <button
+      {/* <button
         onClick={handleConfirm}
-        className="bg-black text-white px-4 py-2 rounded-md"
+        className="bg-black text-white px-4 py-2 rounded-md cursor-pointer"
       >
         Confirm Active Credit Report
-      </button>
+      </button> */}
     </div>
   );
 };
