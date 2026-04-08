@@ -1,39 +1,69 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import toast from "react-hot-toast";
 import { useFlowContext } from "../../../store/FlowContext";
 import { useNavigate } from "react-router-dom";
+import PromptRadio from "../components/PromptRadio";
+import { BarChart3, Users, Calculator } from "lucide-react";
+import { useSectionStore } from "../../../store/SectionStore";
 
 const QualifyingScore = () => {
   const { registerActions } = useFlowContext();
   const navigate = useNavigate();
 
-  const [borrowerCount, setBorrowerCount] = useState<string | null>(null);
-  
-  const [b1ScoresCount, setB1ScoresCount] = useState<string | null>(null);
-  const [b2ScoresCount, setB2ScoresCount] = useState<string | null>(null);
+  const { qualifyingScore, setQualifyingScore } = useSectionStore();
 
-  const [b1Scores, setB1Scores] = useState({ sc1: "", sc2: "", sc3: "" });
-  const [b2Scores, setB2Scores] = useState({ sc1: "", sc2: "", sc3: "" });
+  const { borrowerCount, b1ScoresCount, b2ScoresCount, b1Scores, b2Scores } =
+    qualifyingScore;
 
-  const handleScoreChange = (borrower: "b1" | "b2", field: string, val: string) => {
-    if (borrower === "b1") setB1Scores(prev => ({ ...prev, [field]: val }));
-    else setB2Scores(prev => ({ ...prev, [field]: val }));
+  /* ---------------- SCORE CHANGE ---------------- */
+
+  const handleScoreChange = (
+    borrower: "b1" | "b2",
+    field: "sc1" | "sc2" | "sc3",
+    val: string,
+  ) => {
+    if (borrower === "b1") {
+      setQualifyingScore({
+        b1Scores: { ...b1Scores, [field]: val },
+      });
+    } else {
+      setQualifyingScore({
+        b2Scores: { ...b2Scores, [field]: val },
+      });
+    }
   };
 
-  const getQualifyingScore = (scores: {sc1: string, sc2: string, sc3: string}, count: string) => {
-      const parsed = [parseInt(scores.sc1), parseInt(scores.sc2), parseInt(scores.sc3)].filter(s => !isNaN(s));
-      if (count === "1" && parsed.length >= 1) return parsed[0];
-      if (count === "2" && parsed.length >= 2) return Math.min(parsed[0], parsed[1]);
-      if (count === "3" && parsed.length >= 3) {
-          parsed.sort((a,b) => a - b);
-          return parsed[1];
-      }
-      return null;
+  /* ---------------- SCORE CALCULATOR ---------------- */
+
+  const calculateScore = (
+    scores: { sc1: string; sc2: string; sc3: string },
+    count: string,
+  ) => {
+    const parsed = [
+      parseInt(scores.sc1),
+      parseInt(scores.sc2),
+      parseInt(scores.sc3),
+    ].filter((n) => !isNaN(n));
+
+    if (parsed.length === 0) return null;
+
+    if (count === "1") return parsed[0];
+
+    if (count === "2") return Math.min(parsed[0], parsed[1]);
+
+    if (count === "3") {
+      const sorted = [...parsed].sort((a, b) => a - b);
+      return sorted[1]; // middle score
+    }
+
+    return null;
   };
+
+  /* ---------------- CONTINUE ---------------- */
 
   const handleContinue = () => {
     if (!borrowerCount) {
-      toast.error("Please enter number of borrowers.");
+      toast.error("Please select number of borrowers.");
       return;
     }
 
@@ -42,24 +72,32 @@ const QualifyingScore = () => {
       return;
     }
 
-    const b1Score = getQualifyingScore(b1Scores, b1ScoresCount);
+    const b1Score = calculateScore(b1Scores, b1ScoresCount);
+
     if (!b1Score) {
-       toast.error("Please enter valid scores for Borrower 1.");
-       return;
+      toast.error("Enter valid Borrower scores.");
+      return;
     }
+
+    let b2Score = null;
 
     if (borrowerCount === "2") {
-       const b2Score = getQualifyingScore(b2Scores, b2ScoresCount!);
-       if (!b2Score) {
-         toast.error("Please enter valid scores for Borrower 2.");
-         return;
-       }
-       localStorage.setItem("b2_qualifying_score", b2Score.toString());
+      b2Score = calculateScore(b2Scores, b2ScoresCount!);
+
+      if (!b2Score) {
+        toast.error("Enter valid Co-Borrower scores.");
+        return;
+      }
     }
 
-    localStorage.setItem("b1_qualifying_score", b1Score.toString());
+    /* STORE RESULTS */
 
-    toast.success("Scores registered. Proceed to median rules");
+    setQualifyingScore({
+      b1QualifyingScore: b1Score,
+      b2QualifyingScore: b2Score,
+    });
+
+    toast.success("Scores calculated successfully.");
     navigate("/s3/median-score");
   };
 
@@ -68,68 +106,118 @@ const QualifyingScore = () => {
       onContinue: handleContinue,
       onBack: () => navigate("/s3/score-availability"),
     });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [borrowerCount, b1ScoresCount, b2ScoresCount, b1Scores, b2Scores, navigate, registerActions]);
+  }, [borrowerCount, b1ScoresCount, b2ScoresCount, b1Scores, b2Scores]);
 
-  const renderScoreInputs = (borrower: "b1"|"b2", count: string) => {
-      return (
-         <div className="flex gap-4 mt-2">
-            <input type="number" placeholder="SC1" onChange={(e) => handleScoreChange(borrower, "sc1", e.target.value)} className="border rounded px-2 w-20" />
-            {count !== "1" && (
-                <input type="number" placeholder="SC2" onChange={(e) => handleScoreChange(borrower, "sc2", e.target.value)} className="border rounded px-2 w-20" />
-            )}
-            {count === "3" && (
-                <input type="number" placeholder="SC3" onChange={(e) => handleScoreChange(borrower, "sc3", e.target.value)} className="border rounded px-2 w-20" />
-            )}
-         </div>
-      );
+  /* ---------------- SCORE INPUTS ---------------- */
+
+  const renderScoreInputs = (borrower: "b1" | "b2", count: string) => {
+    const scores = borrower === "b1" ? b1Scores : b2Scores;
+
+    return (
+      <div className="flex gap-4 mt-3">
+        <input
+          type="number"
+          placeholder="SC1"
+          value={scores.sc1}
+          onChange={(e) => handleScoreChange(borrower, "sc1", e.target.value)}
+          className="border rounded-lg px-3 py-2 w-24"
+        />
+
+        {count !== "1" && (
+          <input
+            type="number"
+            placeholder="SC2"
+            value={scores.sc2}
+            onChange={(e) => handleScoreChange(borrower, "sc2", e.target.value)}
+            className="border rounded-lg px-3 py-2 w-24"
+          />
+        )}
+
+        {count === "3" && (
+          <input
+            type="number"
+            placeholder="SC3"
+            value={scores.sc3}
+            onChange={(e) => handleScoreChange(borrower, "sc3", e.target.value)}
+            className="border rounded-lg px-3 py-2 w-24"
+          />
+        )}
+      </div>
+    );
   };
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-lg font-semibold">3.2 Qualifying Credit Score Determination</h2>
+    <div className="flex justify-center w-full px-6">
+      <div className="w-full max-w-4xl bg-white p-8 rounded-2xl shadow-sm border border-gray-200 space-y-8">
+        {/* HEADER */}
 
-      <div className="border p-4 rounded-md space-y-4 bg-white shadow-sm">
-        <p className="text-sm font-medium mb-2">Number of borrowers on the credit report?</p>
-        <div className="flex gap-4">
-           {["1", "2"].map((opt) => (
-             <label key={opt} className="flex items-center gap-2 cursor-pointer">
-               <input type="radio" checked={borrowerCount === opt} onChange={() => setBorrowerCount(opt)} />
-               <span className="text-sm">{opt}</span>
-             </label>
-           ))}
+        <div className="flex items-center gap-3">
+          <Calculator className="w-7 h-7 text-blue-400" />
+          <h2 className="text-2xl font-semibold text-gray-800">
+            Qualifying Credit Score
+          </h2>
         </div>
 
-        {borrowerCount && (
-           <div className="mt-4 border-t pt-4 space-y-4">
-              <div>
-                <p className="text-sm font-medium mb-2">For Borrower, how many scores are available?</p>
-                 <div className="flex gap-4">
-                   {["1", "2", "3"].map((opt) => (
-                     <label key={opt} className="flex items-center gap-2 cursor-pointer">
-                       <input type="radio" checked={b1ScoresCount === opt} onChange={() => setB1ScoresCount(opt)} />
-                       <span className="text-sm">{opt}</span>
-                     </label>
-                   ))}
-                </div>
-                {b1ScoresCount && renderScoreInputs("b1", b1ScoresCount)}
-              </div>
+        {/* INFO */}
 
-              {borrowerCount === "2" && (
-                 <div className="mt-4 border-t pt-4">
-                   <p className="text-sm font-medium mb-2">For Co-Borrower, how many scores are available?</p>
-                    <div className="flex gap-4">
-                      {["1", "2", "3"].map((opt) => (
-                        <label key={opt} className="flex items-center gap-2 cursor-pointer">
-                          <input type="radio" checked={b2ScoresCount === opt} onChange={() => setB2ScoresCount(opt)} />
-                          <span className="text-sm">{opt}</span>
-                        </label>
-                      ))}
-                   </div>
-                   {b2ScoresCount && renderScoreInputs("b2", b2ScoresCount)}
-                 </div>
-              )}
-           </div>
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-800">
+          Enter borrower credit scores to calculate the qualifying score.
+        </div>
+
+        {/* BORROWER COUNT */}
+
+        <div className="border rounded-xl p-6 bg-gray-50 space-y-6">
+          <div className="flex items-center gap-2 font-semibold">
+            <Users className="w-5 h-5" />
+            Borrower Information
+          </div>
+
+          <PromptRadio
+            label="Number of borrowers?"
+            value={borrowerCount}
+            options={["1", "2"]}
+            onChange={(v) => setQualifyingScore({ borrowerCount: v })}
+          />
+        </div>
+
+        {/* BORROWER 1 */}
+
+        {borrowerCount && (
+          <div className="border rounded-xl p-6 bg-gray-50 space-y-6">
+            <div className="flex items-center gap-2 font-semibold">
+              <BarChart3 className="w-5 h-5" />
+              Borrower Scores
+            </div>
+
+            <PromptRadio
+              label="How many scores available?"
+              value={b1ScoresCount}
+              options={["1", "2", "3"]}
+              onChange={(v) => setQualifyingScore({ b1ScoresCount: v })}
+            />
+
+            {b1ScoresCount && renderScoreInputs("b1", b1ScoresCount)}
+          </div>
+        )}
+
+        {/* CO BORROWER */}
+
+        {borrowerCount === "2" && (
+          <div className="border rounded-xl p-6 bg-gray-50 space-y-6">
+            <div className="flex items-center gap-2 font-semibold">
+              <BarChart3 className="w-5 h-5" />
+              Co-Borrower Scores
+            </div>
+
+            <PromptRadio
+              label="How many scores available?"
+              value={b2ScoresCount}
+              options={["1", "2", "3"]}
+              onChange={(v) => setQualifyingScore({ b2ScoresCount: v })}
+            />
+
+            {b2ScoresCount && renderScoreInputs("b2", b2ScoresCount)}
+          </div>
         )}
       </div>
     </div>

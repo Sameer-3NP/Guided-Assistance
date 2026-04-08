@@ -1,57 +1,98 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import toast from "react-hot-toast";
 import { useFlowContext } from "../../../store/FlowContext";
+import { useSectionStore } from "../../../store/SectionStore";
 import { useNavigate } from "react-router-dom";
 
+import {
+  User,
+  Shield,
+  Calendar,
+  // HelpCircle,
+  // CheckCircle,
+  // XCircle,
+  AlertTriangle,
+  FileCheck,
+} from "lucide-react";
+
+type QuestionProps = {
+  label: string;
+  value: string | null;
+  field: string;
+  options?: string[];
+  onChange: (field: string, value: string) => void;
+};
+
+const Question = ({
+  label,
+  value,
+  field,
+  options = ["Matches", "Does Not Match", "Missing"],
+  onChange,
+}: QuestionProps) => (
+  <div className="space-y-4">
+    <div className="flex items-start gap-3 bg-blue-100 border border-blue-200 rounded-lg p-3">
+      {/* <HelpCircle className="w-5 h-5 text-red-400 mt-0.5" /> */}
+      <p className="text-md text-black font-semibold ">{label}</p>
+    </div>
+
+    <div className="flex gap-10">
+      {options.map((opt) => (
+        <label key={opt} className="flex items-center gap-2 cursor-pointer">
+          <input
+            type="radio"
+            checked={value === opt}
+            onChange={() => onChange(field, opt)}
+            className="accent-blue-500"
+          />
+
+          {/* {opt === "Matches" && (
+            <CheckCircle className="w-4 h-4 text-blue-500" />
+          )}
+          {opt === "Does Not Match" && (
+            <XCircle className="w-4 h-4 text-blue-500" />
+          )}
+          {opt === "Missing" && (
+            <AlertTriangle className="w-4 h-4 text-blue-500" />
+          )}
+          {opt === "Yes" && <CheckCircle className="w-4 h-4 text-blue-500" />}
+          {opt === "No" && <XCircle className="w-4 h-4 text-blue-500" />} */}
+
+          <span className="text-sm">{opt}</span>
+        </label>
+      ))}
+    </div>
+  </div>
+);
+
 const CoreIdentity = () => {
-  const { registerActions } = useFlowContext();
   const navigate = useNavigate();
+  const { registerActions } = useFlowContext();
 
-  // Field states
-  const [firstLastName, setFirstLastName] = useState<string | null>(null);
-  const [middleName, setMiddleName] = useState<string | null>(null);
-  const [suffix, setSuffix] = useState<string | null>(null);
-
-  const [ssn, setSsn] = useState<string | null>(null);
-  const [dob, setDob] = useState<string | null>(null);
-  const [akaSsn, setAkaSsn] = useState<string | null>(null);
+  const { coreIdentity, setCoreIdentity } = useSectionStore();
+  const { firstLastName, middleName, suffix, ssn, dob, akaSsn } = coreIdentity;
 
   const handleContinue = () => {
-    if (!firstLastName) {
-      toast.error("Please answer the First/Last Name prompt.");
-      return;
-    }
+    if (!firstLastName)
+      return toast.error("Please answer the First/Last Name prompt.");
 
-    if (!middleName) {
-      toast.error("Please answer the Middle Name prompt.");
-      return;
-    }
+    if (!middleName)
+      return toast.error("Please answer the Middle Name prompt.");
 
-    if (!suffix) {
-      toast.error("Please answer the Suffix prompt.");
-      return;
-    }
+    if (!suffix) return toast.error("Please answer the Suffix prompt.");
 
-    if (!ssn) {
-      toast.error("Please answer the SSN prompt.");
-      return;
-    }
+    if (!ssn) return toast.error("Please answer the SSN prompt.");
 
-    if (!dob) {
-      toast.error("Please answer the DOB prompt.");
-      return;
-    }
+    if (!dob) return toast.error("Please answer the DOB prompt.");
 
-    if (dob === "Matches" && !akaSsn) {
-      toast.error("Please answer the Additional / AKA SSN prompt.");
-      return;
-    }
+    if (!akaSsn)
+      return toast.error("Please answer the Additional / AKA SSN prompt.");
 
-    // Log logic conditions based on prompt mismatches
     const hasNameMismatch =
       firstLastName !== "Matches" ||
       middleName !== "Matches" ||
       suffix !== "Matches";
+
     const hasSsnMismatch = ssn !== "Matches";
     const hasDobMismatch = dob !== "Matches";
     const hasAkaSsn = akaSsn === "Yes";
@@ -63,137 +104,181 @@ const CoreIdentity = () => {
       );
     }
 
-    navigate("/s2/current-address");
+    navigate("/s2/core-identity-summary");
   };
 
   useEffect(() => {
     registerActions({
       onContinue: handleContinue,
-      onBack: () => navigate("/s1/screen1-summary"),
+      onBack: () => navigate("/s1/section1-summary"),
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    firstLastName,
-    middleName,
-    suffix,
-    ssn,
-    dob,
-    akaSsn,
-    navigate,
-    registerActions,
-  ]);
-
-  const renderRadioGroup = (
-    label: string,
-    value: string | null,
-    setter: (val: string) => void,
-    options: string[] = ["Matches", "Does Not Match", "Missing"],
-  ) => (
-    <div className="mb-4">
-      <p className="text-sm font-medium mb-2">{label}</p>
-      <div className="flex gap-4">
-        {options.map((opt) => (
-          <label key={opt} className="flex items-center gap-2 cursor-pointer">
-            <input
-              type="radio"
-              checked={value === opt}
-              onChange={() => setter(opt)}
-            />
-            <span className="text-sm">{opt}</span>
-          </label>
-        ))}
-      </div>
-    </div>
-  );
+  }, [firstLastName, middleName, suffix, ssn, dob, akaSsn]);
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-lg font-semibold">
-        Borrower Core Identity Verification
-      </h2>
+    <div className="flex justify-center w-full px-6">
+      <div className="w-full max-w-4xl bg-white p-8 rounded-2xl shadow-sm border border-gray-200 space-y-8">
+        <div className="flex items-center gap-3">
+          <FileCheck className="w-7 h-7 text-blue-400" />
+          <h2 className="text-2xl font-semibold text-gray-800">
+            Borrower Core Identity Verification
+          </h2>
+        </div>
 
-      <div className="border p-4 rounded-md space-y-4 bg-white shadow-sm">
-        <h3 className="font-medium text-blue-800">Prompt Group A — Name</h3>
+        <div className="border rounded-xl p-6 bg-gray-50 shadow-sm space-y-6">
+          <div className="flex items-center gap-2 font-semibold text-gray-800">
+            <User className="w-5 h-5 text-gray-600" />
+            Borrower Name Verification
+          </div>
 
-        {renderRadioGroup(
-          "Does the borrower First/Last name on the credit report match the loan application?",
-          firstLastName,
-          setFirstLastName,
+          <Question
+            label="Does the borrower First/Last name on the credit report match the loan application?"
+            value={firstLastName}
+            field="firstLastName"
+            onChange={(f, v) => setCoreIdentity({ [f]: v })}
+          />
+
+          {firstLastName &&
+            firstLastName !== "Matches" &&
+            firstLastName !== "Missing" && (
+              <div className="flex items-center gap-2 border border-red-400 bg-red-50 p-3 rounded text-sm text-red-700">
+                <AlertTriangle className="w-4 h-4" />
+                Alert: First and Last Name mismatch detected
+              </div>
+            )}
+
+          {firstLastName && firstLastName === "Missing" && (
+            <div className="flex items-center gap-2 border border-yellow-400 bg-yellow-50 p-3 rounded text-sm text-yellow-800">
+              <AlertTriangle className="w-4 h-4" />
+              Alert: First and Last Name missing
+            </div>
+          )}
+
+          {firstLastName && (
+            <Question
+              label="Does the borrower Middle Name match the loan application?"
+              value={middleName}
+              field="middleName"
+              onChange={(f, v) => setCoreIdentity({ [f]: v })}
+            />
+          )}
+
+          {middleName &&
+            middleName !== "Matches" &&
+            middleName !== "Missing" && (
+              <div className="flex items-center gap-2 border border-red-400 bg-red-50 p-3 rounded text-sm text-red-700">
+                <AlertTriangle className="w-4 h-4" />
+                Alert: Middle Name mismatch detected
+              </div>
+            )}
+
+          {middleName && middleName === "Missing" && (
+            <div className="flex items-center gap-2 border border-yellow-400 bg-yellow-50 p-3 rounded text-sm text-yellow-800">
+              <AlertTriangle className="w-4 h-4" />
+              Alert: Middle Name missing
+            </div>
+          )}
+
+          {middleName && (
+            <Question
+              label="Does the borrower suffix match the loan application?"
+              value={suffix}
+              field="suffix"
+              onChange={(f, v) => setCoreIdentity({ [f]: v })}
+            />
+          )}
+
+          {suffix && suffix !== "Matches" && suffix !== "Missing" && (
+            <div className="flex items-center gap-2 border border-red-400 bg-red-50 p-3 rounded text-sm text-red-700">
+              <AlertTriangle className="w-4 h-4" />
+              Alert: Suffix mismatch detected
+            </div>
+          )}
+
+          {suffix && suffix === "Missing" && (
+            <div className="flex items-center gap-2 border border-yellow-400 bg-yellow-50 p-3 rounded text-sm text-yellow-800">
+              <AlertTriangle className="w-4 h-4" />
+              Alert: Suffix missing
+            </div>
+          )}
+        </div>
+
+        {suffix && (
+          <div className="border rounded-xl p-6 bg-gray-50 shadow-sm space-y-6">
+            <div className="flex items-center gap-2 font-semibold text-gray-800">
+              <Shield className="w-5 h-5 text-gray-600" />
+              SSN Verification
+            </div>
+
+            <Question
+              label="Is SSN matching with the loan application?"
+              value={ssn}
+              field="ssn"
+              onChange={(f, v) => setCoreIdentity({ [f]: v })}
+            />
+
+            {ssn && ssn !== "Matches" && ssn !== "Missing" && (
+              <div className="flex items-center gap-2 border border-red-400 bg-red-50 p-3 rounded text-sm text-red-700">
+                <AlertTriangle className="w-4 h-4" />
+                Alert: SSN mismatch or missing
+              </div>
+            )}
+
+            {ssn && ssn !== "Matches" && ssn === "Missing" && (
+              <div className="flex items-center gap-2 border border-yellow-400 bg-yellow-50 p-3 rounded text-sm text-yellow-800">
+                <AlertTriangle className="w-4 h-4" />
+                Alert: SSN missing
+              </div>
+            )}
+          </div>
         )}
 
-        {firstLastName &&
-          renderRadioGroup(
-            "Does the borrower Middle Name on the credit report match the loan application?",
-            middleName,
-            setMiddleName,
-          )}
+        {ssn && (
+          <div className="border rounded-xl p-6 bg-gray-50 shadow-sm space-y-6">
+            <div className="flex items-center gap-2 font-semibold text-gray-800">
+              <Calendar className="w-5 h-5 text-gray-600" />
+              DOB / AKA SSN Verification
+            </div>
 
-        {middleName &&
-          renderRadioGroup(
-            "Does the borrower Suffix on the credit report match the loan application?",
-            suffix,
-            setSuffix,
-          )}
+            <Question
+              label="Does Date of Birth match the loan application?"
+              value={dob}
+              field="dob"
+              onChange={(f, v) => setCoreIdentity({ [f]: v })}
+            />
 
-        {firstLastName && firstLastName !== "Matches" && (
-          <div className="border border-red-400 bg-red-50 p-3 rounded text-sm text-red-700">
-            Alert: Name Mismatch (Outcome A Condition)
+            {dob && dob !== "Matches" && dob !== "Missing" && (
+              <div className="flex items-center gap-2 border border-red-400 bg-red-50 p-3 rounded text-sm text-red-700">
+                <AlertTriangle className="w-4 h-4" />
+                Alert: DOB mismatch or missing
+              </div>
+            )}
+
+            {dob && dob !== "Matches" && dob === "Missing" && (
+              <div className="flex items-center gap-2 border border-yellow-400 bg-yellow-50 p-3 rounded text-sm text-yellow-800">
+                <AlertTriangle className="w-4 h-4" />
+                Alert: DOB missing
+              </div>
+            )}
+
+            {dob && (
+              <Question
+                label="Is any additional or AKA SSN reflected on the credit report ?"
+                value={akaSsn}
+                field="akaSsn"
+                options={["No", "Yes"]}
+                onChange={(field, value) => setCoreIdentity({ [field]: value })}
+              />
+            )}
+
+            {akaSsn === "Yes" && (
+              <div className="flex items-center gap-2 border border-orange-400 bg-orange-50 p-3 rounded text-sm text-orange-800">
+                <AlertTriangle className="w-4 h-4" />
+                Condition: Additional SSN requires verification
+              </div>
+            )}
           </div>
         )}
       </div>
-
-      {suffix && (
-        <div className="border p-4 rounded-md space-y-4 bg-white shadow-sm">
-          <h3 className="font-medium text-blue-800">Prompt Group B — SSN</h3>
-
-          {renderRadioGroup(
-            "Is SSN, if displayed on the credit report, matching with the loan application?",
-            ssn,
-            setSsn,
-            ["Matches", "Does Not Match", "Missing"],
-          )}
-
-          {ssn && ssn !== "Matches" && (
-            <div className="border border-red-400 bg-red-50 p-3 rounded text-sm text-red-700">
-              Alert: SSN Mismatch/Missing
-            </div>
-          )}
-        </div>
-      )}
-
-      {ssn && (
-        <div className="border p-4 rounded-md space-y-4 bg-white shadow-sm">
-          <h3 className="font-medium text-blue-800">
-            Prompt Group C & D — DOB / AKA
-          </h3>
-
-          {renderRadioGroup(
-            "Does Date of Birth on the credit report match the loan application?",
-            dob,
-            setDob,
-          )}
-
-          {dob && dob !== "Matches" && (
-            <div className="border border-red-400 bg-red-50 p-3 rounded text-sm text-red-700">
-              Condition: DOB discrepancy
-            </div>
-          )}
-
-          {dob &&
-            renderRadioGroup(
-              "Is any additional or AKA SSN reflected on the credit report?",
-              akaSsn,
-              setAkaSsn,
-              ["No", "Yes"],
-            )}
-
-          {akaSsn === "Yes" && (
-            <div className="border border-orange-400 bg-orange-50 p-3 rounded text-sm text-orange-800">
-              Condition: Additional SSN requires verification
-            </div>
-          )}
-        </div>
-      )}
     </div>
   );
 };

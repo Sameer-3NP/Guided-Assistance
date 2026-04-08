@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 import { useSectionStore } from "../../../store/SectionStore";
 import { useFlowContext } from "../../../store/FlowContext";
 import { useNavigate } from "react-router-dom";
+import { FileText } from "lucide-react"; // 📄 icon for Credit Inventory
 
 const MAX_REPORTS = 5;
 
@@ -14,13 +15,7 @@ const createReport = (index: number): CreditReport => ({
   updateDate: "",
   expirationDate: "",
   overrideExpiration: false,
-
-  repositories: {
-    eq: false,
-    ex: false,
-    tu: false,
-  },
-
+  repositories: { eq: false, ex: false, tu: false },
   repositoryCount: 0,
 });
 
@@ -31,18 +26,6 @@ const CreditInventory = () => {
 
   const creditReports = s1;
 
-  // Load saved reports
-  // useEffect(() => {
-  //   if (s1.length === 0) {
-  //     const saved = localStorage.getItem("S1_data");
-
-  //     if (saved) {
-  //       setS1(JSON.parse(saved));
-  //     }
-  //   }
-  // }, [s1.length, setS1]);
-
-  // Save reports
   useEffect(() => {
     localStorage.setItem("S1_data", JSON.stringify(creditReports));
 
@@ -57,10 +40,10 @@ const CreditInventory = () => {
           toast(
             "Multiple credit reports detected. Please select the one used for qualification.",
             {
-              icon: "⚠️",
+              // icon: "⚠️",
               style: {
-                background: "#fff3cd",
-                color: "#333",
+                background: "#ffffff",
+                color: "black",
                 border: "1px solid #ddd",
               },
             },
@@ -76,75 +59,96 @@ const CreditInventory = () => {
         toast.success("Credit report data saved");
       },
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [creditReports, navigate, registerActions]);
 
   const handleReportCount = (count: number) => {
     if (count > MAX_REPORTS) {
-      toast.error("Maximum 5 credit reports allowed");
+      toast.error("Maximum 5 credit reports supported.");
       count = MAX_REPORTS;
     }
 
     const current = creditReports.length;
 
-    // Increase reports
     if (count > current) {
-      const newReports = [...creditReports];
-
-      for (let i = current; i < count; i++) {
-        newReports.push(createReport(i));
-      }
-
-      setS1(newReports);
-    }
-
-    // Decrease reports
-    if (count < current) {
+      setS1([
+        ...creditReports,
+        ...Array.from({ length: count - current }, (_, i) =>
+          createReport(current + i),
+        ),
+      ]);
+    } else if (count < current) {
       setS1(creditReports.slice(0, count));
     }
   };
 
   const updateReport = (index: number, updatedReport: CreditReport) => {
     const updated = [...creditReports];
-
     updated[index] = updatedReport;
-
     setS1(updated);
   };
 
   return (
-    <div className="bg-white p-6 rounded-xl ">
-      <h2 className="text-lg font-semibold mb-4">Credit Report Inventory</h2>
+    <div className="bg-white p-8 rounded-2xl shadow-md border border-gray-200 max-w-5xl mx-auto">
+      {/* Header */}
+      <div className="flex items-center gap-3 mb-8">
+        <div className="bg-blue-100 p-3 rounded-xl">
+          <FileText className="w-6 h-6 text-blue-700" />
+        </div>
 
-      {/* Number of Reports */}
+        <div>
+          <h1 className="text-2xl font-semibold text-gray-800">
+            Credit Report Inventory
+          </h1>
+          <p className="text-sm text-gray-500">
+            Enter and manage the credit reports indexed in the loan file.
+          </p>
+        </div>
+      </div>
 
-      <div className="mb-6">
-        <label className="block text-sm font-medium mb-2">
-          How many credit reports are indexed in the file?
-        </label>
+      {/* Report Count Section */}
+      <div className="bg-gray-50 border border-gray-200 rounded-xl p-6 mb-8 flex items-center justify-between">
+        <div>
+          <label className="text-md font-medium text-gray-700">
+            How many credit reports are indexed in the file?
+          </label>
+
+          <p className="text-sm text-gray-500 mt-1">
+            Maximum {MAX_REPORTS} reports supported
+          </p>
+        </div>
 
         <input
           type="number"
           min={1}
           max={MAX_REPORTS}
           value={creditReports.length || ""}
-          className={`border rounded-md px-3 py-2 w-40 `}
           onChange={(e) => handleReportCount(Number(e.target.value))}
+          className="border border-gray-300 rounded-lg px-4 py-2 w-24 text-center text-lg font-medium
+        focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition"
         />
       </div>
 
-      {/* Credit Report Cards */}
-
-      <div className="space-y-6">
-        {creditReports.map((report, index) => (
-          <CreditReportCard
-            key={report.label}
-            report={report}
-            index={index}
-            updateReport={updateReport}
-          />
-        ))}
-      </div>
+      {/* Cards */}
+      {creditReports.length === 0 ? (
+        <div className="text-center py-12 text-gray-500 text-sm border border-dashed border-gray-300 rounded-xl">
+          No reports added yet. Enter the number of reports above to begin.
+        </div>
+      ) : (
+        <div className="space-y-6">
+          {creditReports.map((report, index) => (
+            <div
+              key={report.label}
+              className="bg-white border border-gray-200 rounded-xl p-5 shadow-sm hover:shadow-md transition"
+            >
+              <CreditReportCard
+                report={report}
+                index={index}
+                updateReport={updateReport}
+              />
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 };

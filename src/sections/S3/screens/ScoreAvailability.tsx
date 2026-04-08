@@ -1,245 +1,297 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import toast from "react-hot-toast";
 import { useFlowContext } from "../../../store/FlowContext";
 import { useNavigate } from "react-router-dom";
+import { useSectionStore } from "../../../store/SectionStore";
+import PromptRadio from "../components/PromptRadio";
+
+import {
+  //  CheckCircle,
+  // ShieldAlert,
+  AlertTriangle,
+  FileCheck,
+  Lock,
+  BarChart3,
+  FileWarning,
+} from "lucide-react";
 
 const ScoreAvailability = () => {
   const { registerActions } = useFlowContext();
   const navigate = useNavigate();
 
-  const [freeze, setFreeze] = useState<string | null>(null);
-  const [twoBureaus, setTwoBureaus] = useState<string | null>(null);
-  const [oneScore, setOneScore] = useState<string | null>(null);
-  
-  // Non-traditional credit fields
-  const [ausRequiresNonTrad, setAusRequiresNonTrad] = useState<string | null>(null);
-  const [validatedByDu, setValidatedByDu] = useState<string | null>(null);
-  const [nonTradAvailable, setNonTradAvailable] = useState<string | null>(null);
-  const [selectedDocuments, setSelectedDocuments] = useState<string[]>([]);
-  const [checklistChecks, setChecklistChecks] = useState<string[]>([]);
+  const { scoreAvailability, setScoreAvailability } = useSectionStore();
+  const {
+    freeze,
+    twoBureaus,
+    oneScore,
+    ausRequiresNonTrad,
+    validatedByDu,
+    nonTradAvailable,
+    documents,
+    discrepancies,
+  } = scoreAvailability;
 
-  const showPrompt3 = (freeze === "No" && twoBureaus === "No") || (freeze === "Yes" && twoBureaus === "No");
+  const checklistMap: Record<string, string[]> = {
+    "Non-Traditional Credit Report / Credit Supplement": [
+      "Borrower name, SSN, and current address is missing or mismatch with LOS ",
+      "At least 2 non-traditional tradelines are not present ",
+      "At least one housing expense and one non-housing expense are not included",
+      "Tradelines does not reflect 12 months of history",
+      "Delinquencies are reflected in last 12 months",
+    ],
+
+    "Cancelled Check": [
+      "The borrower's name is not the payor. ",
+      "Consecutive 12 months of cancelled check is not available.",
+      "Delinquencies have been reflected in the last 12 months' cancelled check.",
+      "Payee name is not the landlord's name ",
+    ],
+
+    VOR: [
+      "Borrower name is not the tenant name",
+      "Recent 12 months history not available",
+      "Delinquencies reflected in last 12 months",
+      "Landlord name is not present and cannot be verified. ",
+      "VOR is not properly executed and filled out. ",
+      "Discrepant information is present",
+    ],
+
+    "Electricity / Water / Other Bill": [
+      "The borrower's name is not present on the bill. ",
+      "Recent 12 months of borrower history is not available. ",
+      "Delinquencies have been reflected in the last 12 months.",
+      "Company name is not present and cannot be verified. ",
+      "Discrepant information is present",
+    ],
+  };
+
+  const documentOptions = Object.keys(checklistMap);
+
+  /* ---------- BRANCH RULES ---------- */
+
+  const showPrompt3 = freeze !== null && twoBureaus === "No";
+  const showPrompt4 = showPrompt3 && oneScore === "No";
+  const showPrompt5 = showPrompt4 && ausRequiresNonTrad === "Yes";
+  const showPrompt6 = showPrompt5 && validatedByDu === "No";
+  const showPrompt7 = showPrompt6 && nonTradAvailable === "Yes";
+
   const branchACondition = freeze === "Yes" && twoBureaus === "No";
 
-  const handleDocumentChange = (doc: string) => {
-    setSelectedDocuments(prev => prev.includes(doc) ? prev.filter(d => d !== doc) : [...prev, doc]);
-  };
-
-  const handleChecklistChange = (val: string) => {
-    setChecklistChecks(prev => prev.includes(val) ? prev.filter(c => c !== val) : [...prev, val]);
-  };
+  /* ---------- CONTINUE ---------- */
 
   const handleContinue = () => {
-    // Validations
-    if (!freeze || !twoBureaus) {
-      toast.error("Please answer initial prompts.");
-      return;
+    if (!freeze || !twoBureaus)
+      toast.error("Please answer the first two prompts.");
+
+    if (showPrompt3 && !oneScore)
+      toast.error("Please answer the score availability prompt.");
+
+    // if (showPrompt4 && !ausRequiresNonTrad)
+    //   toast.error("Please confirm AUS requirement.");
+
+    if (showPrompt5 && !validatedByDu)
+      toast.error("Please confirm DU validation.");
+
+    if (showPrompt6 && !nonTradAvailable)
+      toast.error("Please confirm document availability.");
+
+    if (showPrompt7 && documents.length === 0) {
+      toast.error("Please select available documents.");
     }
 
-    if (showPrompt3 && !oneScore) {
-       toast.error("Please specify if a single score exists.");
-       return;
+    if (showPrompt7 && documents.length === 0) {
+      toast.error("Please select available documents.");
     }
 
-    // Direct advances
-    if (freeze === "Yes" && twoBureaus === "Yes") {
-      navigate("/s3/qualifying-score");
-      return;
-    }
+    navigate("/s3/qualifying-score");
+  };
 
-    if (freeze === "No" && twoBureaus === "Yes") {
-      navigate("/s3/qualifying-score");
-      return;
-    }
+  const toggleDocument = (doc: string) => {
+    const updated = documents.includes(doc)
+      ? documents.filter((d) => d !== doc)
+      : [...documents, doc];
 
-    if (showPrompt3 && oneScore === "Yes") {
-      navigate("/s3/qualifying-score");
-      return;
-    }
+    setScoreAvailability({ documents: updated });
+  };
 
-    // Branch logic mapping
-    if (showPrompt3 && oneScore === "No") {
-      if (!ausRequiresNonTrad) {
-         toast.error("Please specify if AUS requires non-traditional credit history.");
-         return;
-      }
-      
-      if (ausRequiresNonTrad === "No") {
-        navigate("/s3/qualifying-score");
-        return;
-      }
+  const toggleDiscrepancy = (item: string) => {
+    const updated = discrepancies.includes(item)
+      ? discrepancies.filter((d) => d !== item)
+      : [...discrepancies, item];
 
-      if (ausRequiresNonTrad === "Yes") {
-         if (!validatedByDu) {
-           toast.error("Please specify DU validation status.");
-           return;
-         }
-
-         if (validatedByDu === "Yes") {
-           navigate("/s3/qualifying-score");
-           return;
-         }
-
-         if (validatedByDu === "No") {
-           if (!nonTradAvailable) {
-              toast.error("Please specify if non-traditional credit reports are available.");
-              return;
-           }
-
-           if (nonTradAvailable === "Yes") {
-              if (selectedDocuments.length === 0) {
-                 toast.error("Please select received documents.");
-                 return;
-              }
-
-              // Checklist logic handling
-              if (checklistChecks.length === 0) {
-                 // Non traditional satisfied
-                 navigate("/s3/qualifying-score");
-                 return;
-              } else {
-                 toast("Condition B logged for discrepancy", { icon: "⚠️" });
-                 navigate("/s3/qualifying-score");
-                 return;
-              }
-           } else {
-              // Non trad not available
-              toast("Condition B logged (Option 2).", { icon: "⚠️" });
-              navigate("/s3/qualifying-score");
-              return;
-           }
-         }
-      }
-    }
+    setScoreAvailability({ discrepancies: updated });
   };
 
   useEffect(() => {
     registerActions({
       onContinue: handleContinue,
-      onBack: () => navigate("/s2/previous-address"),
+      onBack: () => navigate("/s2/section2-summary"),
     });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [freeze, twoBureaus, oneScore, ausRequiresNonTrad, validatedByDu, nonTradAvailable, selectedDocuments, checklistChecks, navigate, registerActions]);
+  }, [freeze, twoBureaus, oneScore]);
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-lg font-semibold">3.1 Credit Score Availability & Freeze Handling</h2>
+    <div className="flex justify-center w-full px-6">
+      <div className="w-full max-w-4xl bg-white p-8 rounded-2xl shadow-sm border border-gray-200 space-y-8">
+        {/* HEADER */}
 
-      <div className="border p-4 rounded-md space-y-4 bg-white shadow-sm">
-        <div className="mb-4">
-           <p className="text-sm font-medium mb-2">Is credit freeze noted on credit report for this borrower?</p>
-           <div className="flex gap-4">
-              {["Yes", "No"].map((opt) => (
-                <label key={opt} className="flex items-center gap-2 cursor-pointer">
-                  <input type="radio" checked={freeze === opt} onChange={() => setFreeze(opt)} />
-                  <span className="text-sm">{opt}</span>
-                </label>
-              ))}
-            </div>
+        <div className="flex items-center gap-3">
+          <FileCheck className="w-7 h-7 text-blue-400" />
+          <h2 className="text-2xl font-semibold text-gray-800">
+            Credit Score Availability
+          </h2>
         </div>
 
-        {freeze && (
-           <div className="mb-4">
-             <p className="text-sm font-medium mb-2">Does credit report reflect scores from at least 2 bureaus?</p>
-             <div className="flex gap-4">
-                {["Yes", "No"].map((opt) => (
-                  <label key={opt} className="flex items-center gap-2 cursor-pointer">
-                    <input type="radio" checked={twoBureaus === opt} onChange={() => setTwoBureaus(opt)} />
-                    <span className="text-sm">{opt}</span>
-                  </label>
-                ))}
-              </div>
-           </div>
-        )}
+        {/* INSTRUCTION */}
 
-        {branchACondition && (
-           <div className="border border-red-400 bg-red-50 p-3 rounded text-sm text-red-700">
-             Alert: Condition required as per Branch A
-           </div>
-        )}
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-800">
+          Determine whether sufficient credit scores are available for the
+          borrower and whether non-traditional credit verification is required.
+        </div>
+
+        {/* CREDIT FREEZE BLOCK */}
+
+        <div className="border rounded-xl p-6 bg-gray-50 shadow-sm space-y-6">
+          <div className="flex items-center gap-2 font-semibold text-gray-800">
+            <Lock className="w-5 h-5 text-gray-600" />
+            Credit Freeze Verification
+          </div>
+
+          <PromptRadio
+            label="Is credit freeze noted on credit report for this borrower ?"
+            value={freeze}
+            options={["Yes", "No"]}
+            onChange={(v) => setScoreAvailability({ freeze: v })}
+          />
+
+          <PromptRadio
+            label="Does credit report reflect scores from at least 2 bureaus?"
+            value={twoBureaus}
+            options={["Yes", "No"]}
+            onChange={(v) => setScoreAvailability({ twoBureaus: v })}
+          />
+
+          {branchACondition && (
+            <div className="flex items-center gap-2 border border-red-400 bg-red-50 p-3 rounded text-sm text-red-700">
+              <AlertTriangle className="w-4 h-4" />
+              Condition: Credit freeze present with insufficient bureau scores.
+            </div>
+          )}
+        </div>
+
+        {/* SCORE AVAILABILITY */}
 
         {showPrompt3 && (
-            <div className="mt-4 border-t pt-4">
-             <p className="text-sm font-medium mb-2">Does credit report reflect 1 score for either borrower/co-borrower?</p>
-             <div className="flex gap-4">
-                {["Yes", "No"].map((opt) => (
-                  <label key={opt} className="flex items-center gap-2 cursor-pointer">
-                    <input type="radio" checked={oneScore === opt} onChange={() => setOneScore(opt)} />
-                    <span className="text-sm">{opt}</span>
-                  </label>
-                ))}
-              </div>
-           </div>
-        )}
-
-        {oneScore === "No" && (
-           <div className="mt-4 border-t pt-4 space-y-4">
-             <div className="border border-orange-400 bg-orange-50 p-3 rounded text-sm text-orange-800">
-               Alert: Branch B (Investigate non-traditional credit) 
-             </div>
-
-             <p className="text-sm font-medium mb-2">Prompt 4: Check if AUS requires non-traditional credit history?</p>
-             <div className="flex gap-4 mb-4">
-                {["Yes", "No"].map((opt) => (
-                  <label key={opt} className="flex items-center gap-2 cursor-pointer">
-                    <input type="radio" checked={ausRequiresNonTrad === opt} onChange={() => setAusRequiresNonTrad(opt)} />
-                    <span className="text-sm">{opt}</span>
-                  </label>
-                ))}
+          <div className="border rounded-xl p-6 bg-gray-50 shadow-sm space-y-6">
+            <div className="flex items-center gap-2 font-semibold text-gray-800">
+              <BarChart3 className="w-5 h-5 text-gray-600" />
+              Score Availability Review
             </div>
 
-            {ausRequiresNonTrad === "Yes" && (
-              <>
-                 <p className="text-sm font-medium mb-2">Prompt 5: Is non-traditional credit history validated by DU or satisfy requirements?</p>
-                 <div className="flex gap-4 mb-4">
-                    {["Yes", "No"].map((opt) => (
-                      <label key={opt} className="flex items-center gap-2 cursor-pointer">
-                        <input type="radio" checked={validatedByDu === opt} onChange={() => setValidatedByDu(opt)} />
-                        <span className="text-sm">{opt}</span>
-                      </label>
-                    ))}
+            <PromptRadio
+              label="Does credit report reflect 1 score for borrower/co-borrower?"
+              value={oneScore}
+              options={["Yes", "No"]}
+              onChange={(v) => setScoreAvailability({ oneScore: v })}
+            />
+          </div>
+        )}
+
+        {/* NON TRADITIONAL CREDIT */}
+
+        {showPrompt4 && (
+          <div className="border rounded-xl p-6 bg-gray-50 shadow-sm space-y-6">
+            <div className="flex items-center gap-2 font-semibold text-gray-800">
+              <FileWarning className="w-5 h-5 text-gray-600" />
+              Non-Traditional Credit Evaluation
+            </div>
+
+            <PromptRadio
+              label="Check if AUS requires non-traditional credit history ? "
+              value={ausRequiresNonTrad}
+              options={["Yes", "No"]}
+              onChange={(v) => setScoreAvailability({ ausRequiresNonTrad: v })}
+            />
+
+            {showPrompt5 && (
+              <PromptRadio
+                label="Is non-traditional credit history validated by DU” or “if DU indicates that third-party asset verification may satisfy requirements ?"
+                value={validatedByDu}
+                options={["Yes", "No"]}
+                onChange={(v) => setScoreAvailability({ validatedByDu: v })}
+              />
+            )}
+
+            {showPrompt6 && (
+              <PromptRadio
+                label="Check if the most recent Non-Traditional Credit Report / Credit Supplement/other documents are Available ? "
+                value={nonTradAvailable}
+                options={["Yes", "No"]}
+                onChange={(v) => setScoreAvailability({ nonTradAvailable: v })}
+              />
+            )}
+
+            {showPrompt7 && (
+              <div className="border rounded-xl p-6 bg-gray-50 shadow-sm space-y-6">
+                <div className="flex items-center gap-2 font-semibold text-gray-800">
+                  <FileCheck className="w-5 h-5 text-gray-600" />
+                  Document Availability
                 </div>
 
-                {validatedByDu === "No" && (
-                  <>
-                     <p className="text-sm font-medium mb-2">Prompt 6: Most recent Non-Traditional Reports Available?</p>
-                     <div className="flex gap-4 mb-4">
-                        {["Yes", "No"].map((opt) => (
-                          <label key={opt} className="flex items-center gap-2 cursor-pointer">
-                            <input type="radio" checked={nonTradAvailable === opt} onChange={() => setNonTradAvailable(opt)} />
-                            <span className="text-sm">{opt}</span>
-                          </label>
-                        ))}
-                    </div>
+                <p className="text-sm font-medium">
+                  Check all the documents which are available:
+                </p>
 
-                    {nonTradAvailable === "Yes" && (
-                        <div className="space-y-3 bg-gray-50 border p-3 rounded mt-2">
-                           <p className="text-sm font-medium">Check available documents:</p>
-                           {["Non-Traditional Credit report / Credit Supplement", "Cancelled check", "VOR", "Electricity / Utility Bill"].map(opt => (
-                              <label key={opt} className="flex items-center gap-2 cursor-pointer">
-                                <input type="checkbox" checked={selectedDocuments.includes(opt)} onChange={() => handleDocumentChange(opt)} />
-                                <span className="text-xs">{opt}</span>
-                              </label>
-                           ))}
-
-                           {selectedDocuments.length > 0 && (
-                              <div className="mt-4 border-t pt-4">
-                                 <p className="text-sm font-medium text-red-600 mb-2">Discrepancy Check (Check if true)</p>
-                                 {["Name/SSN mismatch", "Missing History", ">12 mo delinquencies"].map(opt => (
-                                    <label key={opt} className="flex items-center gap-2 cursor-pointer">
-                                      <input type="checkbox" checked={checklistChecks.includes(opt)} onChange={() => handleChecklistChange(opt)} />
-                                      <span className="text-xs">{opt}</span>
-                                    </label>
-                                 ))}
-                              </div>
-                           )}
-                        </div>
-                    )}
-                  </>
-                )}
-              </>
+                <div className="grid grid-cols-2 gap-4">
+                  {documentOptions.map((doc) => (
+                    <label
+                      key={doc}
+                      className="flex items-center gap-2 cursor-pointer"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={documents.includes(doc)}
+                        onChange={() => toggleDocument(doc)}
+                      />
+                      <span className="text-sm">{doc}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
             )}
-           </div>
+
+            {documents.length > 0 && (
+              <div className="border rounded-xl p-6 bg-blue-50 border-blue-200 space-y-6">
+                <div className="font-semibold text-gray-800">
+                  Validation Checklist
+                </div>
+
+                {documents.map((doc) => (
+                  <div key={doc} className="space-y-3">
+                    <p className="text-sm font-semibold text-gray-700">{doc}</p>
+
+                    {(checklistMap[doc] || []).map((item) => (
+                      <label key={item} className="flex items-center gap-2">
+                        <input
+                          type="checkbox"
+                          checked={discrepancies.includes(item)}
+                          onChange={() => toggleDiscrepancy(item)}
+                        />
+                        <span className="text-sm">{item}</span>
+                      </label>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {discrepancies.length > 0 && (
+              <div className="flex items-center gap-2 border border-red-400 bg-red-50 p-3 rounded text-sm text-red-700">
+                <AlertTriangle className="w-4 h-4" />
+                Condition: Non-traditional credit documentation discrepancy
+                detected.
+              </div>
+            )}
+          </div>
         )}
       </div>
     </div>

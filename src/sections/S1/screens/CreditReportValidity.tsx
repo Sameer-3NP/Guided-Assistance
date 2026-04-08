@@ -1,8 +1,16 @@
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { useSectionStore } from "../../../store/SectionStore";
 import toast from "react-hot-toast";
 import { useFlowContext } from "../../../store/FlowContext";
 import { useNavigate } from "react-router-dom";
+// import { HelpCircle } from "lucide-react";
+import {
+  CreditCard,
+  AlertCircle,
+  CalendarCheck,
+  ShieldAlert,
+  CheckCircle,
+} from "lucide-react";
 
 const CreditReportValidity = () => {
   const { registerActions } = useFlowContext();
@@ -26,14 +34,10 @@ const CreditReportValidity = () => {
   if (!activeReport || !s0) return null;
 
   const expirationDate = new Date(activeReport.expirationDate);
-  console.log(expirationDate);
   const closingDate = new Date(s0.closingDate);
-
   const expirationCondition = expirationDate < closingDate;
-  console.log(expirationCondition);
 
   const handleContinue = () => {
-    // STEP 1 → Pull Type Check
     if (creditValidityStep === "pullCheck") {
       if (!pullType) {
         toast.error("Please select Hard Pull or Soft Pull");
@@ -49,9 +53,9 @@ const CreditReportValidity = () => {
         "Credit report expires before the estimated closing date. An updated credit report must be obtained.",
         { icon: "❌" },
       );
+      return;
     }
 
-    // STEP 2 → Expiration Check
     navigate("/s1/source-request-integrity");
   };
 
@@ -66,99 +70,110 @@ const CreditReportValidity = () => {
         }
       },
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    creditValidityStep,
-    pullType,
-    expirationCondition,
-    navigate,
-    registerActions,
-  ]);
+  }, [creditValidityStep, pullType, expirationCondition, navigate]);
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-lg font-semibold">Credit Report Validity</h2>
+    <div className="flex justify-center w-full px-6">
+      <div className="w-full max-w-4xl bg-white p-8 rounded-2xl shadow-sm border border-gray-200 space-y-8">
+        {/* Header */}
+        <div className="flex items-center gap-3">
+          <CreditCard className="w-7 h-7 text-blue-400" />
+          <h2 className="text-2xl font-semibold text-gray-800">
+            Credit Report Validity
+          </h2>
+        </div>
 
-      {/* STEP 1 — Pull Type */}
+        {/* STEP 1 */}
+        {creditValidityStep === "pullCheck" && (
+          <div className="border bg-gray-50 border-gray-300 rounded-xl p-5  shadow-sm space-y-4">
+            <div className="flex items-center gap-2 font-semibold text-gray-800">
+              <ShieldAlert className="w-5 h-5 text-blue-400" />
+              Credit Pull Type Verification
+            </div>
 
-      {creditValidityStep === "pullCheck" && (
-        <>
-          <div>
-            <p className="mb-2">
-              Is the credit report a Hard Pull or Soft Pull?
-            </p>
+            <div className="flex items-start gap-3 bg-blue-100 border border-blue-200 rounded-lg p-3 mb-4">
+              {/* <HelpCircle className="w-5 h-5 text-red-400 mt-0.5" /> */}
 
-            <div className="flex gap-6">
-              <label className="flex gap-2">
+              <p className="text-md text-black leading-relaxed font-semibold">
+                Is the credit report a Hard pull or Soft pull ?
+              </p>
+            </div>
+
+            <div className="flex gap-10">
+              <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="radio"
                   name="pullType"
                   value="hard"
                   checked={pullType === "hard"}
                   onChange={(e) => setPullType(e.target.value)}
+                  className="accent-indigo-600"
                 />
                 Hard Pull
               </label>
 
-              <label className="flex gap-2">
+              <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="radio"
                   name="pullType"
                   value="soft"
+                  checked={pullType === "soft"}
                   onChange={(e) => setPullType(e.target.value)}
+                  className="accent-red-600"
                 />
                 Soft Pull
               </label>
             </div>
+            {pullType === "soft" && (
+              <div className="flex items-start gap-2 border border-red-300 bg-red-50 p-4 rounded-lg text-sm text-red-700">
+                <AlertCircle className="w-5 h-5 mt-0.5" />
+                Soft Pull credit reports cannot be used for loan qualification.
+                A Hard Pull credit report must be obtained.
+              </div>
+            )}
           </div>
+        )}
 
-          {/* Soft Pull Condition */}
-
-          {pullType === "soft" && (
-            <div className="border border-red-400 bg-red-50 p-3 rounded text-sm text-red-700">
-              Soft Pull credit report detected. A Hard Pull credit report must
-              be obtained for qualification.
+        {/* STEP 2 */}
+        {creditValidityStep === "expirationCheck" && (
+          <div className="border-gray-200 bg-gray-50 rounded-xl p-5  shadow-sm space-y-4">
+            <div className="flex items-center gap-2 font-semibold text-gray-800">
+              <CalendarCheck className="w-5 h-5 text-blue-400" />
+              Credit Expiration Validation
             </div>
-          )}
-        </>
-      )}
 
-      {/* STEP 2 — Expiration Check */}
+            <div className="flex items-start gap-3 bg-blue-100 border border-blue-200 rounded-lg p-3 mb-4">
+              {/* <HelpCircle className="w-5 h-5 text-red-400 mt-0.5" /> */}
+              <p className="text-md text-black leading-relaxed font-semibold">
+                Does the credit report expiration date cover the Estimated
+                Closing Date ?
+              </p>
+            </div>
 
-      {creditValidityStep === "expirationCheck" && (
-        <>
-          <div className="border rounded-md p-4 bg-gray-50 text-sm">
-            <div>
+            <div className="flex items-center gap-2 text-sm text-gray-700">
+              <CheckCircle className="w-4 h-4 text-blue-400" />
               Credit Expiration Date:
               <span className="font-medium ml-2">
                 {activeReport.expirationDate}
               </span>
             </div>
 
-            <div>
+            <div className="flex items-center gap-2 text-sm text-gray-700">
+              <CalendarCheck className="w-4 h-4 text-blue-400" />
               Estimated Closing Date:
               <span className="font-medium ml-2">{s0.closingDate}</span>
             </div>
+
+            {expirationCondition && (
+              <div className="flex items-start gap-2 border border-red-300 bg-red-50 p-4 rounded-lg text-sm text-red-700">
+                <AlertCircle className="w-5 h-5 mt-0.5" />
+                Credit report expires before the estimated closing date. An
+                updated credit report must be obtained.
+              </div>
+            )}
           </div>
-
-          {/* {expirationCondition && (
-            <div className="border border-red-400 bg-red-50 p-3 rounded text-sm text-red-700">
-              {toast.error(
-                `Credit report expires before the estimated closing date. An updated credit report must be obtained.
-              updated credit report must be obtained.`,
-                { icon: "❌" },
-              )}
-            </div>
-          )} */}
-        </>
-      )}
-
-      {/* <button
-        onClick={handleContinue}
-        className="bg-black text-white px-4 py-2 rounded-md cursor-pointer"
-      >
-        Continue
-      </button> */}
+        )}
+      </div>
     </div>
   );
 };

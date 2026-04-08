@@ -3,12 +3,12 @@ import toast from "react-hot-toast";
 import { useSectionStore } from "../../../store/SectionStore";
 import { useFlowContext } from "../../../store/FlowContext";
 import { useNavigate } from "react-router-dom";
+import { Calendar, FileCheck, Database } from "lucide-react";
 
 const SystemAlignmentReview = () => {
   const {
     s1,
     activeCreditReport,
-    setSectionStatus,
     systemAlignmentReview,
     setSystemAlignmentReview,
   } = useSectionStore();
@@ -32,33 +32,22 @@ const SystemAlignmentReview = () => {
       return;
     }
 
-    /* PERFECT MATCH */
-
     if (losAlign === "yes" && ausAlign === "yes") {
-      toast.success("System alignment verified.");
-
-      navigate("/s1/screen1-summary");
+      toast.success("System alignment verified.", { icon: "✅" });
+      navigate("/s1/section1-summary");
       return;
     }
 
     if (!ausDateObj) return;
 
-    /* CASE A */
-
     if (creditUpdateDate > ausDateObj) {
-      toast("Credit report newer than AUS submission.", {
-        icon: "⚠️",
-      });
-
+      toast("Credit report newer than AUS submission.", { icon: "⚠️" });
       toast.error(
         "AUS must be re-run using the latest credit report before closing.",
       );
-
-      navigate("/s1/screen1-summary");
+      navigate("/s1/section1-summary");
       return;
     }
-
-    /* CASE B */
 
     if (ausDateObj > creditUpdateDate) {
       if (!matchingReport) {
@@ -67,26 +56,22 @@ const SystemAlignmentReview = () => {
       }
 
       if (matchingReport === "yes") {
-        toast("Matching credit report available.", {
-          icon: "⚠️",
-        });
-
+        toast("Matching credit report available.", { icon: "⚠️" });
         toast.error(
           "Update system records to align with the matching credit report.",
         );
-
-        navigate("/s1/screen1-summary");
+        navigate("/s1/section1-summary");
         return;
       }
 
       if (matchingReport === "no") {
         toast.error("AUS alignment issue. Credit report must be revalidated.");
-        navigate("/s1/screen1-summary");
+        navigate("/s1/section1-summary");
         return;
       }
     }
 
-    navigate("/s1/screen1-summary");
+    navigate("/s1/section1-summary");
   };
 
   useEffect(() => {
@@ -94,88 +79,125 @@ const SystemAlignmentReview = () => {
       onContinue: handleContinue,
       onBack: () => navigate("/s1/source-request-integrity"),
     });
-  }, [ausDate, losAlign, ausAlign, matchingReport, navigate, registerActions]);
+  }, [ausDate, losAlign, ausAlign, matchingReport]);
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-lg font-semibold">System Alignment Review</h2>
-
-      {/* AUS DATE */}
-
-      <div>
-        <label className="block text-sm mb-1">
-          Enter AUS Credit Report Date
-        </label>
-
-        <input
-          type="date"
-          value={ausDate}
-          onChange={(e) =>
-            setSystemAlignmentReview({ ausDate: e.target.value })
-          }
-          className="border rounded-md px-3 py-2"
-        />
-      </div>
-
-      {/* LOS ALIGNMENT */}
-
-      <div>
-        <p className="mb-1">
-          Does LOS Credit Reference ID align with Active Credit Report?
-        </p>
-
-        <label className="mr-4">
-          <input
-            type="radio"
-            name="losAlign"
-            checked={losAlign === "yes"}
-            onChange={() => setSystemAlignmentReview({ losAlign: "yes" })}
-          />
-          Yes
-        </label>
-
-        <label>
-          <input
-            type="radio"
-            name="losAlign"
-            checked={losAlign === "no"}
-            onChange={() => setSystemAlignmentReview({ losAlign: "no" })}
-          />
-          No
-        </label>
-      </div>
-
-      {/* CASE B PROMPT */}
-
-      {ausDateObj && ausDateObj > creditUpdateDate && (
-        <div className="border p-3 rounded-md bg-gray-50">
-          <p className="mb-2">Is a matching credit report available?</p>
-
-          <label className="mr-4">
-            <input
-              type="radio"
-              name="matchingReport"
-              checked={matchingReport === "yes"}
-              onChange={() =>
-                setSystemAlignmentReview({ matchingReport: "yes" })
-              }
-            />
-            Yes
-          </label>
-
-          <label>
-            <input
-              type="radio"
-              name="matchingReport"
-              checked={matchingReport === "no"}
-              onChange={() =>
-                setSystemAlignmentReview({ matchingReport: "no" })
-              }
-            />
-            No
-          </label>
+    <div className="flex justify-center w-full px-6">
+      <div className="w-full max-w-4xl bg-white p-8 rounded-2xl shadow-sm border border-gray-200 space-y-8">
+        {/* HEADER */}
+        <div className="flex items-center gap-3">
+          <FileCheck className="w-7 h-7 text-blue-400" />
+          <h2 className="text-2xl font-semibold text-gray-800">
+            System Alignment Review
+          </h2>
         </div>
-      )}
+
+        {/* DATE COMPARISON */}
+        <div className="border rounded-xl p-6 bg-gray-50 shadow-sm space-y-4">
+          <div className="flex items-center gap-2 font-semibold text-gray-800">
+            <Calendar className="w-5 h-5 text-gray-600" />
+            Enter AUS Credit Report Date
+          </div>
+
+          <input
+            type="date"
+            value={ausDate || ""}
+            onChange={(e) =>
+              setSystemAlignmentReview({ ausDate: e.target.value })
+            }
+            className="border rounded-md px-3 py-2 w-full"
+          />
+
+          <div className="text-sm text-gray-600 flex items-center gap-2">
+            <Database className="w-4 h-4" />
+            Active Credit Report Update Date:
+            <span className="font-medium ml-2">{activeReport.updateDate}</span>
+          </div>
+        </div>
+
+        {/* LOS ALIGNMENT */}
+        <div className="border rounded-xl p-6 bg-gray-50 shadow-sm space-y-4">
+          <div className="flex items-center gap-2 font-semibold text-gray-800">
+            <Database className="w-5 h-5 text-gray-600" />
+            LOS Credit Reference Alignment
+          </div>
+
+          <div className="flex items-start gap-3 bg-blue-100 border border-blue-200 rounded-lg p-3 mb-4">
+            {/* <HelpCircle className="w-5 h-5 text-blue-400 mt-0.5" /> */}
+            <p className="text-md text-black leading-relaxed font-semibold">
+              Does AUS Credit Reference id align with Active Credit Report ?
+            </p>
+          </div>
+
+          <div className="flex gap-10">
+            {["yes", "no"].map((val) => (
+              <label
+                key={val}
+                className="flex items-center gap-2 cursor-pointer"
+              >
+                <input
+                  type="radio"
+                  checked={losAlign === val}
+                  onChange={() => setSystemAlignmentReview({ losAlign: val })}
+                  className={`accent-${val === "yes" ? "blue" : "red"}-500`}
+                />
+
+                {/* {val === "yes" ? (
+                  <CheckCircle className="w-4 h-4 text-green-500" />
+                ) : (
+                  <AlertTriangle className="w-4 h-4 text-red-500" />
+                )} */}
+
+                {val === "yes" ? "Yes" : "No"}
+              </label>
+            ))}
+          </div>
+        </div>
+
+        {/* CASE B */}
+        {ausDateObj && ausDateObj > creditUpdateDate && (
+          <div className="border rounded-xl p-6 bg-gray-50 shadow-sm space-y-4">
+            <div className="flex items-center gap-2 font-semibold text-gray-800">
+              {/* <AlertTriangle className="w-5 h-5 text-yellow-500" /> */}
+              AUS Date Newer Than Credit Report
+            </div>
+
+            <div className="flex items-start gap-3 bg-blue-100 border border-blue-200 rounded-lg p-3 mb-4">
+              {/* <HelpCircle className="w-5 h-5 text-red-400 mt-0.5" /> */}
+              <p className="text-md text-black leading-relaxed font-semibold">
+                Is a matching credit report available that corresponds to the{" "}
+                AUS submission ?
+              </p>
+            </div>
+
+            <div className="flex gap-10">
+              {["yes", "no"].map((val) => (
+                <label
+                  key={val}
+                  className="flex items-center gap-2 cursor-pointer"
+                >
+                  <input
+                    type="radio"
+                    checked={matchingReport === val}
+                    onChange={() =>
+                      setSystemAlignmentReview({ matchingReport: val })
+                    }
+                    className={`accent-${val === "yes" ? "blue" : "red"}-500`}
+                  />
+
+                  {/* {val === "yes" ? (
+                    <CheckCircle className="w-4 h-4 text-green-500" />
+                  ) : (
+                    <AlertTriangle className="w-4 h-4 text-red-500" />
+                  )} */}
+
+                  {val === "yes" ? "Yes" : "No"}
+                </label>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 };

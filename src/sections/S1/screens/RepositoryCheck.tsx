@@ -1,8 +1,17 @@
 import { useSectionStore } from "../../../store/SectionStore";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import toast from "react-hot-toast";
 import { useFlowContext } from "../../../store/FlowContext";
 import { useNavigate } from "react-router-dom";
+// import { HelpCircle } from "lucide-react";
+import {
+  FileText,
+  CheckCircle,
+  XCircle,
+  ShieldCheck,
+  Database,
+  AlertTriangle,
+} from "lucide-react";
 
 const RepositoryCheck = () => {
   const { registerActions } = useFlowContext();
@@ -10,6 +19,7 @@ const RepositoryCheck = () => {
 
   const { s1, activeCreditReport, biMergeAccepted, setBiMergeAccepted } =
     useSectionStore();
+
   const activeReport =
     s1.length === 1
       ? s1[0]
@@ -18,7 +28,6 @@ const RepositoryCheck = () => {
   if (!activeReport) return null;
 
   const repositories = activeReport.repositories;
-
   const repoCount = Object.values(repositories).filter(Boolean).length;
 
   const handleContinue = () => {
@@ -30,15 +39,13 @@ const RepositoryCheck = () => {
 
       if (biMergeAccepted === "no") {
         toast.error(
-          "Credit report has been pulled with less than three distinct repositories and same is not acceptable. Hence, obtain a Tri-merged credit report in order to proceed further.",
+          "Credit report has been pulled with less than three distinct repositories. Obtain a Tri-merged credit report.",
           { icon: "❌" },
         );
       }
 
       toast.success("Bi-merge accepted as per policy");
-    }
-
-    if (repoCount === 3) {
+    } else {
       toast.success("Tri-merge repository coverage confirmed");
     }
 
@@ -46,91 +53,116 @@ const RepositoryCheck = () => {
   };
 
   useEffect(() => {
-    if (biMergeAccepted) {
-      localStorage.setItem("biMergeAccepted", biMergeAccepted);
-    }
-  }, [biMergeAccepted]);
-
-  useEffect(() => {
     registerActions({
       onContinue: handleContinue,
       onBack: () => {
-        if (s1.length > 1) {
-          navigate("/s1/multiple-reports");
-        } else {
-          navigate("/s1/inventory");
-        }
+        if (s1.length > 1) navigate("/s1/multiple-reports");
+        else navigate("/s1/inventory");
       },
     });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [biMergeAccepted, repoCount, navigate, s1.length, registerActions]);
 
   return (
-    <div className="space-y-6">
-      <h2 className="text-lg font-semibold">Repository Coverage Check</h2>
-
-      {/* Active Report */}
-
-      <div className="border rounded-md p-4 bg-gray-50">
-        <div className="mb-2 font-medium">
-          Active Credit Report: {activeReport.label}
+    <div className="flex justify-center w-full px-6">
+      <div className="w-full max-w-4xl bg-white p-8 rounded-2xl shadow-sm border border-gray-200 space-y-8">
+        {/* Header */}
+        <div className="flex items-center gap-3">
+          <ShieldCheck className="w-7 h-7 text-blue-400" />
+          <h2 className="text-2xl font-semibold text-gray-800">
+            Repository Coverage Check
+          </h2>
         </div>
 
-        <div className="text-sm">
-          Repositories Present:
-          {repositories.eq && " EQ"}
-          {repositories.ex && " EX"}
-          {repositories.tu && " TU"}
-        </div>
-      </div>
-
-      {/* Bi-merge question */}
-
-      {repoCount < 3 && (
-        <div>
-          <p className="mb-2">
-            Is a bi-merged credit report acceptable per client policy?
-          </p>
-
-          <div className="flex gap-6">
-            <label className="flex gap-2">
-              <input
-                type="radio"
-                name="biMerge"
-                value="yes"
-                checked={biMergeAccepted === "yes"}
-                onChange={(e) => setBiMergeAccepted(e.target.value)}
-              />
-              Yes
-            </label>
-
-            <label className="flex gap-2">
-              <input
-                type="radio"
-                name="biMerge"
-                value="no"
-                checked={biMergeAccepted === "no"}
-                onChange={(e) => setBiMergeAccepted(e.target.value)}
-              />
-              No
-            </label>
-          </div>
-          {biMergeAccepted === "no" && (
-            <div className="border border-red-400 bg-red-50 p-3 rounded text-sm text-red-700">
-              Credit report has been pulled with less than three distinct
-              repositories and same is not acceptable. Hence, obtain a
-              Tri-merged credit report in order to proceed further.
+        {/* Active Report Card */}
+        <div className="border border-gray-300 bg-gray-50 rounded-xl p-5 shadow-sm">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2 text-gray-800 font-semibold">
+              <FileText className="w-5 h-5 text-gray-600" />
+              Active Credit Report: {activeReport.label}
             </div>
-          )}
-        </div>
-      )}
 
-      {/* <button
-        onClick={handleContinue}
-        className="bg-black text-white px-4 py-2 rounded-md cursor-pointer"
-      >
-        Continue
-      </button> */}
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <Database className="w-4 h-4" />
+              {repoCount}/3 repositories
+            </div>
+          </div>
+
+          {/* Repository Badges */}
+          <div className="flex gap-3 flex-wrap">
+            {repositories.eq && (
+              <span className="flex items-center gap-1 px-3 py-1 bg-green-100 text-green-700 text-sm rounded-lg">
+                <CheckCircle className="w-4 h-4" /> Equifax
+              </span>
+            )}
+
+            {repositories.ex && (
+              <span className="flex items-center gap-1 px-3 py-1 bg-green-100 text-green-700 text-sm rounded-lg">
+                <CheckCircle className="w-4 h-4" /> Experian
+              </span>
+            )}
+
+            {repositories.tu && (
+              <span className="flex items-center gap-1 px-3 py-1 bg-green-100 text-green-700 text-sm rounded-lg">
+                <CheckCircle className="w-4 h-4" /> TransUnion
+              </span>
+            )}
+          </div>
+        </div>
+
+        {/* Bi-Merge Policy */}
+        {repoCount < 3 && (
+          <div className="border border-gray-300 bg-gray-50 rounded-xl p-5 shadow-sm">
+            <div className="flex items-center gap-2 mb-3 font-medium text-gray-800">
+              <AlertTriangle className="w-5 h-5 text-blue-400" />
+              Bi-Merge Policy Check
+            </div>
+
+            <div className="flex items-start gap-3 bg-blue-100 border border-blue-200 rounded-lg p-3 mb-4">
+              {/* <HelpCircle className="w-5 h-5 text-red-400 mt-0.5" /> */}
+
+              <p className="text-md text-black leading-relaxed font-semibold">
+                Is a bi-merge credit report acceptable for this loan as per
+                client policy?
+              </p>
+            </div>
+
+            {/* Radio Buttons */}
+            <div className="flex gap-10 mb-4">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="biMerge"
+                  value="yes"
+                  checked={biMergeAccepted === "yes"}
+                  onChange={(e) => setBiMergeAccepted(e.target.value)}
+                  className="accent-indigo-600"
+                />
+                Yes
+              </label>
+
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="radio"
+                  name="biMerge"
+                  value="no"
+                  checked={biMergeAccepted === "no"}
+                  onChange={(e) => setBiMergeAccepted(e.target.value)}
+                  className="accent-red-600"
+                />
+                No
+              </label>
+            </div>
+
+            {biMergeAccepted === "no" && (
+              <div className="flex items-start gap-2 border border-red-300 bg-red-50 p-4 rounded-lg text-sm text-red-700">
+                <XCircle className="w-5 h-5 mt-0.5" />
+                Credit report has fewer than three distinct repositories. Obtain
+                a Tri-merged report before proceeding.
+              </div>
+            )}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
