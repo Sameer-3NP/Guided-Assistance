@@ -4,7 +4,6 @@ import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useSectionStore } from "../store/SectionStore";
 import { useFlowContext } from "../store/FlowContext";
 import GlobalHeader from "../sections/S1/components/GlobalHeaderS1";
-import { act } from "react";
 
 const MainLayout = () => {
   const { pathname } = useLocation();
@@ -37,13 +36,15 @@ const MainLayout = () => {
         activeSection={activeSection}
         sectionStatus={sectionStatus}
         setActiveSection={setActiveSection}
-        logoSrc="../../public/logo.svg"
+        logoSrc="/logo.svg"
       />
 
       <Breadcrumb activeSection={activeSection} />
       {activeSection === "S1" ? <GlobalHeader /> : null}
       {activeSection === "S2" ? <GlobalHeader /> : null}
       {activeSection === "S3" ? <GlobalHeader /> : null}
+      {activeSection === "S4" ? <GlobalHeader /> : null}
+      {activeSection === "S5" ? <GlobalHeader /> : null}
 
       {/* Main Content */}
       <div className="flex-1 p-6 overflow-auto bg-white">

@@ -4,7 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
-import { Lock } from "lucide-react";
+import { Calendar, CalendarClock, FileText, Lock, Users } from "lucide-react";
 import { useFlowContext } from "../../store/FlowContext";
 import { useSectionStore } from "../../store/SectionStore";
 import {
@@ -12,7 +12,6 @@ import {
   type InitializationForm,
 } from "../../utils/initializationSchema";
 import PopUp from "../../components/PopUp";
-// import Breadcrumb from "../../components/Breadcrumb"; // dynamic breadcrumb
 
 const Initialization = () => {
   const navigate = useNavigate();
@@ -24,10 +23,10 @@ const Initialization = () => {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    // formState: {},
   } = useForm<InitializationForm>({
     resolver: zodResolver(initializationSchema),
-    defaultValues: s0 || undefined,
+    defaultValues: s0,
   });
 
   const doSubmit = (data: InitializationForm) => {
@@ -77,89 +76,70 @@ const Initialization = () => {
         >
           {/* Application Date */}
           <div className="flex flex-col">
-            <label className="text-sm font-medium mb-1 text-gray-700">
-              Application Date
-            </label>
+            <div className="flex items-center gap-2 mb-2">
+              <Calendar className="w-4 h-4 text-blue-400" />
+              <label className="text-sm font-medium text-gray-700">
+                Application Date
+              </label>
+            </div>
             <input
               type="date"
               {...register("applicationDate")}
               disabled={isLocked}
-              className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 disabled:bg-gray-100 disabled:text-gray-500"
+              className="w-full border border-black rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 disabled:bg-gray-100 "
             />
-            {/* {errors.applicationDate && (
-              <span className="text-red-500 text-xs mt-1">
-                {errors.applicationDate.message}
-              </span>
-            )} */}
           </div>
 
           {/* Closing Date */}
           <div className="flex flex-col">
-            <label className="text-sm font-medium mb-1 text-gray-700">
-              Estimated Closing Date
-            </label>
+            <div className="flex items-center gap-2 mb-2">
+              <CalendarClock className="w-4 h-4 text-blue-400" />
+              <label className="text-sm font-medium text-gray-700">
+                Estimated Closing Date
+              </label>
+            </div>
             <input
               type="date"
               {...register("closingDate")}
               disabled={isLocked}
-              className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 disabled:bg-gray-100 disabled:text-gray-500"
+              className="w-full border border-black rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 disabled:bg-gray-100"
             />
-            {/* {errors.closingDate && (
-              <span className="text-red-500 text-xs mt-1">
-                {errors.closingDate.message}
-              </span>
-            )} */}
           </div>
 
           {/* Credit Report Date */}
           <div className="flex flex-col">
-            <label className="text-sm font-medium mb-1 text-gray-700">
-              Credit Report "As Of" Date
-            </label>
+            <div className="flex items-center gap-2 mb-2">
+              <FileText className="w-4 h-4 text-blue-400" />
+              <label className="text-sm font-medium text-gray-700">
+                Credit Report "As Of" Date
+              </label>
+            </div>
             <input
               type="date"
               {...register("creditAsOfDate")}
               disabled={isLocked}
-              className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 disabled:bg-gray-100 disabled:text-gray-500"
+              className="w-full border border-black rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 disabled:bg-gray-100"
             />
-            {/* {errors.creditAsOfDate && (
-              <span className="text-red-500 text-xs mt-1">
-                {errors.creditAsOfDate.message}
-              </span>
-            )} */}
           </div>
 
           {/* Borrower Count */}
           <div className="flex flex-col">
-            <label className="text-sm font-medium mb-1 text-gray-700">
-              Borrower Count
-            </label>
+            <div className="flex items-center gap-2 mb-2">
+              <Users className="w-4 h-4 text-blue-400" />
+              <label className="text-sm font-medium text-gray-700">
+                Borrower Count
+              </label>
+            </div>
             <input
               type="number"
               min={1}
               max={10}
               {...register("borrowerCount", { valueAsNumber: true })}
               disabled={isLocked}
-              className="border rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-400 focus:border-blue-400 disabled:bg-gray-100 disabled:text-gray-500"
+              className="w-full border border-black rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 disabled:bg-gray-100"
             />
-            {/* {errors.borrowerCount && (
-              <span className="text-red-500 text-xs mt-1">
-                {errors.borrowerCount.message}
-              </span>
-            )} */}
           </div>
         </form>
-        {/* Continue Button
-        {!isLocked && (
-          <div className="flex justify-end mt-8">
-            <button
-              onClick={handleContinue}
-              className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg shadow-md transition"
-            >
-              Continue
-            </button>
-          </div>
-        )} */}
       </div>
     </div>
   );

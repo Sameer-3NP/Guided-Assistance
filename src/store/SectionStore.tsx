@@ -133,6 +133,187 @@ type Store = {
 
   updateB2Scores: (data: Partial<Store["qualifyingScore"]["b2Scores"]>) => void;
 
+  tradelineAlignment: {
+    losGreater: string | null;
+    creditGreater: string | null;
+    fieldsMatch: string | null;
+  };
+
+  setTradelineAlignment: (data: Partial<Store["tradelineAlignment"]>) => void;
+
+  missingTradelinePayment: {
+    allPayments: string | null;
+    accountType: string | null;
+    loanType: string | null;
+    creditorName: string | null;
+    accountNumber: string | null;
+    setCreditorName: string | null;
+    setAccountNumber: string | null;
+  };
+
+  setMissingTradelinePayment: (
+    data: Partial<Store["missingTradelinePayment"]>,
+  ) => void;
+
+  collectionHandling: {
+    hasCollection: string | null;
+    collectionType: string | null;
+    individualBalance: string | null;
+    cumulativeBalance: string | null;
+    occupancy: string | null;
+    unit: string | null;
+    accountName: string | null;
+    accountNumber: string | null;
+  };
+
+  setCollectionHandling: (data: Partial<Store["collectionHandling"]>) => void;
+
+  disputedHandling: {
+    hasDispute: string | null;
+    ausEligible: string | null;
+    disputeDueToAccount: string | null;
+
+    accountName: string | null;
+    accountNumber: string | null;
+
+    supplementAvailable: string | null;
+
+    checklist: string[];
+  };
+
+  setDisputedHandling: (data: Partial<Store["disputedHandling"]>) => void;
+
+  utilityTelecomAccount: {
+    hasUtilityAccount: string | null;
+    paymentIncludedInDTI: string | null;
+  };
+
+  setUtilityTelecomAccount: (
+    data: Partial<Store["utilityTelecomAccount"]>,
+  ) => void;
+
+  paymentHistoryRecencyValidation: {
+    hasDLA: string | null;
+    lienTypes: string[];
+
+    accounts: [
+      {
+        type: string | null;
+        accountName: string | null;
+        accountNumber: string | null;
+      },
+    ];
+
+    mortgagePropertyType: string[];
+
+    subjectProperty: {
+      coversClosingMinus1Month: string | null;
+      hasSupportingDocs: string | null;
+      documents: string[];
+      discrepancies: string[];
+    };
+
+    reoProperty: {
+      dlaMoreThan45Days: string | null;
+    };
+
+    nonMortgageLien: {
+      dlaMoreThan90Days: string | null;
+    };
+  };
+
+  setPaymentHistoryRecencyValidation: (
+    data: Partial<Store["paymentHistoryRecencyValidation"]>,
+  ) => void;
+
+  delinquencyLateHandling: {
+    creditorName: string;
+    accountNumber: string;
+
+    latePaymentLast12Months: string;
+
+    lateAccountTypes: string[];
+
+    lenderRequireExplanation: string;
+  };
+
+  setDelinquencyLateHandling: (
+    data: Partial<Store["delinquencyLateHandling"]>,
+  ) => void;
+
+  authorizedUserAccountHandling: {
+    creditorName: string;
+    accountNumber: string;
+
+    loanType: string; // DU | LPA
+
+    duAuthorizedAccount: string;
+    duBorrowerQualify: string;
+    duClauses: string;
+
+    lpaAuthorizedAccount: string;
+    lpaBorrowerQualify: string;
+    lpaClauses: string;
+  };
+
+  setAuthorizedUserAccountHandling: (
+    data: Partial<Store["authorizedUserAccountHandling"]>,
+  ) => void;
+
+  duplicateTradelineHandling: {
+    creditorName: string;
+    accountNumber: string;
+
+    duplicateAccount: string;
+
+    qualifiesWithBothAccounts: string;
+
+    creditSupplementAvailable: string;
+
+    supplementFailures: string[];
+  };
+
+  setDuplicateTradelineHandling: (
+    data: Partial<Store["duplicateTradelineHandling"]>,
+  ) => void;
+
+  pastDueAccountHandling: {
+    creditorName: string;
+    accountNumber: string;
+
+    pastDueAccount: string;
+
+    supportingDocument: string;
+
+    documentType: string[];
+
+    discrepancies: string[];
+  };
+
+  setPastDueAccountHandling: (
+    data: Partial<Store["pastDueAccountHandling"]>,
+  ) => void;
+
+  liabilityPaidOffHandling: {
+    debtPaidOff: string;
+    accountTypes: string[];
+    supportingDocument: string;
+    documentType: string[];
+    discrepancies: string[];
+    accounts: {
+      creditorName: string;
+      accountNumber: string;
+    }[];
+    selectedAccount?: {
+      creditorName: string;
+      accountNumber: string;
+    };
+  };
+
+  setLiabilityPaidOffHandling: (
+    data: Partial<Store["liabilityPaidOffHandling"]>,
+  ) => void;
+
   sectionStatus: Record<string, string>;
   setSectionStatus: (
     status:
@@ -147,7 +328,7 @@ export const SectionProvider = ({ children }: any) => {
   const [s0, setS0] = useState<InventoryItem | null>(null);
   const [s1, setS1] = useState<CreditReport[]>([]);
   const [activeCreditReport, setActiveCreditReport] = useState<string | null>(
-    null
+    null,
   );
 
   const [creditValidityStep, setCreditValidityStep] = useState<
@@ -235,6 +416,170 @@ export const SectionProvider = ({ children }: any) => {
 
     b1QualifyingScore: null,
     b2QualifyingScore: null,
+  });
+
+  const [tradelineAlignment, setTradelineAlignmentState] = useState<
+    Store["tradelineAlignment"]
+  >({
+    losGreater: null,
+    creditGreater: null,
+    fieldsMatch: null,
+  });
+
+  const [missingTradelinePayment, setMissingTradelinePaymentState] = useState<
+    Store["missingTradelinePayment"]
+  >({
+    allPayments: null,
+    accountType: null,
+    loanType: null,
+    creditorName: null,
+    accountNumber: null,
+    setCreditorName: null,
+    setAccountNumber: null,
+  });
+
+  const [collectionHandling, setCollectionHandlingState] = useState<
+    Store["collectionHandling"]
+  >({
+    hasCollection: null,
+    collectionType: null,
+    individualBalance: "",
+    cumulativeBalance: "",
+    occupancy: null,
+    unit: null,
+    accountName: "",
+    accountNumber: "",
+  });
+
+  const [disputedHandling, setDisputeHandlingState] = useState<
+    Store["disputedHandling"]
+  >({
+    hasDispute: null,
+    ausEligible: null,
+    disputeDueToAccount: null,
+
+    accountName: null,
+    accountNumber: null,
+
+    supplementAvailable: null,
+
+    checklist: [],
+  });
+
+  const [utilityTelecomAccount, setUtilityTelecomAccountState] = useState<
+    Store["utilityTelecomAccount"]
+  >({
+    hasUtilityAccount: "",
+    paymentIncludedInDTI: "",
+  });
+
+  const [
+    paymentHistoryRecencyValidation,
+    setPaymentHistoryRecencyValidationState,
+  ] = useState<Store["paymentHistoryRecencyValidation"]>({
+    hasDLA: "",
+    lienTypes: [],
+
+    accounts: [
+      {
+        type: "",
+        accountName: "",
+        accountNumber: "",
+      },
+    ],
+
+    mortgagePropertyType: [],
+
+    subjectProperty: {
+      coversClosingMinus1Month: "",
+      hasSupportingDocs: "",
+      documents: [],
+      discrepancies: [],
+    },
+
+    reoProperty: {
+      dlaMoreThan45Days: "",
+    },
+
+    nonMortgageLien: {
+      dlaMoreThan90Days: "",
+    },
+  });
+
+  const [delinquencyLateHandling, setDelinquencyLateHandlingState] = useState<
+    Store["delinquencyLateHandling"]
+  >({
+    creditorName: "",
+    accountNumber: "",
+    latePaymentLast12Months: "",
+    lateAccountTypes: [],
+    lenderRequireExplanation: "",
+  });
+
+  const [authorizedUserAccountHandling, setAuthorizedUserAccountHandlingState] =
+    useState<Store["authorizedUserAccountHandling"]>({
+      creditorName: "",
+      accountNumber: "",
+
+      loanType: "", // DU | LPA
+
+      duAuthorizedAccount: "",
+      duBorrowerQualify: "",
+      duClauses: "",
+
+      lpaAuthorizedAccount: "",
+      lpaBorrowerQualify: "",
+      lpaClauses: "",
+    });
+
+  const [duplicateTradelineHandling, setDuplicateTradelineHandlingState] =
+    useState<Store["duplicateTradelineHandling"]>({
+      creditorName: "",
+      accountNumber: "",
+
+      duplicateAccount: "",
+
+      qualifiesWithBothAccounts: "",
+
+      creditSupplementAvailable: "",
+
+      supplementFailures: [],
+    });
+
+  const [pastDueAccountHandling, setPastDueAccountHandlingState] = useState<
+    Store["pastDueAccountHandling"]
+  >({
+    creditorName: "",
+    accountNumber: "",
+
+    pastDueAccount: "",
+
+    supportingDocument: "",
+
+    documentType: [],
+
+    discrepancies: [],
+  });
+
+  const [liabilityPaidOffHandling, setLiabilityPaidOffHandlingState] = useState<
+    Store["liabilityPaidOffHandling"]
+  >({
+    debtPaidOff: undefined,
+
+    accountTypes: [],
+
+    supportingDocument: undefined,
+
+    documentType: [],
+
+    discrepancies: [],
+
+    accounts: [],
+
+    selectedAccount: {
+      creditorName: "",
+      accountNumber: "",
+    },
   });
 
   const setQualifyingScore = (
@@ -350,6 +695,103 @@ export const SectionProvider = ({ children }: any) => {
     }));
   };
 
+  const setTradelineAlignment = (
+    data: Partial<Store["tradelineAlignment"]>,
+  ) => {
+    setTradelineAlignmentState((prev) => ({
+      ...prev,
+      ...data,
+    }));
+  };
+
+  const setMissingTradelinePayment = (
+    data: Partial<Store["missingTradelinePayment"]>,
+  ) => {
+    setMissingTradelinePaymentState((prev) => ({
+      ...prev,
+      ...data,
+    }));
+  };
+
+  const setCollectionHandling = (
+    data: Partial<Store["collectionHandling"]>,
+  ) => {
+    setCollectionHandlingState((prev) => ({
+      ...prev,
+      ...data,
+    }));
+  };
+
+  const setDisputedHandling = (data: Partial<Store["disputedHandling"]>) => {
+    setDisputeHandlingState((prev) => ({
+      ...prev,
+      ...data,
+    }));
+  };
+
+  const setUtilityTelecomAccount = (
+    data: Partial<Store["utilityTelecomAccount"]>,
+  ) => {
+    setUtilityTelecomAccountState((prev) => ({
+      ...prev,
+      ...data,
+    }));
+  };
+
+  const setPaymentHistoryRecencyValidation = (
+    data: Partial<Store["paymentHistoryRecencyValidation"]>,
+  ) => {
+    setPaymentHistoryRecencyValidationState((prev) => ({
+      ...prev,
+      ...data,
+    }));
+  };
+
+  const setDelinquencyLateHandling = (
+    data: Partial<Store["delinquencyLateHandling"]>,
+  ) => {
+    setDelinquencyLateHandlingState((prev) => ({
+      ...prev,
+      ...data,
+    }));
+  };
+
+  const setAuthorizedUserAccountHandling = (
+    data: Partial<Store["authorizedUserAccountHandling"]>,
+  ) => {
+    setAuthorizedUserAccountHandlingState((prev) => ({
+      ...prev,
+      ...data,
+    }));
+  };
+
+  const setDuplicateTradelineHandling = (
+    data: Partial<Store["duplicateTradelineHandling"]>,
+  ) => {
+    setDuplicateTradelineHandlingState((prev) => ({
+      ...prev,
+      ...data,
+    }));
+  };
+
+  const setPastDueAccountHandling = (
+    data: Partial<Store["pastDueAccountHandling"]>,
+  ) => {
+    setPastDueAccountHandlingState((prev) => ({
+      ...prev,
+      ...data,
+    }));
+  };
+
+  const setLiabilityPaidOffHandling = (
+    data: Partial<Store["liabilityPaidOffHandling"]>,
+  ) => {
+    setLiabilityPaidOffHandlingState((prev) => ({
+      ...prev,
+      ...data,
+    }));
+  };
+
   const [sectionStatus, setSectionStatus] = useState<Record<string, string>>({
     S0: "active",
     S1: "locked",
@@ -398,6 +840,28 @@ export const SectionProvider = ({ children }: any) => {
         setQualifyingScore,
         updateB1Scores,
         updateB2Scores,
+        tradelineAlignment,
+        setTradelineAlignment,
+        missingTradelinePayment,
+        setMissingTradelinePayment,
+        collectionHandling,
+        setCollectionHandling,
+        disputedHandling,
+        setDisputedHandling,
+        utilityTelecomAccount,
+        setUtilityTelecomAccount,
+        paymentHistoryRecencyValidation,
+        setPaymentHistoryRecencyValidation,
+        delinquencyLateHandling,
+        setDelinquencyLateHandling,
+        authorizedUserAccountHandling,
+        setAuthorizedUserAccountHandling,
+        duplicateTradelineHandling,
+        setDuplicateTradelineHandling,
+        pastDueAccountHandling,
+        setPastDueAccountHandling,
+        liabilityPaidOffHandling,
+        setLiabilityPaidOffHandling,
       }}
     >
       {children}

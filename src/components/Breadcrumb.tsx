@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from "react-router-dom";
-import { ChevronRightIcon, FolderIcon } from "lucide-react";
+import { ChevronRightIcon } from "lucide-react";
 
 // Optional: map segment keys to pretty names
 const segmentNames: Record<string, string> = {
@@ -21,6 +21,28 @@ const segmentNames: Record<string, string> = {
   "score-availability": "3.1 - Credit Score Availability & Freeze Handling ",
   "qualifying-score": "3.2 - Qualifying Credit Score Determination ",
   "median-score": " 3.3 - Median Credit Score & Minimum Requirement ",
+  s4: "Credit Report Tradeline Validation Rules",
+  "tradeline-structural-alignment": "4.1 - Tradeline Structural Alignment",
+  "missing-tradeline-payment": "4.2 - Missing Tradeline Payment Handling",
+  "collection-account": "4.3 - Collection Account Handling",
+  "disputed-account": "4.4 - Disputed Account Handling",
+  "excluded-tradeline": "4.5 - Excluded / Omitted Tradeline Validation",
+  "utility-telecom-account":
+    "4.6 - Utility / Self-Reported / Telecom Account Handling",
+  "payment-history-recency": "4.7 - Payment History Recency Validation",
+  "delinquency-late": "4.8 - Delinquency & 30/60/90 Late Handling",
+  "authorized-user-account": "4.9 - Authorized User Account Handling",
+  "duplicate-trade": "4.10 - Duplicate Tradeline Handling ",
+  "past-due": "4.11 - Past Due Account Handling",
+  "liability-paid-off": "4.12 - Liability Being Paid Off Handling",
+  s5: "Derogatory Events Rule",
+  "active-bankruptcy": "5.1 - Active Bankruptcy Handling",
+  "bankruptcy-waiting-period":
+    "5.2 - Bankruptcy Waiting Period Validation (Chapter 7 & 13)",
+  "mortgage-derogatory-event": "5.3 - Mortgage Derogatory Event Handling",
+  "tax-lien": "5.4 - Tax Lien Handling (Released & Not Released)",
+  judgment: "5.5 - Judgment Handling (Released & Not Released)",
+  "section5-summary": "Section5 Summary",
 };
 
 // Helper: build paths for each breadcrumb segment

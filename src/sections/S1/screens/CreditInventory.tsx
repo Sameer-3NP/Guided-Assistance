@@ -123,7 +123,7 @@ const CreditInventory = () => {
           max={MAX_REPORTS}
           value={creditReports.length || ""}
           onChange={(e) => handleReportCount(Number(e.target.value))}
-          className="border border-gray-300 rounded-lg px-4 py-2 w-24 text-center text-lg font-medium
+          className="border  border-black  rounded-lg px-4 py-2 w-24 text-center text-lg font-medium
         focus:ring-2 focus:ring-blue-400 focus:border-blue-400 outline-none transition"
         />
       </div>

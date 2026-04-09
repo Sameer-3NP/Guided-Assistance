@@ -124,16 +124,16 @@ const Section1Summary = () => {
       (c) => copiedConditions.includes(c) && raisedConditions.includes(c),
     );
 
-  const alignmentConditionExists = conditions.includes(
-    "Alignment missing report",
-  );
-
-  const mandatoryEscalationDone = !alignmentConditionExists
-    ? true
-    : escalations.includes("Alignment missing report");
+  const mandatoryEscalationDone = conditions
+    .filter((c) => c === "Alignment missing report")
+    .every((c) => escalations.includes(c));
 
   const sectionComplete =
-    !!activeCreditReport && allConditionsRaised && mandatoryEscalationDone;
+    activeCreditReport &&
+    sourceRequestIntegrity &&
+    systemAlignmentReview &&
+    allConditionsRaised &&
+    mandatoryEscalationDone;
 
   const handleContinue = () => {
     if (!allConditionsRaised) {
@@ -212,26 +212,63 @@ const Section1Summary = () => {
           </div>
         )}
 
-        
-        
-          </div>
-        )}
-
-        {/* If everything fine */}
-        {alerts.length === 0 && conditions.length === 0 && (
-          <div className="bg-green-50 border border-green-300 rounded-xl p-6 shadow-sm text-center">
-            <div className="flex justify-center mb-3">
-              <CheckCircle className="w-8 h-8 text-green-600" />
-            </div>
-
-            <h3 className="text-lg font-semibold text-green-700 mb-2">
-              No Issues Found
+        {/* CONDITIONS */}
+        {conditions.length > 0 && (
+          <div className="bg-red-50 border border-red-300 rounded-xl p-6 space-y-4 shadow-sm">
+            <h3 className="flex items-center gap-2 text-red-700 font-semibold">
+              <FileWarning className="w-5 h-5" />
+              Conditions
             </h3>
 
-            <p className="text-sm text-gray-600">
-              All the verification step is completed successfully without
-              raising any issue
-            </p>
+            {conditions.map((condition) => (
+              <div
+                key={condition}
+                className="bg-white border rounded-lg p-4 space-y-3"
+              >
+                <div className="flex justify-between items-start">
+                  <p className="text-sm text-gray-700">{condition}</p>
+
+                  <button
+                    onClick={() => {
+                      navigator.clipboard.writeText(condition);
+                      toast.success("Copied to LOS");
+
+                      if (!copiedConditions.includes(condition)) {
+                        setCopiedConditions((prev) => [...prev, condition]);
+                      }
+                    }}
+                    className="flex items-center gap-1 text-xs bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md"
+                  >
+                    <Clipboard className="w-3 h-3" />
+                    Copy
+                  </button>
+                </div>
+
+                <label className="flex items-center gap-2 text-sm">
+                  <input
+                    type="checkbox"
+                    checked={raisedConditions.includes(condition)}
+                    disabled={!copiedConditions.includes(condition)}
+                    onChange={() => toggleCondition(condition)}
+                    title="Do Copy to LOS before raising condition"
+                    className="accent-red-500 disabled:opacity-40"
+                  />
+                  Condition Raised
+                </label>
+
+                {condition === "Alignment missing report" && (
+                  <label className="flex items-center gap-2 text-sm">
+                    <input
+                      type="checkbox"
+                      checked={escalations.includes(condition)}
+                      onChange={() => toggleEscalation(condition)}
+                      className="accent-red-500"
+                    />
+                    Escalation Required
+                  </label>
+                )}
+              </div>
+            ))}
           </div>
         )}
 
