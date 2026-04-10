@@ -3,7 +3,7 @@ import toast from "react-hot-toast";
 import { useFlowContext } from "../../../store/FlowContext";
 import { useNavigate } from "react-router-dom";
 import { useSectionStore } from "../../../store/SectionStore";
-import PromptRadio from "../../S3/components/PromptRadio";
+import PromptRadio from "../../../components/PromptRadio";
 
 import { FileCheck, FileWarning, FileSearch } from "lucide-react";
 
@@ -26,7 +26,7 @@ const DisputedAccountHandling = () => {
     checklist,
   } = disputedHandling;
 
-  const [showPopup, setShowPopup] = useState(false);
+  const [showPopup, setShowPopup] = useState(true);
 
   const checklistItems = [
     "Credit supplement reflects incorrect borrower name.",
@@ -201,14 +201,16 @@ const DisputedAccountHandling = () => {
               type="text"
               placeholder="Account Name"
               value={accountName ?? ""}
-              onChange={(e) =>
-                setDisputedHandling({ accountName: e.target.value })
-              }
+              name="fullname"
+              onChange={(e) => {
+                const value = e.target.value.replace(/[^A-Za-z\s]/g, "");
+                setDisputedHandling({ accountName: value });
+              }}
               className="w-full border rounded-md p-2 text-sm"
             />
 
             <input
-              type="text"
+              type="number"
               placeholder="Account Number"
               value={accountNumber ?? ""}
               onChange={(e) =>

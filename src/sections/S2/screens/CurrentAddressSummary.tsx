@@ -102,6 +102,12 @@ const CurrentAddressSummary = () => {
                     if (!copiedConditions.includes(condition)) {
                       setCopiedConditions((prev) => [...prev, condition]);
                     }
+
+                    if (!raisedConditions.includes(condition)) {
+                      setCurrentAddressSummary({
+                        conditions: [...raisedConditions, condition],
+                      });
+                    }
                   }}
                   className="flex items-center gap-1 text-xs bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md"
                 >

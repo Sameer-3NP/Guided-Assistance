@@ -3,7 +3,7 @@ import toast from "react-hot-toast";
 import { useFlowContext } from "../../../store/FlowContext";
 import { useNavigate } from "react-router-dom";
 import { useSectionStore } from "../../../store/SectionStore";
-import PromptRadio from "../../S3/components/PromptRadio";
+import PromptRadio from "../../../components/PromptRadio";
 
 import {
   FileCheck,
@@ -73,7 +73,7 @@ const MissingTradelinePaymentHandling = () => {
 
   return (
     <div className="flex justify-center w-full px-6">
-      <div className="w-full max-w-4xl bg-white p-8 rounded-2xl shadow-sm border border-gray-200 space-y-8">
+      <div className="w-full max-w-4xl bg-white p-8 rounded-xl shadow-sm border border-gray-200 space-y-8">
         {/* HEADER */}
 
         <div className="flex items-center gap-3">
@@ -85,7 +85,7 @@ const MissingTradelinePaymentHandling = () => {
 
         {/* INSTRUCTION */}
 
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-800">
+        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-sm text-blue-800">
           Verify whether all tradelines reflect a monthly payment. If missing,
           determine the account type and apply the appropriate underwriting
           rule.
@@ -102,7 +102,7 @@ const MissingTradelinePaymentHandling = () => {
           />
 
           {allPayments === "Yes" && (
-            <div className="flex items-center gap-2 border border-green-400 bg-green-50 p-3 rounded text-sm text-green-700">
+            <div className="flex items-center gap-2 border border-green-400 bg-green-50 p-3 rounded-xl text-sm text-green-700">
               ✔ All tradelines reflect payments. No action required.
             </div>
           )}
@@ -140,7 +140,7 @@ const MissingTradelinePaymentHandling = () => {
             />
 
             {accountType === "Revolving" && (
-              <div className="flex items-center gap-2 border border-yellow-400 bg-yellow-50 p-3 rounded text-sm text-yellow-800">
+              <div className="flex items-center gap-2 border border-yellow-400 bg-yellow-50 p-3 rounded-xl text-sm text-yellow-800">
                 <CreditCard className="w-4 h-4" />
                 Action: Consider 5% of the outstanding balance or $10, whichever
                 is higher.
@@ -161,13 +161,17 @@ const MissingTradelinePaymentHandling = () => {
                     <label className="text-sm font-medium">Creditor Name</label>
                     <input
                       type="text"
-                      value={creditorName ?? " "}
-                      onChange={(e) =>
-                        setMissingTradelinePayment({
-                          creditorName: e.target.value,
-                        })
-                      }
-                      className="w-full mt-1 border rounded-md p-2 text-sm"
+                      placeholder="Account Name"
+                      value={creditorName ?? ""}
+                      name="fullname"
+                      onChange={(e) => {
+                        const value = e.target.value.replace(
+                          /[^A-Za-z\s]/g,
+                          "",
+                        );
+                        setMissingTradelinePayment({ creditorName: value });
+                      }}
+                      className="w-full border rounded-md p-2 text-sm"
                     />
                   </div>
 
@@ -176,7 +180,7 @@ const MissingTradelinePaymentHandling = () => {
                       Account Number
                     </label>
                     <input
-                      type="text"
+                      type="number"
                       value={accountNumber ?? " "}
                       onChange={(e) =>
                         setMissingTradelinePayment({
@@ -205,13 +209,13 @@ const MissingTradelinePaymentHandling = () => {
                 />
 
                 {loanType === "FHLMC" && (
-                  <div className="flex items-center gap-2 border border-yellow-400 bg-yellow-50 p-3 rounded text-sm text-yellow-800">
+                  <div className="flex items-center gap-2 border border-yellow-400 bg-yellow-50 p-3 rounded-xl text-sm text-yellow-800">
                     Update LOS based on FHLMC student loan guidelines.
                   </div>
                 )}
 
                 {loanType === "FNMA" && (
-                  <div className="flex items-center gap-2 border border-yellow-400 bg-yellow-50 p-3 rounded text-sm text-yellow-800">
+                  <div className="flex items-center gap-2 border border-yellow-400 bg-yellow-50 p-3 rounded-xl text-sm text-yellow-800">
                     Update LOS based on FNMA student loan guidelines.
                   </div>
                 )}

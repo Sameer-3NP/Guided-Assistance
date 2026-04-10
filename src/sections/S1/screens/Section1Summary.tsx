@@ -25,7 +25,6 @@ const Section1Summary = () => {
   const { registerActions } = useFlowContext();
   const navigate = useNavigate();
   const [copiedConditions, setCopiedConditions] = useState<string[]>([]);
-
   const [raisedConditions, setRaisedConditions] = useState<string[]>([]);
   const [escalations, setEscalations] = useState<string[]>([]);
 
@@ -110,13 +109,13 @@ const Section1Summary = () => {
     );
   };
 
-  const toggleEscalation = (condition: string) => {
-    setEscalations((prev) =>
-      prev.includes(condition)
-        ? prev.filter((c) => c !== condition)
-        : [...prev, condition],
-    );
-  };
+  // const toggleEscalation = (condition: string) => {
+  //   setEscalations((prev) =>
+  //     prev.includes(condition)
+  //       ? prev.filter((c) => c !== condition)
+  //       : [...prev, condition],
+  //   );
+  // };
 
   const allConditionsRaised =
     conditions.length === 0 ||
@@ -141,10 +140,10 @@ const Section1Summary = () => {
       return;
     }
 
-    if (!mandatoryEscalationDone) {
-      toast.error("Escalation confirmation required");
-      return;
-    }
+    // if (!mandatoryEscalationDone) {
+    //   toast.error("Escalation confirmation required");
+    //   return;
+    // }
 
     setSectionStatus((prev) => ({ ...prev, S1: "completed", S2: "active" }));
 
@@ -233,8 +232,14 @@ const Section1Summary = () => {
                       navigator.clipboard.writeText(condition);
                       toast.success("Copied to LOS");
 
+                      //mark as copied
                       if (!copiedConditions.includes(condition)) {
                         setCopiedConditions((prev) => [...prev, condition]);
+                      }
+
+                      // auto check checkbox
+                      if (!raisedConditions.includes(condition)) {
+                        setRaisedConditions((prev) => [...prev, condition]);
                       }
                     }}
                     className="flex items-center gap-1 text-xs bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md"
@@ -256,17 +261,18 @@ const Section1Summary = () => {
                   Condition Raised
                 </label>
 
-                {condition === "Alignment missing report" && (
+                {/* {condition === "Alignment missing report" && (
                   <label className="flex items-center gap-2 text-sm">
                     <input
                       type="checkbox"
                       checked={escalations.includes(condition)}
+                      disabled={!escalations.includes(condition)}
                       onChange={() => toggleEscalation(condition)}
-                      className="accent-red-500"
+                      className="accent-red-500 disabled:opacity-40"
                     />
                     Escalation Required
                   </label>
-                )}
+                )} */}
               </div>
             ))}
           </div>

@@ -3,7 +3,7 @@ import toast from "react-hot-toast";
 import { useFlowContext } from "../../../store/FlowContext";
 import { useNavigate } from "react-router-dom";
 import { useSectionStore } from "../../../store/SectionStore";
-import PromptRadio from "../../S3/components/PromptRadio";
+import PromptRadio from "../../../components/PromptRadio";
 
 import { FileCheck, AlertTriangle, GitCompare, Database } from "lucide-react";
 
@@ -39,13 +39,13 @@ const TradelineStructuralAlignment = () => {
   useEffect(() => {
     registerActions({
       onContinue: handleContinue,
-      onBack: () => navigate("/s3/qualifying-score"),
+      onBack: () => navigate("/s3/median-score"),
     });
   }, [losGreater, creditGreater, fieldsMatch]);
 
   return (
     <div className="flex justify-center w-full px-6">
-      <div className="w-full max-w-4xl bg-white p-8 rounded-2xl shadow-sm border border-gray-200 space-y-8">
+      <div className="w-full max-w-4xl bg-white p-8 rounded-xl shadow-sm border border-gray-200 space-y-8">
         {/* HEADER */}
 
         <div className="flex items-center gap-3">
@@ -71,7 +71,7 @@ const TradelineStructuralAlignment = () => {
           />
 
           {branch1Condition && (
-            <div className="flex items-center gap-2 border border-red-400 bg-red-50 p-3 rounded text-sm text-red-700">
+            <div className="flex items-center gap-2 border border-red-400 bg-red-50 p-3 rounded-xl text-sm text-red-700">
               <AlertTriangle className="w-4 h-4" />
               Condition: LOS reflects more tradelines than the credit report.
               Manual reconciliation required.
@@ -88,7 +88,7 @@ const TradelineStructuralAlignment = () => {
           )}
 
           {creditGreater === "Yes" && (
-            <div className="flex items-center gap-2 border border-yellow-400 bg-yellow-50 p-3 rounded text-sm text-yellow-800">
+            <div className="flex items-center gap-2 border border-yellow-400 bg-yellow-50 p-3 rounded-xl text-sm text-yellow-800">
               <AlertTriangle className="w-4 h-4" />
               Action Required: Update LOS based on tradelines reflected on the
               credit report.
@@ -113,7 +113,7 @@ const TradelineStructuralAlignment = () => {
             />
 
             {fieldsMatch === "Mismatch" && (
-              <div className="flex items-center gap-2 border border-yellow-400 bg-yellow-50 p-3 rounded text-sm text-yellow-800">
+              <div className="flex items-center gap-2 border border-yellow-400 bg-yellow-50 p-3 rounded-xl text-sm text-yellow-800">
                 <AlertTriangle className="w-4 h-4" />
                 Action Required: Update LOS tradeline fields based on credit
                 report data.
@@ -121,7 +121,7 @@ const TradelineStructuralAlignment = () => {
             )}
 
             {fieldsMatch === "Matches" && (
-              <div className="flex items-center gap-2 border border-green-400 bg-green-50 p-3 rounded text-sm text-green-700">
+              <div className="flex items-center gap-2 border border-green-400 bg-green-50 p-3 rounded-xl text-sm text-green-700">
                 ✔ No discrepancies detected. No action required.
               </div>
             )}

@@ -3,7 +3,7 @@ import toast from "react-hot-toast";
 import { useFlowContext } from "../../../store/FlowContext";
 import { useNavigate } from "react-router-dom";
 import { useSectionStore } from "../../../store/SectionStore";
-import PromptRadio from "../components/PromptRadio";
+import PromptRadio from "../../../components/PromptRadio";
 
 import {
   //  CheckCircle,
@@ -171,7 +171,7 @@ const ScoreAvailability = () => {
           />
 
           {branchACondition && (
-            <div className="flex items-center gap-2 border border-red-400 bg-red-50 p-3 rounded text-sm text-red-700">
+            <div className="flex items-center gap-2 border border-red-400 bg-red-50 p-3 rounded-xl text-sm text-red-700">
               <AlertTriangle className="w-4 h-4" />
               Condition: Credit freeze present with insufficient bureau scores.
             </div>

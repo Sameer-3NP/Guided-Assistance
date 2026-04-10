@@ -300,11 +300,12 @@ type Store = {
     supportingDocument: string;
     documentType: string[];
     discrepancies: string[];
+    latestCreditReport: string;
     accounts: {
       creditorName: string;
       accountNumber: string;
     }[];
-    selectedAccount?: {
+    selectedAccount: {
       creditorName: string;
       accountNumber: string;
     };
@@ -312,6 +313,144 @@ type Store = {
 
   setLiabilityPaidOffHandling: (
     data: Partial<Store["liabilityPaidOffHandling"]>,
+  ) => void;
+
+  childSupportHandling: {
+    hasChildSupportTradeline: string; 
+
+    dlaLessThan7Years: string; 
+
+    supportingDocument: string; 
+
+    documentType: string[];
+
+    discrepancies: string[]; 
+    lenderRequirement: string; 
+
+    accounts: {
+      creditorName: string;
+      accountNumber: string;
+      balance: string;
+    }[];
+
+    selectedAccount?: {
+      creditorName: string;
+      accountNumber: string;
+      balance: string;
+    };
+  };
+
+  setChildSupportHandling: (
+    data: Partial<Store["childSupportHandling"]>,
+  ) => void;
+
+  activeBankruptcyHandling: {
+    hasActiveBankruptcy: string;
+    bankruptcyType: string;
+
+    cases: {
+      caseNumber: string;
+      bankruptcyDate: string;
+    }[];
+
+    selectedCase: {
+      caseNumber: string;
+      bankruptcyDate: string;
+    };
+
+    supportingDocument: string;
+
+    escalatedToManagement: boolean;
+  };
+
+  setActiveBankruptcyHandling: (
+    data: Partial<Store["activeBankruptcyHandling"]>,
+  ) => void;
+
+  bankruptcyWaitingValidation: {
+    hasInactiveBankruptcy: string;
+
+    bankruptcyType: string;
+
+    caseNumber: string;
+
+    dischargedDate: string;
+
+    waitingPeriod4Years: string;
+
+    waitingPeriod2Years: string;
+
+    lenderRequirement: string;
+
+    bankruptcyDocumentAvailable: string;
+
+    extenuatingDocuments: string;
+
+    dismissedOrDischarged: string;
+
+    escalatedToManagement: boolean;
+  };
+
+  setBankruptcyWaitingValidation: (
+    data: Partial<Store["bankruptcyWaitingValidation"]>,
+  ) => void;
+
+  mortgageDerogatoryEventHandling: {
+    derogatoryTypes: string[]; // Prompt 1
+
+    accounts: {
+      creditorName: string;
+      accountNumber: string;
+    }[];
+
+    selectedAccount?: {
+      creditorName: string;
+      accountNumber: string;
+    };
+
+    /* FORECLOSURE */
+
+    foreclosureDocsAvailable: string; // Prompt 2
+
+    foreclosureDocTypes: string[]; // Prompt 2a
+
+    trusteesDeedChecklist: string[]; // Prompt 2b
+
+    propertyProfileChecklist: string[]; // Prompt 2c
+
+    foreclosureWaitingPeriod: string; // Prompt 2d
+
+    /* PRE FORECLOSURE */
+
+    preForeclosureDocsAvailable: string; // Prompt 3
+
+    preForeclosureDocTypes: string[]; // Prompt 3a
+
+    shortSaleChecklist: string[]; // Prompt 3b
+
+    settlementChecklist: string[]; // Prompt 3c
+
+    propertyProfileChecklistB: string[]; // Prompt 3d
+
+    preForeclosureWaitingPeriod: string; // Prompt 3e
+
+    /* CHARGE OFF */
+
+    chargeOffDocsAvailable: string; // Prompt 4
+
+    chargeOffDocTypes: string[]; // Prompt 4a
+
+    cancellationChecklist: string[]; // Prompt 4b
+
+    lenderLetterChecklist: string[]; // Prompt 4c
+
+    chargeOffWaitingPeriod: string; // Prompt 4d
+
+    escalatedToManagement: boolean;
+  };
+
+  setMortgageDerogatoryEventHandling: (
+    data: Partial<Store["mortgageDerogatoryEventHandling"]>,
   ) => void;
 
   sectionStatus: Record<string, string>;
@@ -564,11 +703,12 @@ export const SectionProvider = ({ children }: any) => {
   const [liabilityPaidOffHandling, setLiabilityPaidOffHandlingState] = useState<
     Store["liabilityPaidOffHandling"]
   >({
-    debtPaidOff: undefined,
+    debtPaidOff: "",
 
     accountTypes: [],
 
-    supportingDocument: undefined,
+    supportingDocument: "",
+    latestCreditReport: "",
 
     documentType: [],
 
@@ -580,6 +720,102 @@ export const SectionProvider = ({ children }: any) => {
       creditorName: "",
       accountNumber: "",
     },
+  });
+
+  const [childSupportHandling, setChildSupportHandlingState] = useState<
+    Store["childSupportHandling"]
+  >({
+    hasChildSupportTradeline: "",
+    dlaLessThan7Years: "",
+    supportingDocument: "",
+    documentType: [],
+    discrepancies: [],
+    lenderRequirement: "",
+    accounts: [],
+    selectedAccount: undefined,
+  });
+
+  const [activeBankruptcyHandling, setActiveBankruptcyHandlingState] = useState<
+    Store["activeBankruptcyHandling"]
+  >({
+    hasActiveBankruptcy: "",
+    bankruptcyType: "",
+    cases: [],
+    selectedCase: {
+      caseNumber: "",
+      bankruptcyDate: "",
+    },
+    supportingDocument: "",
+    escalatedToManagement: false,
+  });
+
+  const [bankruptcyWaitingValidation, setBankruptcyWaitingValidationState] =
+    useState<Store["bankruptcyWaitingValidation"]>({
+      hasInactiveBankruptcy: "",
+      bankruptcyType: "",
+      caseNumber: "",
+      dischargedDate: "",
+      waitingPeriod4Years: "",
+      waitingPeriod2Years: "",
+      lenderRequirement: "",
+      bankruptcyDocumentAvailable: "",
+      extenuatingDocuments: "",
+      dismissedOrDischarged: "",
+      escalatedToManagement: false,
+    });
+
+  const [
+    mortgageDerogatoryEventHandling,
+    setMortgageDerogatoryEventHandlingState,
+  ] = useState<Store["mortgageDerogatoryEventHandling"]>({
+    derogatoryTypes: [],
+
+    accounts: [],
+
+    selectedAccount: {
+      creditorName: "",
+      accountNumber: "",
+    },
+
+    /* FORECLOSURE */
+
+    foreclosureDocsAvailable: "",
+
+    foreclosureDocTypes: [],
+
+    trusteesDeedChecklist: [],
+
+    propertyProfileChecklist: [],
+
+    foreclosureWaitingPeriod: "",
+
+    /* PRE FORECLOSURE */
+
+    preForeclosureDocsAvailable: "",
+
+    preForeclosureDocTypes: [],
+
+    shortSaleChecklist: [],
+
+    settlementChecklist: [],
+
+    propertyProfileChecklistB: [],
+
+    preForeclosureWaitingPeriod: "",
+
+    /* CHARGE OFF */
+
+    chargeOffDocsAvailable: "",
+
+    chargeOffDocTypes: [],
+
+    cancellationChecklist: [],
+
+    lenderLetterChecklist: [],
+
+    chargeOffWaitingPeriod: "",
+
+    escalatedToManagement: false,
   });
 
   const setQualifyingScore = (
@@ -660,12 +896,17 @@ export const SectionProvider = ({ children }: any) => {
     }));
   };
 
-  const [currentAddressSummary, setCurrentAddressSummaryState] = useState({
+  const [currentAddressSummary, setCurrentAddressSummaryState] = useState<
+    Store["currentAddressSummary"]
+  >({
     conditions: [],
   });
 
   const setCurrentAddressSummary = (data: Store["currentAddressSummary"]) => {
-    setCurrentAddressSummaryState(data);
+    setCurrentAddressSummaryState((prev) => ({
+      ...prev,
+      ...data,
+    }));
   };
 
   const setPreviousAddress = (data: Partial<Store["previousAddress"]>) => {
@@ -792,6 +1033,42 @@ export const SectionProvider = ({ children }: any) => {
     }));
   };
 
+  const setChildSupportHandling = (
+    data: Partial<Store["childSupportHandling"]>,
+  ) => {
+    setChildSupportHandlingState((prev) => ({
+      ...prev,
+      ...data,
+    }));
+  };
+
+  const setActiveBankruptcyHandling = (
+    data: Partial<Store["activeBankruptcyHandling"]>,
+  ) => {
+    setActiveBankruptcyHandlingState((prev) => ({
+      ...prev,
+      ...data,
+    }));
+  };
+
+  const setBankruptcyWaitingValidation = (
+    data: Partial<Store["bankruptcyWaitingValidation"]>,
+  ) => {
+    setBankruptcyWaitingValidationState((prev) => ({
+      ...prev,
+      ...data,
+    }));
+  };
+
+  const setMortgageDerogatoryEventHandling = (
+    data: Partial<Store["mortgageDerogatoryEventHandling"]>,
+  ) => {
+    setMortgageDerogatoryEventHandlingState((prev) => ({
+      ...prev,
+      ...data,
+    }));
+  };
+
   const [sectionStatus, setSectionStatus] = useState<Record<string, string>>({
     S0: "active",
     S1: "locked",
@@ -862,6 +1139,14 @@ export const SectionProvider = ({ children }: any) => {
         setPastDueAccountHandling,
         liabilityPaidOffHandling,
         setLiabilityPaidOffHandling,
+        childSupportHandling,
+        setChildSupportHandling,
+        activeBankruptcyHandling,
+        setActiveBankruptcyHandling,
+        bankruptcyWaitingValidation,
+        setBankruptcyWaitingValidation,
+        mortgageDerogatoryEventHandling,
+        setMortgageDerogatoryEventHandling,
       }}
     >
       {children}

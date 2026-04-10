@@ -84,7 +84,7 @@ const CoreIdentitySummary = () => {
       onContinue: handleContinue,
       onBack: () => navigate("/s2/core-identity"),
     });
-  }, [raisedConditions]);
+  }, [raisedConditions, navigate, registerActions]);
 
   return (
     <div className="max-w-4xl mx-auto space-y-8">
@@ -154,6 +154,13 @@ const CoreIdentitySummary = () => {
 
                     if (!copiedConditions.includes(condition)) {
                       setCopiedConditions((prev) => [...prev, condition]);
+                    }
+
+                    if (!raisedConditions.includes(condition)) {
+                      setCoreIdentitySummary({
+                        conditions: [...raisedConditions, condition],
+                        alerts: raisedAlerts,
+                      });
                     }
                   }}
                   className="flex items-center gap-1 text-xs bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md"

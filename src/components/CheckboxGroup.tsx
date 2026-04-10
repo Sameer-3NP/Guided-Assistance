@@ -15,8 +15,8 @@ const CheckboxGroup = ({ label, options, values, onChange }: Props) => {
   };
 
   return (
-    <div className="space-y-4">
-      <div className="font-medium text-gray-800">{label}</div>
+    <div className="space-y-4 ">
+      <div className="font-medium text-gray-800 ">{label}</div>
 
       <div className="space-y-2">
         {options.map((option) => {
@@ -25,7 +25,7 @@ const CheckboxGroup = ({ label, options, values, onChange }: Props) => {
           return (
             <label
               key={option}
-              className={`flex items-center gap-3   rounded-lg cursor-pointer transition
+              className={`flex items-center gap-3  rounded-lg cursor-pointer transition
               `}
             >
               <input

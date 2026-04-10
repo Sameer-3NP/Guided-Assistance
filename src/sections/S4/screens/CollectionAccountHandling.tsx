@@ -6,7 +6,7 @@ import { useSectionStore } from "../../../store/SectionStore";
 import ConditionBanner from "../../../components/ConditionBanner";
 import { FileCheck, FileWarning, Stethoscope } from "lucide-react";
 
-import PromptRadio from "../../S3/components/PromptRadio";
+import PromptRadio from "../../../components/PromptRadio";
 import PopUp from "../../../components/PopUp";
 
 const CollectionAccountHandling = () => {
@@ -170,7 +170,7 @@ const CollectionAccountHandling = () => {
           />
 
           {hasCollection === "No" && (
-            <div className="flex items-center gap-2 border border-green-400 bg-green-50 p-3 rounded text-sm text-green-700">
+            <div className="flex items-center gap-2 border border-green-400 bg-green-50 p-3 rounded-xl text-sm text-green-700">
               ✔ No collection accounts present.
             </div>
           )}
@@ -204,7 +204,7 @@ const CollectionAccountHandling = () => {
             />
 
             {collectionType === "Medical" && (
-              <div className="flex items-center gap-2 border border-green-400 bg-green-50 p-3 rounded text-sm text-green-700">
+              <div className="flex items-center gap-2 border border-green-400 bg-green-50 p-3 rounded-xl text-sm text-green-700">
                 <Stethoscope className="w-4 h-4" />
                 Medical Condition , No action required.
               </div>
@@ -269,14 +269,16 @@ const CollectionAccountHandling = () => {
               type="text"
               placeholder="Account Name"
               value={accountName ?? ""}
-              onChange={(e) =>
-                setCollectionHandling({ accountName: e.target.value })
-              }
+              name="fullname"
+              onChange={(e) => {
+                const value = e.target.value.replace(/[^A-Za-z\s]/g, "");
+                setCollectionHandling({ accountName: value });
+              }}
               className="w-full border rounded-md p-2 text-sm"
             />
-
+            
             <input
-              type="text"
+              type="number"
               placeholder="Account Number"
               value={accountNumber ?? ""}
               onChange={(e) =>

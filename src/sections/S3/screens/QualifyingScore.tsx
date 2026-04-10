@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import toast from "react-hot-toast";
 import { useFlowContext } from "../../../store/FlowContext";
 import { useNavigate } from "react-router-dom";
-import PromptRadio from "../components/PromptRadio";
+import PromptRadio from "../../../components/PromptRadio";
 import { BarChart3, Users, Calculator } from "lucide-react";
 import { useSectionStore } from "../../../store/SectionStore";
 
@@ -22,6 +22,19 @@ const QualifyingScore = () => {
     field: "sc1" | "sc2" | "sc3",
     val: string,
   ) => {
+    if (val === "") {
+      updateScore(borrower, field, "");
+      return;
+    }
+
+    const num = Number(val);
+
+    if (num < 1 || num > 900) return;
+
+    updateScore(borrower, field, val);
+  };
+
+  const updateScore = (borrower: "b1" | "b2", field: string, val: string) => {
     if (borrower === "b1") {
       setQualifyingScore({
         b1Scores: { ...b1Scores, [field]: val },
@@ -39,13 +52,11 @@ const QualifyingScore = () => {
     scores: { sc1: string; sc2: string; sc3: string },
     count: string,
   ) => {
-    const parsed = [
-      parseInt(scores.sc1),
-      parseInt(scores.sc2),
-      parseInt(scores.sc3),
-    ].filter((n) => !isNaN(n));
+    const parsed = [scores.sc1, scores.sc2, scores.sc3]
+      .map(Number)
+      .filter((n) => !isNaN(n));
 
-    if (parsed.length === 0) return null;
+    if (parsed.length < Number(count)) return null;
 
     if (count === "1") return parsed[0];
 
@@ -53,7 +64,7 @@ const QualifyingScore = () => {
 
     if (count === "3") {
       const sorted = [...parsed].sort((a, b) => a - b);
-      return sorted[1]; // middle score
+      return sorted[1];
     }
 
     return null;
@@ -118,7 +129,11 @@ const QualifyingScore = () => {
         <input
           type="number"
           placeholder="SC1"
+          min={1}
+          max={900}
+          maxLength={3}
           value={scores.sc1}
+          inputMode="numeric"
           onChange={(e) => handleScoreChange(borrower, "sc1", e.target.value)}
           className="border rounded-lg px-3 py-2 w-24"
         />
@@ -127,7 +142,11 @@ const QualifyingScore = () => {
           <input
             type="number"
             placeholder="SC2"
+            min={1}
+            max={900}
+            maxLength={3}
             value={scores.sc2}
+            inputMode="numeric"
             onChange={(e) => handleScoreChange(borrower, "sc2", e.target.value)}
             className="border rounded-lg px-3 py-2 w-24"
           />
@@ -137,7 +156,11 @@ const QualifyingScore = () => {
           <input
             type="number"
             placeholder="SC3"
+            min={1}
+            max={900}
+            maxLength={3}
             value={scores.sc3}
+            inputMode="numeric"
             onChange={(e) => handleScoreChange(borrower, "sc3", e.target.value)}
             className="border rounded-lg px-3 py-2 w-24"
           />

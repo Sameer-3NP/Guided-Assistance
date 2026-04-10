@@ -29,6 +29,8 @@ const GlobalHeader = () => {
   const isSection1 = location.pathname.startsWith("/s1");
   const isSection2 = location.pathname.startsWith("/s2");
   const isSection3 = location.pathname.startsWith("/s3");
+  const isSection4 = location.pathname.startsWith("/s4");
+  const isSection5 = location.pathname.startsWith("/s5");
 
   const activeReport =
     s1.length === 1 ? s1[0] : s1.find((r) => r.label === activeCreditReport);
@@ -72,33 +74,34 @@ const GlobalHeader = () => {
         )}
 
         {/* SECTION 2 & 3 BANNER */}
-        {(isSection2 || isSection3) && activeReport && (
-          <>
-            <InfoCard
-              icon={<Calendar size={16} />}
-              label="Application Date"
-              value={formatDate(s0.applicationDate)}
-            />
+        {(isSection2 || isSection3 || isSection4 || isSection5) &&
+          activeReport && (
+            <>
+              <InfoCard
+                icon={<Calendar size={16} />}
+                label="Application Date"
+                value={formatDate(s0.applicationDate)}
+              />
 
-            <InfoCard
-              icon={<CalendarCheck size={16} />}
-              label="Estimated Closing"
-              value={formatDate(s0.closingDate)}
-            />
+              <InfoCard
+                icon={<CalendarCheck size={16} />}
+                label="Estimated Closing"
+                value={formatDate(s0.closingDate)}
+              />
 
-            <InfoCard
-              icon={<CreditCard size={16} />}
-              label="Active Credit Report"
-              value={activeReport.label}
-            />
+              <InfoCard
+                icon={<CreditCard size={16} />}
+                label="Active Credit Report"
+                value={activeReport.label}
+              />
 
-            <InfoCard
-              icon={<User size={16} />}
-              label="Borrower Slot"
-              value={activeReport.borrowerSlot || "-"}
-            />
-          </>
-        )}
+              <InfoCard
+                icon={<User size={16} />}
+                label="Borrower Slot"
+                value={activeReport.borrowerSlot || "-"}
+              />
+            </>
+          )}
       </div>
     </header>
   );
@@ -156,7 +159,7 @@ const SectionProgress = () => {
             </div>
 
             {i !== sections.length - 1 && (
-              <div className="w-6 h-[2px] bg-gray-300"></div>
+              <div className="w-6 h-0.5 bg-gray-300"></div>
             )}
           </div>
         );

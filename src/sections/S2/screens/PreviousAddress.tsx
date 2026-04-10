@@ -4,13 +4,7 @@ import { useFlowContext } from "../../../store/FlowContext";
 import { useNavigate } from "react-router-dom";
 import { useSectionStore } from "../../../store/SectionStore";
 
-import {
-  HelpCircle,
-  CheckCircle,
-  XCircle,
-  AlertTriangle,
-  FileCheck,
-} from "lucide-react";
+import { AlertTriangle, FileCheck } from "lucide-react";
 
 const PreviousAddress = () => {
   const navigate = useNavigate();
@@ -64,7 +58,7 @@ const PreviousAddress = () => {
 
   return (
     <div className="flex justify-center w-full px-6">
-      <div className="w-full max-w-4xl bg-white p-8 rounded-2xl shadow-sm border border-gray-200 space-y-8">
+      <div className="w-full max-w-4xl bg-white p-8 rounded-xl shadow-sm border border-gray-200 space-y-8">
         {/* HEADER */}
         <div className="flex items-center gap-3">
           <FileCheck className="w-7 h-7 text-blue-400" />
@@ -75,7 +69,7 @@ const PreviousAddress = () => {
 
         {/* PROMPT 1 */}
         <div className="space-y-4">
-          <div className="flex items-start gap-3 bg-blue-100 border border-blue-200 rounded-lg p-3">
+          <div className="flex items-start gap-3 bg-blue-100 border border-blue-200 rounded-xl p-3">
             {/* <HelpCircle className="w-5 h-5 text-red-400 mt-0.5" /> */}
             <p className="text-md text-black font-semibold">
               Is a previous address reflected on the credit report?
@@ -91,7 +85,7 @@ const PreviousAddress = () => {
         {/* PROMPT 2 */}
         {hasPreviousAddress === "Yes" && (
           <div className="space-y-4">
-            <div className="flex items-start gap-3 bg-blue-100 border border-blue-200 rounded-lg p-3">
+            <div className="flex items-start gap-3 bg-blue-100 border border-blue-200 rounded-xl p-3">
               {/* <HelpCircle className="w-5 h-5 text-red-400 mt-0.5" /> */}
               <p className="text-md text-black font-semibold">
                 Does the previous address match the previous address on loan
@@ -109,7 +103,7 @@ const PreviousAddress = () => {
         {/* PROMPT 3 */}
         {addressMatch === "No" && (
           <div className="space-y-4">
-            <div className="flex items-start gap-3 bg-blue-100 border border-blue-200 rounded-lg p-3">
+            <div className="flex items-start gap-3 bg-blue-100 border border-blue-200 rounded-xl p-3">
               {/* <HelpCircle className="w-5 h-5 text-red-400 mt-0.5" /> */}
               <p className="text-md text-black font-semibold">
                 Per lender requirement, is an updated credit report required for
@@ -123,7 +117,7 @@ const PreviousAddress = () => {
             </div>
 
             {requireUpdatedReport === "Yes" && (
-              <div className="flex items-center gap-2 border border-red-400 bg-red-50 p-3 rounded text-sm text-red-700">
+              <div className="flex items-center gap-2 border border-red-400 bg-red-50 p-3 rounded-xl text-sm text-red-700">
                 <AlertTriangle className="w-4 h-4" />
                 Condition: Updated credit report required
               </div>

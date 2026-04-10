@@ -31,8 +31,7 @@ import UtilityTelecomAccountHandling from "./sections/S4/screens/UtilityTelecomA
 import PaymentHistoryRecencyValidation from "./sections/S4/screens/PaymentHistoryRecencyValidation";
 import DelinquencyLateHandling from "./sections/S4/screens/DelinquencyLateHandling";
 import AuthorizedUserAccountHandling from "./sections/S4/screens/AuthorizedUserAccountHandling";
-import LiabilityPaidOffHandling from "./sections/S4/screens/LiabilityPaidOffHandling";
-import Section4Summary from "./sections/S4/screens/Section4Summary";
+import LiabilityPaidOffHandling from "./sections/S4/screens/LiabilityPaidOffHandling/LiabilityPaidOffHandling";
 
 import ActiveBankruptcyHandling from "./sections/S5/screens/ActiveBankruptcyHandling";
 import BankruptcyWaitingPeriodValidation from "./sections/S5/screens/BankruptcyWaitingPeriodValidation";
@@ -42,6 +41,7 @@ import JudgmentHandling from "./sections/S5/screens/JudgmentHandling";
 import Section5Summary from "./sections/S5/screens/Section5Summary";
 import DuplicateTradelineHandling from "./sections/S4/screens/DuplicateTradelineHandling";
 import PastAccountHandling from "./sections/S4/screens/PastAccountHandling";
+import ChildSupportHandling from "./sections/S4/screens/ChildSupportHandling";
 
 export const router = createBrowserRouter([
   {
@@ -126,7 +126,7 @@ export const router = createBrowserRouter([
       { path: "s4/duplicate-trade", element: <DuplicateTradelineHandling /> },
       { path: "s4/past-due", element: <PastAccountHandling /> },
       { path: "s4/liability-paid-off", element: <LiabilityPaidOffHandling /> },
-      { path: "s4/section4-summary", element: <Section4Summary /> },
+      { path: "s4/child-support", element: <ChildSupportHandling /> },
 
       // Section 5
       { path: "s5", element: <Navigate to="/s5/active-bankruptcy" replace /> },

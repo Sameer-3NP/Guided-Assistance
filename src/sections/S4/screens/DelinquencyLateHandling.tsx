@@ -4,7 +4,7 @@ import { useFlowContext } from "../../../store/FlowContext";
 import { useNavigate } from "react-router-dom";
 import { useSectionStore } from "../../../store/SectionStore";
 
-import PromptRadio from "../../S3/components/PromptRadio";
+import PromptRadio from "../../../components/PromptRadio";
 import CheckboxGroup from "../../../components/CheckboxGroup";
 import PopUp from "../../../components/PopUp";
 
@@ -94,11 +94,12 @@ const DelinquencyLateHandling = () => {
               <input
                 type="text"
                 value={creditorName ?? ""}
-                onChange={(e) =>
+                onChange={(e) => {
+                  const value = e.target.value.replace(/[^A-Za-z\s]/g, "");
                   setDelinquencyLateHandling({
-                    creditorName: e.target.value,
-                  })
-                }
+                    creditorName: value,
+                  });
+                }}
                 className="w-full mt-1 border rounded-md p-2 text-sm"
               />
             </div>
@@ -106,7 +107,7 @@ const DelinquencyLateHandling = () => {
             <div>
               <label className="text-sm font-medium">Account Number</label>
               <input
-                type="text"
+                type="number"
                 value={accountNumber ?? ""}
                 onChange={(e) =>
                   setDelinquencyLateHandling({
@@ -158,7 +159,7 @@ const DelinquencyLateHandling = () => {
             {/* BRANCH ALERT */}
 
             {lateAccountTypes.includes("Mortgage account") && (
-              <div className="border border-yellow-400 bg-yellow-50 p-3 rounded text-sm text-yellow-800">
+              <div className="border border-yellow-400 bg-yellow-50 p-3 rounded-xl text-sm text-yellow-800">
                 Alert appears as per Branch 1
               </div>
             )}
@@ -181,7 +182,7 @@ const DelinquencyLateHandling = () => {
             />
 
             {lenderRequireExplanation === "Yes" && (
-              <div className="border border-red-400 bg-red-50 p-3 rounded text-sm text-red-700">
+              <div className="border border-red-400 bg-red-50 p-3 rounded-xl text-sm text-red-700">
                 Condition appears as per branch 1
               </div>
             )}

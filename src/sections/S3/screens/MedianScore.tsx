@@ -40,7 +40,7 @@ const MedianScore = () => {
 
   return (
     <div className="flex justify-center w-full px-6">
-      <div className="w-full max-w-3xl bg-white p-8 rounded-2xl shadow-sm border border-gray-200 space-y-8">
+      <div className="w-full max-w-3xl bg-white p-8 rounded-xl shadow-sm border border-gray-200 space-y-8">
         {/* HEADER */}
 
         <div className="flex items-center gap-3">
@@ -52,7 +52,7 @@ const MedianScore = () => {
 
         {/* INFO */}
 
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-800">
+        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 text-sm text-blue-800">
           The final qualifying credit score is determined by selecting the lower
           score between borrowers.
         </div>

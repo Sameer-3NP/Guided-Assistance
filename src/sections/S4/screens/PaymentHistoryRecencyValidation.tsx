@@ -3,7 +3,7 @@ import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { useFlowContext } from "../../../store/FlowContext";
 import { useSectionStore } from "../../../store/SectionStore";
-import PromptRadio from "../../S3/components/PromptRadio";
+import PromptRadio from "../../../components/PromptRadio";
 import PopUp from "../../../components/PopUp";
 import DocumentChecklist from "../../../components/DocumentChecklist";
 
@@ -113,7 +113,7 @@ const PaymentHistoryRecencyValidation = () => {
           />
 
           {hasDLA === "No" && (
-            <div className="flex items-center gap-2 border border-green-400 bg-green-50 p-3 rounded text-sm text-green-700">
+            <div className="flex items-center gap-2 border border-green-400 bg-green-50 p-3 rounded-xl text-sm text-green-700">
               ✔ No DLA prior to application date reflected.
             </div>
           )}
@@ -220,7 +220,7 @@ const PaymentHistoryRecencyValidation = () => {
             )}
 
             {subjectProperty.hasSupportingDocs === "No" && (
-              <div className="flex items-center gap-2 border border-yellow-400 bg-yellow-50 p-3 rounded text-sm text-yellow-800">
+              <div className="flex items-center gap-2 border border-yellow-400 bg-yellow-50 p-3 rounded-xl text-sm text-yellow-800">
                 <AlertCircle className="w-4 h-4" />
                 Condition appears based on Branch 4
               </div>
@@ -396,7 +396,7 @@ const PaymentHistoryRecencyValidation = () => {
             />
 
             {nonMortgageLien.dlaMoreThan90Days === "Yes" && (
-              <div className="flex items-center gap-2 border border-yellow-400 bg-yellow-50 p-3 rounded text-sm text-yellow-800">
+              <div className="flex items-center gap-2 border border-yellow-400 bg-yellow-50 p-3 rounded-xl text-sm text-yellow-800">
                 <AlertCircle className="w-4 h-4" />
                 Condition appears as per Branch 1.
               </div>
@@ -419,8 +419,11 @@ const PaymentHistoryRecencyValidation = () => {
               <label className="text-sm font-medium">Account Name</label>
               <input
                 type="text"
-                value={accountName}
-                onChange={(e) => setAccountName(e.target.value)}
+                value={accountName ?? ""}
+                onChange={(e) => {
+                  const value = e.target.value.replace(/[^A-Za-z\s]/g, "");
+                  setAccountName(value);
+                }}
                 className="w-full mt-1 border rounded-md p-2 text-sm"
               />
             </div>
@@ -428,7 +431,7 @@ const PaymentHistoryRecencyValidation = () => {
             <div>
               <label className="text-sm font-medium">Account Number</label>
               <input
-                type="text"
+                type="number"
                 value={accountNumber}
                 onChange={(e) => setAccountNumber(e.target.value)}
                 className="w-full mt-1 border rounded-md p-2 text-sm"

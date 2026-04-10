@@ -3,7 +3,7 @@ import toast from "react-hot-toast";
 import { useFlowContext } from "../../../store/FlowContext";
 import { useNavigate } from "react-router-dom";
 import { useSectionStore } from "../../../store/SectionStore";
-import PromptRadio from "../../S3/components/PromptRadio";
+import PromptRadio from "../../../components/PromptRadio";
 
 import { Phone, AlertCircle } from "lucide-react";
 
@@ -81,7 +81,7 @@ const UtilityTelecomAccountHandling = () => {
           />
 
           {hasUtilityAccount === "No" && (
-            <div className="flex items-center gap-2 border border-green-400 bg-green-50 p-3 rounded text-sm text-green-700">
+            <div className="flex items-center gap-2 border border-green-400 bg-green-50 p-3 rounded-xl text-sm text-green-700">
               ✔ No Utility/Self-reported/Telecom account reflected.
             </div>
           )}
@@ -103,13 +103,13 @@ const UtilityTelecomAccountHandling = () => {
             />
 
             {paymentIncludedInDTI === "No" && (
-              <div className="flex items-center gap-2 border border-green-400 bg-green-50 p-3 rounded text-sm text-green-700">
+              <div className="flex items-center gap-2 border border-green-400 bg-green-50 p-3 rounded-xl text-sm text-green-700">
                 ✔ Payment is not included in DTI. No action required.
               </div>
             )}
 
             {paymentIncludedInDTI === "Yes" && (
-              <div className="flex items-center gap-2 border border-yellow-400 bg-yellow-50 p-3 rounded text-sm text-yellow-800">
+              <div className="flex items-center gap-2 border border-yellow-400 bg-yellow-50 p-3 rounded-xl text-sm text-yellow-800">
                 <AlertCircle className="w-4 h-4" />
                 Update instruction appears as per Branch 1.
               </div>
