@@ -38,7 +38,6 @@ import BankruptcyWaitingPeriodValidation from "./sections/S5/screens/BankruptcyW
 import MortgageDerogatoryEventHandling from "./sections/S5/screens/MortgageDerogatoryEventHandling";
 import TaxLienHandling from "./sections/S5/screens/TaxLienHandling";
 import JudgmentHandling from "./sections/S5/screens/JudgmentHandling";
-import Section5Summary from "./sections/S5/screens/Section5Summary";
 import DuplicateTradelineHandling from "./sections/S4/screens/DuplicateTradelineHandling";
 import PastAccountHandling from "./sections/S4/screens/PastAccountHandling";
 import ChildSupportHandling from "./sections/S4/screens/ChildSupportHandling";
@@ -142,7 +141,6 @@ export const router = createBrowserRouter([
       },
       { path: "s5/tax-lien", element: <TaxLienHandling /> },
       { path: "s5/judgment", element: <JudgmentHandling /> },
-      { path: "s5/section5-summary", element: <Section5Summary /> },
     ],
   },
 ]);

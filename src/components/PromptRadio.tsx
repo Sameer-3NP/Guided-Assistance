@@ -8,7 +8,7 @@ type Props = {
 const PromptRadio = ({ label, value, options, onChange }: Props) => {
   return (
     <>
-      <div className="items-start gap-3 bg-blue-100 border border-blue-200 rounded-xl p-3">
+      <div className="items-start gap-3 bg-blue-100 border border-blue-200 rounded-xl p-3 ">
         <p className="text-md font-semibold text-black">{label}</p>
       </div>
       <div className="flex gap-6">

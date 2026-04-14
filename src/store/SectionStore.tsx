@@ -316,16 +316,16 @@ type Store = {
   ) => void;
 
   childSupportHandling: {
-    hasChildSupportTradeline: string; 
+    hasChildSupportTradeline: string;
 
-    dlaLessThan7Years: string; 
+    dlaLessThan7Years: string;
 
-    supportingDocument: string; 
+    supportingDocument: string;
 
     documentType: string[];
 
-    discrepancies: string[]; 
-    lenderRequirement: string; 
+    discrepancies: string[];
+    lenderRequirement: string;
 
     accounts: {
       creditorName: string;
@@ -452,6 +452,107 @@ type Store = {
   setMortgageDerogatoryEventHandling: (
     data: Partial<Store["mortgageDerogatoryEventHandling"]>,
   ) => void;
+
+  excludedTradelineValidation: {
+    excludedFromVOL?: string;
+
+    accountTypes: string[];
+
+    accounts: {
+      type: string;
+      creditorName: string;
+      accountNumber: string;
+    }[];
+
+    installmentLessThan10Payments?: string;
+
+    installmentSupportingDocs?: string;
+
+    installmentReason: string[];
+
+    installmentDocuments: string[];
+
+    installmentChecklist: string[];
+  };
+
+  setExcludedTradelineValidation: (
+    data: Partial<Store["excludedTradelineValidation"]>,
+  ) => void;
+
+  taxLienHandling: {
+    taxLienDetected: string;
+    lienStatus: string[];
+
+    releasedCaseNumber: string;
+    releasedCreditorName: string;
+    releasedDate: string;
+    payoffInFileAvailable: string;
+
+    releaseDateBeforeAppDate: string;
+    taxLienSourceDocsProvided: string;
+    taxLienSourceDocTypes: string[];
+
+    bankStatementChecklist2: string[];
+    cancelledCheckChecklist2: string[];
+    giftLetterChecklist2: string[];
+
+    taxLienAdditionalDocsProvided: string;
+    additionalDocTypes: string[];
+
+    creditorLetterChecklist: string[];
+    bankStatementChecklist3: string[];
+    cancelledCheckChecklist3: string[];
+    giftLetterChecklist3: string[];
+
+    losUpdatedForTaxLien: string;
+    payoffInFile: string;
+    payoffChecklist: string[];
+
+    selectedTaxLienAccount: {
+      creditorName: string;
+      caseNumber: string;
+    };
+  };
+
+  setTaxLienHandling: (data: Partial<Store["taxLienHandling"]>) => void;
+
+  judgmentHandling: {
+    judgmentTypes: string[];
+
+    selectedAccount: {
+      creditorName: string;
+      accountNumber: string;
+    };
+
+    judgmentStatus: string[];
+    releasedCreditorName: string;
+    releasedCaseNumber: string;
+    releasedDate: string;
+    judgmentDocsAvailable: string;
+    judgmentDocTypes: string[];
+
+    bankStatementChecklist: string[];
+    checkChecklist: string[];
+    giftLetterChecklist: string[];
+    judgmentSourceDocsProvided: string;
+    judgmentAdditionalDocsProvided: string;
+    creditorLetterChecklist3: string[];
+
+    creditorLetterChecklist: string[];
+    bankStatementChecklist3: string[];
+    checkChecklist3: string[];
+    giftLetterChecklist3: string[];
+
+    losUpdatedForJudgment: string;
+    payoffAvailable: string;
+    payoffChecklist: string[];
+    judgmentDocTypes3: string[];
+
+    escalatedToManagement: boolean;
+    releaseDateBeforeAppDate: string;
+  };
+
+  setJudgmentHandling: (data: Partial<Store["judgmentHandling"]>) => void;
 
   sectionStatus: Record<string, string>;
   setSectionStatus: (
@@ -818,6 +919,132 @@ export const SectionProvider = ({ children }: any) => {
     escalatedToManagement: false,
   });
 
+  const [excludedTradelineValidation, setExcludedTradelineValidationState] =
+    useState<Store["excludedTradelineValidation"]>({
+      excludedFromVOL: "",
+
+      accountTypes: [],
+
+      accounts: {
+        type: "",
+        creditorName: "",
+        accountNumber: "",
+      },
+
+      installmentLessThan10Payments: "",
+      installmentSupportingDocs: "",
+      installmentChecklist: [],
+      installmentDocuments: [],
+      installmentReason: [],
+    });
+
+  const [taxLienHandling, setTaxLienHandlingState] = useState<
+    Store["taxLienHandling"]
+  >({
+    taxLienDetected: "",
+
+    lienStatus: [], // Released | Not Released
+
+    // Prompt 2 (Released flow)
+    releasedCaseNumber: "",
+    releasedCreditorName: "",
+    releasedDate: "",
+    payoffInFileAvailable: "",
+
+    // Prompt 2a
+    releaseDateBeforeAppDate: "",
+
+    // Prompt 2b
+    taxLienSourceDocsProvided: "",
+
+    // Prompt 2c
+    taxLienSourceDocTypes: [],
+
+    // Prompt 2d (Bank statement checklist)
+    bankStatementChecklist2: [],
+
+    // Prompt 2e (Cancelled check checklist)
+    cancelledCheckChecklist2: [],
+
+    // Prompt 2f (Gift letter checklist)
+    giftLetterChecklist2: [],
+
+    // Prompt 3
+    taxLienAdditionalDocsProvided: "",
+
+    // Prompt 3a doc selection
+    additionalDocTypes: [],
+
+    // Prompt 3b
+    creditorLetterChecklist: [],
+
+    // Prompt 3c
+    bankStatementChecklist3: [],
+
+    // Prompt 3d
+    cancelledCheckChecklist3: [],
+
+    // Prompt 3e
+    giftLetterChecklist3: [],
+
+    // Prompt 4
+    losUpdatedForTaxLien: "",
+
+    // Prompt 4a
+    payoffInFile: "",
+
+    // Prompt 4b
+    payoffChecklist: [],
+
+    // account selection (reused pattern)
+    selectedTaxLienAccount: {
+      creditorName: "",
+      caseNumber: "",
+    },
+  });
+
+  const [judgmentHandling, setJudgmentHandlingState] = useState<
+    Store["judgmentHandling"]
+  >({
+    judgmentTypes: [],
+
+    selectedAccount: {
+      creditorName: "",
+      accountNumber: "",
+    },
+
+    /* RELEASED / NOT RELEASED */
+    judgmentStatus: [], // Released / Not Released
+    releasedCreditorName: "",
+    releasedCaseNumber: "",
+    releasedDate: "",
+    judgmentDocsAvailable: "",
+    judgmentDocTypes: [],
+
+    /* PROMPT 2 */
+    bankStatementChecklist: [],
+    checkChecklist: [],
+    giftLetterChecklist: [],
+    judgmentSourceDocsProvided: "",
+    creditorLetterChecklist3: [],
+
+    /* PROMPT 3 */
+    creditorLetterChecklist: [],
+    bankStatementChecklist3: [],
+    checkChecklist3: [],
+    giftLetterChecklist3: [],
+    judgmentDocTypes3: [],
+    judgmentAdditionalDocsProvided: "",
+
+    /* PROMPT 4 */
+    losUpdatedForJudgment: "",
+    payoffAvailable: "",
+    payoffChecklist: [],
+
+    escalatedToManagement: false,
+    releaseDateBeforeAppDate: "",
+  });
+
   const setQualifyingScore = (
     data:
       | Partial<Store["qualifyingScore"]>
@@ -1069,6 +1296,29 @@ export const SectionProvider = ({ children }: any) => {
     }));
   };
 
+  const setExcludedTradelineValidation = (
+    data: Partial<Store["excludedTradelineValidation"]>,
+  ) => {
+    setExcludedTradelineValidationState((prev) => ({
+      ...prev,
+      ...data,
+    }));
+  };
+
+  const setTaxLienHandling = (data: Partial<Store["taxLienHandling"]>) => {
+    setTaxLienHandlingState((prev) => ({
+      ...prev,
+      ...data,
+    }));
+  };
+
+  const setJudgmentHandling = (data: Partial<Store["judgmentHandling"]>) => {
+    setJudgmentHandlingState((prev) => ({
+      ...prev,
+      ...data,
+    }));
+  };
+
   const [sectionStatus, setSectionStatus] = useState<Record<string, string>>({
     S0: "active",
     S1: "locked",
@@ -1147,6 +1397,12 @@ export const SectionProvider = ({ children }: any) => {
         setBankruptcyWaitingValidation,
         mortgageDerogatoryEventHandling,
         setMortgageDerogatoryEventHandling,
+        excludedTradelineValidation,
+        setExcludedTradelineValidation,
+        taxLienHandling,
+        setTaxLienHandling,
+        judgmentHandling,
+        setJudgmentHandling,
       }}
     >
       {children}
