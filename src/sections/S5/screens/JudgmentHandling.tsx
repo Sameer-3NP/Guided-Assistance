@@ -425,6 +425,35 @@ const JudgmentHandling = () => {
           </div>
         )}
 
+        {judgmentHandling.bankStatementChecklist.length === 0 && (
+          <div className="border rounded-xl p-6 bg-gray-50 space-y-6">
+            <PromptRadio
+              label="Has any other supporting document reflecting tax lien has been paid off and released provided by borrower?"
+              value={judgmentHandling.judgmentAdditionalDocsProvided || ""}
+              options={["Yes", "No"]}
+              onChange={(v) =>
+                setJudgmentHandling({
+                  judgmentAdditionalDocsProvided: v,
+                })
+              }
+            />
+
+            {/* ================= NO PATH ================= */}
+            {judgmentHandling.judgmentAdditionalDocsProvided === "No" && (
+              <div className="border border-yellow-400 bg-yellow-50 p-3 rounded-xl text-sm text-yellow-700">
+                Proceed to Prompt 4
+              </div>
+            )}
+
+            {/* ================= YES PATH ================= */}
+            {judgmentHandling.judgmentAdditionalDocsProvided === "Yes" && (
+              <div className="border border-green-400 bg-green-50 p-3 rounded-xl text-sm text-green-700">
+                Proceed to Prompt 3a
+              </div>
+            )}
+          </div>
+        )}
+
         {/* PROMPT 2e - Cancelled Check / Cashier’s Check Checklist */}
         {judgmentHandling.judgmentDocTypes.includes(
           "Cancelled check/cashier’s check",
@@ -563,8 +592,8 @@ const JudgmentHandling = () => {
           )}
 
         {/* PROMPT 3a */}
-        {judgmentStatus.includes("Not Released") &&
-          judgmentHandling.judgmentAdditionalDocsProvided === "Yes" && (
+        {judgmentStatus.includes("Not Released") ||
+          (judgmentHandling.judgmentAdditionalDocsProvided === "Yes" && (
             <div className="border rounded-xl p-6 bg-gray-50 space-y-6">
               <div className="text-md font-medium">
                 What document has been received? (Select all that apply)
@@ -612,7 +641,7 @@ const JudgmentHandling = () => {
                 </div>
               )}
             </div>
-          )}
+          ))}
 
         {/* PROMPT 3b - Creditor Letter Checklist */}
         {judgmentHandling.judgmentDocTypes3.includes(
@@ -806,7 +835,7 @@ const JudgmentHandling = () => {
         )}
 
         {/* PROMPT 4 */}
-        {judgmentHandling.judgmentDocTypes3.length >= 0 && (
+        {judgmentHandling.judgmentDocTypes3.length > 0 && (
           <div className="border rounded-xl p-6 bg-gray-50 space-y-6">
             <PromptRadio
               label="Is LOS updated for judgment being paid off at closing?"

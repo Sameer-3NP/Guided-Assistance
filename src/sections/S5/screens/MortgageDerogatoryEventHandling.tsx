@@ -66,7 +66,6 @@ const MortgageDerogatoryEventHandling = () => {
     if (derogatoryTypes.includes("Foreclosure")) {
       if (!foreclosureDocsAvailable) {
         toast.error("Please answer Prompt 2.");
-        return;
       }
 
       if (foreclosureDocsAvailable === "No") {
@@ -77,7 +76,6 @@ const MortgageDerogatoryEventHandling = () => {
       if (foreclosureDocTypes.includes("Trustee’s deed")) {
         if (trusteesDeedChecklist.length > 0) {
           toast.error("Condition appears as per Branch 2 for decision logic A");
-          return;
         }
       }
 
@@ -85,7 +83,6 @@ const MortgageDerogatoryEventHandling = () => {
       if (foreclosureDocTypes.includes("Property Profile")) {
         if (propertyProfileChecklist.length > 0) {
           toast.error("Condition appears as per Branch 2 for decision logic A");
-          return;
         }
       }
 
@@ -98,7 +95,6 @@ const MortgageDerogatoryEventHandling = () => {
       ) {
         if (!foreclosureWaitingPeriod) {
           toast.error("Please answer Prompt 2d.");
-          return;
         }
 
         if (foreclosureWaitingPeriod === "No") {
