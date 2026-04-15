@@ -1,18 +1,23 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { useFlowContext } from "../../../store/FlowContext";
 import { useSectionStore } from "../../../store/SectionStore";
 
 import PromptRadio from "../../../components/PromptRadio";
+import PopUp from "../../../components/PopUp";
+import { AlertTriangle } from "lucide-react";
 
 const JudgmentHandling = () => {
   const navigate = useNavigate();
   const { registerActions } = useFlowContext();
-
-  const { judgmentHandling, setJudgmentHandling } = useSectionStore();
+  const [showCreditInventoryPopup, setShowCreditInventoryPopup] =
+    useState(false);
+  const { judgmentHandling, setJudgmentHandling, s1 } = useSectionStore();
 
   const { judgmentTypes, judgmentStatus } = judgmentHandling;
+
+  const creditReports = s1;
 
   /* ---------------- CONTINUE ---------------- */
 
@@ -128,6 +133,16 @@ const JudgmentHandling = () => {
     navigate("/s6/next-section");
   };
 
+  const handleCreditInventoryConfirm = () => {
+    setShowCreditInventoryPopup(false);
+
+    if (creditReports.length > 0) {
+      navigate("/S1/inventory");
+    } else {
+      navigate("/S5");
+    }
+  };
+
   useEffect(() => {
     registerActions({
       onContinue: handleContinue,
@@ -157,8 +172,12 @@ const JudgmentHandling = () => {
             options={["Yes", "No"]}
             onChange={(v) => {
               setJudgmentHandling({
-                judgmentTypes: [v], // single select for Prompt 1
+                judgmentTypes: [v],
               });
+
+              if (v === "No") {
+                setShowCreditInventoryPopup(true);
+              }
             }}
           />
         </div>
@@ -264,11 +283,15 @@ const JudgmentHandling = () => {
               label="Is the release date before the application date?"
               value={judgmentHandling.releaseDateBeforeAppDate || ""}
               options={["Yes", "No"]}
-              onChange={(v) =>
+              onChange={(v) => {
                 setJudgmentHandling({
                   releaseDateBeforeAppDate: v,
-                })
-              }
+                });
+
+                if (v === "Yes") {
+                  setShowCreditInventoryPopup(true);
+                }
+              }}
             />
 
             {/* ================= YES PATH ================= */}
@@ -946,6 +969,23 @@ const JudgmentHandling = () => {
             )}
           </div>
         )}
+        <PopUp
+          open={showCreditInventoryPopup}
+          title="Navigation Confirmation"
+          icon={<AlertTriangle className="w-6 h-6 text-yellow-600" />}
+          onConfirm={handleCreditInventoryConfirm}
+          onClose={() => setShowCreditInventoryPopup(false)}
+        >
+          {/* Message Box */}
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-sm text-yellow-800">
+            <p className="font-medium">No child support tradeline found.</p>
+
+            <p className="mt-1">
+              Do you want to move to{" "}
+              <strong>Credit Inventory (Section-1)</strong>?
+            </p>
+          </div>
+        </PopUp>
       </div>
     </div>
   );

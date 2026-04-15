@@ -13,7 +13,8 @@ import { AlertTriangle, FileWarning } from "lucide-react";
 const ChildSupportHandling = () => {
   const { registerActions } = useFlowContext();
   const navigate = useNavigate();
-
+  const [showCreditInventoryPopup, setShowCreditInventoryPopup] =
+    useState(false);
   const { childSupportHandling, setChildSupportHandling, s1 } =
     useSectionStore();
 
@@ -113,15 +114,15 @@ const ChildSupportHandling = () => {
     navigate("/S5");
   };
 
-  useEffect(() => {
-    if (hasChildSupportTradeline === "No" || dlaLessThan7Years === "No") {
-      if (creditReports.length > 0) {
-        navigate("/S1");
-      } else {
-        navigate("/S5");
-      }
+  const handleCreditInventoryConfirm = () => {
+    setShowCreditInventoryPopup(false);
+
+    if (creditReports.length > 0) {
+      navigate("/S1/inventory");
+    } else {
+      navigate("/S5");
     }
-  }, [hasChildSupportTradeline, creditReports, navigate]);
+  };
 
   useEffect(() => {
     registerActions({
@@ -161,7 +162,13 @@ const ChildSupportHandling = () => {
                 hasChildSupportTradeline: v,
               });
 
-              if (v === "Yes") setShowPopup(true);
+              if (v === "Yes") {
+                setShowPopup(true);
+              }
+
+              if (v === "No") {
+                setShowCreditInventoryPopup(true);
+              }
             }}
           />
 
@@ -209,11 +216,15 @@ const ChildSupportHandling = () => {
               label="Does child support account have DLA of less than 7 years?"
               value={dlaLessThan7Years}
               options={["Yes", "No"]}
-              onChange={(v) =>
+              onChange={(v) => {
                 setChildSupportHandling({
                   dlaLessThan7Years: v,
-                })
-              }
+                });
+
+                if (v === "No") {
+                  setShowCreditInventoryPopup(true);
+                }
+              }}
             />
           </div>
         )}
@@ -367,6 +378,24 @@ const ChildSupportHandling = () => {
                 className="w-full mt-1 border rounded-md p-2 text-sm"
               />
             </div>
+          </div>
+        </PopUp>
+
+        <PopUp
+          open={showCreditInventoryPopup}
+          title="Navigation Confirmation"
+          icon={<AlertTriangle className="w-6 h-6 text-yellow-600" />}
+          onConfirm={handleCreditInventoryConfirm}
+          onClose={() => setShowCreditInventoryPopup(false)}
+        >
+          {/* Message Box */}
+          <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-sm text-yellow-800">
+            <p className="font-medium">No child support tradeline found.</p>
+
+            <p className="mt-1">
+              Do you want to move to{" "}
+              <strong>Credit Inventory (Section-1)</strong>?
+            </p>
           </div>
         </PopUp>
       </div>
