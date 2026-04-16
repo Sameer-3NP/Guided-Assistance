@@ -491,27 +491,26 @@ const MortgageDerogatoryEventHandling = () => {
 
         {derogatoryTypes.includes(
           "Pre-Foreclosure / Short Sale / Deed-in-Lieu",
-        ) &&
-          foreclosureWaitingPeriod === "Yes" && (
-            <div className="border rounded-xl p-6 bg-gray-50 space-y-6">
-              <PromptRadio
-                label="Check if we have any documents available in file to validate the property associated with the mortgage?"
-                value={preForeclosureDocsAvailable}
-                options={["Yes", "No"]}
-                onChange={(v) =>
-                  setMortgageDerogatoryEventHandling({
-                    preForeclosureDocsAvailable: v,
-                  })
-                }
-              />
+        ) && (
+          <div className="border rounded-xl p-6 bg-gray-50 space-y-6">
+            <PromptRadio
+              label="Check if we have any documents available in file to validate the property associated with the mortgage?"
+              value={preForeclosureDocsAvailable}
+              options={["Yes", "No"]}
+              onChange={(v) =>
+                setMortgageDerogatoryEventHandling({
+                  preForeclosureDocsAvailable: v,
+                })
+              }
+            />
 
-              {preForeclosureDocsAvailable === "No" && (
-                <div className="border border-red-400 bg-red-50 p-3 rounded-xl text-sm text-red-700">
-                  Condition appears as per Branch 4 for decision logic B
-                </div>
-              )}
-            </div>
-          )}
+            {preForeclosureDocsAvailable === "No" && (
+              <div className="border border-red-400 bg-red-50 p-3 rounded-xl text-sm text-red-700">
+                Condition appears as per Branch 4 for decision logic B
+              </div>
+            )}
+          </div>
+        )}
 
         {derogatoryTypes.includes(
           "Pre-Foreclosure / Short Sale / Deed-in-Lieu",

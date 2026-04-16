@@ -1,10 +1,10 @@
 import { createContext, useContext, useState } from "react";
 import type { CreditReport } from "../types/credit";
-import type { InventoryItem } from "../types/inventory";
+// import type { InventoryItem } from "../types/inventory";
 
 type Store = {
-  s0: InventoryItem | null;
-  setS0: (data: InventoryItem) => void;
+  // s0: InventoryItem | null;
+  // setS0: (data: InventoryItem) => void;
 
   s1: CreditReport[];
   setS1: (data: CreditReport[]) => void;
@@ -565,7 +565,7 @@ type Store = {
 const SectionContext = createContext<Store | null>(null);
 
 export const SectionProvider = ({ children }: any) => {
-  const [s0, setS0] = useState<InventoryItem | null>(null);
+  // const [s0, setS0] = useState<InventoryItem | null>(null);
   const [s1, setS1] = useState<CreditReport[]>([]);
   const [activeCreditReport, setActiveCreditReport] = useState<string | null>(
     null,
@@ -1319,20 +1319,20 @@ export const SectionProvider = ({ children }: any) => {
     }));
   };
 
-  const [sectionStatus, setSectionStatus] = useState<Record<string, string>>({
-    S0: "active",
-    S1: "locked",
-    S2: "locked",
-    S3: "locked",
-    S4: "locked",
-    S5: "locked",
-  });
+  // const [sectionStatus, setSectionStatus] = useState<Record<string, string>>({
+  //   S0: "active",
+  //   S1: "locked",
+  //   S2: "locked",
+  //   S3: "locked",
+  //   S4: "locked",
+  //   S5: "locked",
+  // });
 
   return (
     <SectionContext.Provider
       value={{
-        s0,
-        setS0,
+        // s0,
+        // setS0,
         s1,
         setS1,
         activeCreditReport,
@@ -1345,8 +1345,8 @@ export const SectionProvider = ({ children }: any) => {
         setBiMergeAccepted,
         sourceRequestIntegrity,
         setSourceRequestIntegrity,
-        sectionStatus,
-        setSectionStatus,
+        // sectionStatus,
+        // setSectionStatus,
         systemAlignmentReview,
         setSystemAlignmentReview,
         coreIdentity,

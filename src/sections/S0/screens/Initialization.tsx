@@ -5,18 +5,24 @@ import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { Calendar, CalendarClock, FileText, Lock, Users } from "lucide-react";
-import { useFlowContext } from "../../store/FlowContext";
-import { useSectionStore } from "../../store/SectionStore";
+import { useFlowContext } from "../../../store/FlowContext";
+// import { useSectionStore } from "../../../store/SectionStore";
+import { useWorkflowStore } from "../../../store/WorkFlowStore";
+import { useS0Store } from "../../S0/store/s0Store";
+import { evaluateInitialization } from "../../S0/rules/s0Rules";
 import {
   initializationSchema,
   type InitializationForm,
-} from "../../utils/initializationSchema";
-import PopUp from "../../components/PopUp";
+} from "../../../utils/initializationSchema";
+import PopUp from "../../../components/PopUp";
 
 const Initialization = () => {
   const navigate = useNavigate();
   const { registerActions } = useFlowContext();
-  const { setS0, s0, setSectionStatus } = useSectionStore();
+  const { data: s0, setData } = useS0Store();
+  // const { setS0, s0, setSectionStatus } = useSectionStore();
+  const { setSectionStatus, completeSection, activateSection } =
+    useWorkflowStore();
   const [showPopup, setShowPopup] = useState(true);
   const isLocked = !!s0;
 
@@ -29,10 +35,26 @@ const Initialization = () => {
     defaultValues: s0,
   });
 
+  // const doSubmit = (data: InitializationForm) => {
+  //   setS0(data);
+  //   setSectionStatus((prev) => ({ ...prev, S0: "completed", S1: "active" }));
+  //   navigate("/s1/inventory");
+  // };
   const doSubmit = (data: InitializationForm) => {
-    setS0(data);
-    setSectionStatus((prev) => ({ ...prev, S0: "completed", S1: "active" }));
-    navigate("/s1/inventory");
+    setData(data);
+
+    const result = evaluateInitialization(data);
+
+    if (result.error) {
+      toast.error(result.error);
+      return;
+    }
+
+    // workflow update
+    completeSection("S0");
+    activateSection("S1");
+
+    navigate(result.nextRoute ?? "");
   };
 
   const handleContinue = () => {

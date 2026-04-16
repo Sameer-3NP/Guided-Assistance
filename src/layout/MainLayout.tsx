@@ -1,14 +1,16 @@
 import Navbar from "../components/Navbar";
 import Breadcrumb from "../components/Breadcrumb";
 import { Outlet, useLocation, useNavigate } from "react-router-dom";
-import { useSectionStore } from "../store/SectionStore";
+// import { useSectionStore } from "../store/SectionStore";
+import { useWorkflowStore } from "../store/WorkFlowStore";
 import { useFlowContext } from "../store/FlowContext";
 import GlobalHeader from "../sections/S1/components/GlobalHeaderS1";
 
 const MainLayout = () => {
   const { pathname } = useLocation();
   const navigate = useNavigate();
-  const { sectionStatus } = useSectionStore();
+  // const { sectionStatus } = useSectionStore();
+  const { sectionStatus } = useWorkflowStore();
   const { actions } = useFlowContext();
 
   // Deduce activeSection from pathname

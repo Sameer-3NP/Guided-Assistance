@@ -258,7 +258,7 @@ export const mortgageDerogatoryPrompts = [
       "From the available document, has the waiting period of 4 years met?",
     options: ["Yes", "No"],
     storeKey: "preForeclosureWaitingPeriod",
-    condition: (s: any) =>
+    condition: (s: any) => 
       s.preForeclosureDocsAvailable === "Yes" &&
       s.preForeclosureDocTypes?.length > 0,
   },

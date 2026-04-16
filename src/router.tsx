@@ -1,7 +1,7 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import MainLayout from "./layout/MainLayout";
 
-import Initialization from "./sections/S0/Initialization";
+import Initialization from "./sections/S0/screens/Initialization";
 
 import CreditInventory from "./sections/S1/screens/CreditInventory";
 import MultipleReports from "./sections/S1/screens/MultipleReports";
