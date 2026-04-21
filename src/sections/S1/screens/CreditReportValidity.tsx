@@ -3,7 +3,7 @@ import { useSectionStore } from "../../../store/SectionStore";
 import toast from "react-hot-toast";
 import { useFlowContext } from "../../../store/FlowContext";
 import { useNavigate } from "react-router-dom";
-// import { HelpCircle } from "lucide-react";
+import EditableCondition from "../../../components/EditableCondition";
 import {
   CreditCard,
   AlertCircle,
@@ -24,12 +24,24 @@ const CreditReportValidity = () => {
     setCreditValidityStep,
     pullType,
     setPullType,
+    CreditCondition,
+    setCreditCondition,
   } = useSectionStore();
 
   const activeReport =
     s1.length === 1
       ? s1[0]
       : s1.find((report) => report.label === activeCreditReport);
+
+  const borrower = activeReport?.borrowerSlot || "Unknown";
+
+  useEffect(() => {
+    if (!CreditCondition.softPull) {
+      setCreditCondition({
+        softPull: `Credit report provided for borrower ${borrower} is a soft pull. Loan Officer to pull new credit report reflecting credit report type as hard pull.`,
+      });
+    }
+  }, [borrower]);
 
   if (!activeReport || !s0) return null;
 
@@ -51,9 +63,7 @@ const CreditReportValidity = () => {
     if (expirationCondition) {
       toast.error(
         "Credit report expires before the estimated closing date. An updated credit report must be obtained.",
-        { icon: "❌" },
       );
-      return;
     }
 
     navigate("/s1/source-request-integrity");
@@ -107,7 +117,7 @@ const CreditReportValidity = () => {
                   value="hard"
                   checked={pullType === "hard"}
                   onChange={(e) => setPullType(e.target.value)}
-                  className="accent-indigo-600"
+                  className="accent-blue-600"
                 />
                 Hard Pull
               </label>
@@ -125,11 +135,11 @@ const CreditReportValidity = () => {
               </label>
             </div>
             {pullType === "soft" && (
-              <div className="flex items-start gap-2 border border-red-300 bg-red-50 p-4 rounded-lg text-sm text-red-700">
-                <AlertCircle className="w-5 h-5 mt-0.5" />
-                Soft Pull credit reports cannot be used for loan qualification.
-                A Hard Pull credit report must be obtained.
-              </div>
+              <EditableCondition
+                type="condition"
+                value={CreditCondition.softPull}
+                onChange={(val) => setCreditCondition({ softPull: val })}
+              />
             )}
           </div>
         )}
@@ -167,8 +177,8 @@ const CreditReportValidity = () => {
             {expirationCondition && (
               <div className="flex items-start gap-2 border border-red-300 bg-red-50 p-4 rounded-lg text-sm text-red-700">
                 <AlertCircle className="w-5 h-5 mt-0.5" />
-                Credit report expires before the estimated closing date. An
-                updated credit report must be obtained.
+                Provide updated credit report valid till closing as provided
+                credit report has expired on DD/MM/YYYY.
               </div>
             )}
           </div>

@@ -1,5 +1,7 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import MainLayout from "./layout/MainLayout";
+// import SessionRestore from "./components/SessionRestore";
+
 
 import Initialization from "./sections/S0/Initialization";
 
@@ -45,7 +47,12 @@ import ChildSupportHandling from "./sections/S4/screens/ChildSupportHandling";
 export const router = createBrowserRouter([
   {
     path: "/",
-    element: <MainLayout />,
+    element: (
+    <>
+      {/* <SessionRestore /> */}
+      <MainLayout />
+    </>
+    ),
     children: [
       { index: true, element: <Navigate to="/s0" /> },
       { path: "s0", element: <Initialization /> },

@@ -3,17 +3,8 @@ import toast from "react-hot-toast";
 import { useFlowContext } from "../../../store/FlowContext";
 import { useSectionStore } from "../../../store/SectionStore";
 import { useNavigate } from "react-router-dom";
-
-import {
-  User,
-  Shield,
-  Calendar,
-  // HelpCircle,
-  // CheckCircle,
-  // XCircle,
-  AlertTriangle,
-  FileCheck,
-} from "lucide-react";
+import { User, Shield, Calendar, AlertTriangle, FileCheck } from "lucide-react";
+import EditableCondition from "../../../components/EditableCondition";
 
 type QuestionProps = {
   label: string;
@@ -45,18 +36,6 @@ const Question = ({
             onChange={() => onChange(field, opt)}
             className="accent-blue-500"
           />
-
-          {/* {opt === "Matches" && (
-            <CheckCircle className="w-4 h-4 text-blue-500" />
-          )}
-          {opt === "Does Not Match" && (
-            <XCircle className="w-4 h-4 text-blue-500" />
-          )}
-          {opt === "Missing" && (
-            <AlertTriangle className="w-4 h-4 text-blue-500" />
-          )}
-          {opt === "Yes" && <CheckCircle className="w-4 h-4 text-blue-500" />}
-          {opt === "No" && <XCircle className="w-4 h-4 text-blue-500" />} */}
 
           <span className="text-sm">{opt}</span>
         </label>
@@ -138,20 +117,14 @@ const CoreIdentity = () => {
           />
 
           {firstLastName &&
-            firstLastName !== "Matches" &&
-            firstLastName !== "Missing" && (
-              <div className="flex items-center gap-2 border border-red-400 bg-red-50 p-3 rounded text-sm text-red-700">
-                <AlertTriangle className="w-4 h-4" />
-                Alert: First and Last Name mismatch detected
-              </div>
+            (firstLastName === "Does Not Match" ||
+              firstLastName === "Missing") && (
+              <EditableCondition
+                type="condition"
+                value={`Borrower identity information - first & last name on the credit report doesn't matched or missing when compared to borrower details reflected in the loan application. Please provide corrected documentation or re-pull the credit report as applicable.`}
+                onChange={""}
+              />
             )}
-
-          {firstLastName && firstLastName === "Missing" && (
-            <div className="flex items-center gap-2 border border-yellow-400 bg-yellow-50 p-3 rounded text-sm text-yellow-800">
-              <AlertTriangle className="w-4 h-4" />
-              Alert: First and Last Name missing
-            </div>
-          )}
 
           {firstLastName && (
             <Question

@@ -3,7 +3,7 @@ import { useEffect } from "react";
 import toast from "react-hot-toast";
 import { useFlowContext } from "../../../store/FlowContext";
 import { useNavigate } from "react-router-dom";
-// import { HelpCircle } from "lucide-react";
+import EditableCondition from "../../../components/EditableCondition";
 import {
   FileText,
   CheckCircle,
@@ -17,8 +17,14 @@ const RepositoryCheck = () => {
   const { registerActions } = useFlowContext();
   const navigate = useNavigate();
 
-  const { s1, activeCreditReport, biMergeAccepted, setBiMergeAccepted } =
-    useSectionStore();
+  const {
+    s1,
+    activeCreditReport,
+    biMergeAccepted,
+    setBiMergeAccepted,
+    repositoryConditions,
+    setRepositoryConditions,
+  } = useSectionStore();
 
   const activeReport =
     s1.length === 1
@@ -40,7 +46,6 @@ const RepositoryCheck = () => {
       if (biMergeAccepted === "no") {
         toast.error(
           "Credit report has been pulled with less than three distinct repositories. Obtain a Tri-merged credit report.",
-          { icon: "❌" },
         );
       }
 
@@ -135,7 +140,7 @@ const RepositoryCheck = () => {
                   value="yes"
                   checked={biMergeAccepted === "yes"}
                   onChange={(e) => setBiMergeAccepted(e.target.value)}
-                  className="accent-indigo-600"
+                  className="accent-blue-600"
                 />
                 Yes
               </label>
@@ -154,11 +159,23 @@ const RepositoryCheck = () => {
             </div>
 
             {biMergeAccepted === "no" && (
-              <div className="flex items-start gap-2 border border-red-300 bg-red-50 p-4 rounded-lg text-sm text-red-700">
-                <XCircle className="w-5 h-5 mt-0.5" />
-                Credit report has fewer than three distinct repositories. Obtain
-                a Tri-merged report before proceeding.
-              </div>
+              <EditableCondition
+                type="condition"
+                value={repositoryConditions.biMergeFail}
+                onChange={(val) =>
+                  setRepositoryConditions({ biMergeFail: val })
+                }
+              />
+            )}
+
+            {biMergeAccepted === "yes" && (
+              <EditableCondition
+                type="success"
+                value={repositoryConditions.biMergePass}
+                onChange={(val) =>
+                  setRepositoryConditions({ biMergePass: val })
+                }
+              />
             )}
           </div>
         )}

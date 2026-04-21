@@ -20,6 +20,7 @@ const Section1Summary = () => {
     sourceRequestIntegrity,
     systemAlignmentReview,
     setSectionStatus,
+    CreditCondition,
   } = useSectionStore();
 
   const { registerActions } = useFlowContext();
@@ -42,9 +43,7 @@ const Section1Summary = () => {
     const list: string[] = [];
 
     if (pullType === "soft") {
-      list.push(
-        "Credit report provided for borrower is a soft pull. Loan officer must obtain a new Hard Pull credit report.",
-      );
+      list.push(CreditCondition.softPull);
     }
 
     const expirationDate = new Date(activeReport.expirationDate);

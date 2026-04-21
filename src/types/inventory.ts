@@ -3,4 +3,5 @@ export type InventoryItem = {
   closingDate: string;
   creditAsOfDate: string;
   borrowerCount: number;
+  loanNumber: number;
 };

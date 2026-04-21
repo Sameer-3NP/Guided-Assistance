@@ -30,7 +30,14 @@ const Initialization = () => {
   });
 
   const doSubmit = (data: InitializationForm) => {
-    setS0(data);
+    const fullLoanNumber = `${data.loanNumber}`;
+
+    const finalData = {
+      ...data,
+      loanNumber: fullLoanNumber,
+    };
+
+    setS0(finalData);
     setSectionStatus((prev) => ({ ...prev, S0: "completed", S1: "active" }));
     navigate("/s1/inventory");
   };
@@ -89,7 +96,6 @@ const Initialization = () => {
               className="w-full border border-black rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 disabled:bg-gray-100 "
             />
           </div>
-
           {/* Closing Date */}
           <div className="flex flex-col">
             <div className="flex items-center gap-2 mb-2">
@@ -105,7 +111,6 @@ const Initialization = () => {
               className="w-full border border-black rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 disabled:bg-gray-100"
             />
           </div>
-
           {/* Credit Report Date */}
           <div className="flex flex-col">
             <div className="flex items-center gap-2 mb-2">
@@ -121,7 +126,6 @@ const Initialization = () => {
               className="w-full border border-black rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 disabled:bg-gray-100"
             />
           </div>
-
           {/* Borrower Count */}
           <div className="flex flex-col">
             <div className="flex items-center gap-2 mb-2">
@@ -138,6 +142,38 @@ const Initialization = () => {
               disabled={isLocked}
               className="w-full border border-black rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 disabled:bg-gray-100"
             />
+          </div>
+          {/* Loan Number */}
+          <div className="flex flex-col">
+            <div className="flex items-center gap-2 mb-2">
+              <FileText className="w-4 h-4 text-blue-400" />
+              <label className="text-sm font-medium text-gray-700">
+                Loan Number
+              </label>
+            </div>
+
+            <div className="relative">
+              {/* Masked prefix */}
+              <span className="absolute left-3 top-2 text-gray-600 pointer-events-none">
+                XXXXXXXX
+              </span>
+
+              <input
+                type="text"
+                maxLength={4}
+                {...register("loanNumber")}
+                disabled={isLocked}
+                className="w-full border border-black rounded-lg pl-22.5 pr-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 disabled:bg-gray-100"
+                placeholder="1234"
+                inputMode="numeric"
+                onInput={(e) => {
+                  e.currentTarget.value = e.currentTarget.value.replace(
+                    /\D/g,
+                    "",
+                  );
+                }}
+              />
+            </div>
           </div>
         </form>
       </div>

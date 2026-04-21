@@ -3,22 +3,19 @@ import toast from "react-hot-toast";
 import { useFlowContext } from "../../../store/FlowContext";
 import { useSectionStore } from "../../../store/SectionStore";
 import { useNavigate } from "react-router-dom";
-import {
-  Building,
-  UserCheck,
-  AlertCircle,
-  ShieldCheck,
-  FileSearch,
-  // CheckCircle,
-  // HelpCircle,
-} from "lucide-react";
+import { Building, UserCheck, ShieldCheck, FileSearch } from "lucide-react";
+import EditableCondition from "../../../components/EditableCondition";
 
 const SourceRequestIntegrity = () => {
   const { registerActions } = useFlowContext();
   const navigate = useNavigate();
 
-  const { sourceRequestIntegrity, setSourceRequestIntegrity } =
-    useSectionStore();
+  const {
+    sourceRequestIntegrity,
+    setSourceRequestIntegrity,
+    sourceIntegrityConditions,
+    setSourceIntegrityConditions,
+  } = useSectionStore();
 
   const {
     agencyName,
@@ -39,6 +36,25 @@ const SourceRequestIntegrity = () => {
   const requestedByBorrower = requestedRole === "Borrower";
   const lastNameMatches = lastNameMatch === "yes";
 
+  const missingFields: string[] = [];
+
+  if (agencyName === "no") missingFields.push("Agency Name");
+  if (agencyAddress === "no") missingFields.push("Agency Address");
+  if (agencyPhone === "no") missingFields.push("Agency Phone");
+  if (lenderName === "no") missingFields.push("Lender Name");
+  if (requestedByBorrower) missingFields.push("requested by borrower");
+  if (lastNameMatch === "no")
+    missingFields.push(
+      `requested by the ${requestedRole} & last name matches the borrower’s last name`,
+    );
+
+  const missingTextReadable =
+    missingFields.length > 1
+      ? missingFields.slice(0, -1).join(", ") +
+        " and " +
+        missingFields.slice(-1)
+      : missingFields[0] || "";
+
   const handleContinue = () => {
     if (!agencyName || !agencyAddress || !agencyPhone || !lenderName) {
       toast.error("Please answer all Agency Information fields");
@@ -55,7 +71,6 @@ const SourceRequestIntegrity = () => {
     if (allAgencyPresent && !requestedByBorrower && !lastNameMatches) {
       if (!loanMatch) {
         toast.error("Please confirm LOS loan number alignment");
-        return;
       }
     }
 
@@ -124,11 +139,18 @@ const SourceRequestIntegrity = () => {
           agencyAddress &&
           agencyPhone &&
           lenderName && (
-            <div className="flex items-start gap-2 border border-red-300 bg-red-50 p-4 rounded-lg text-sm text-red-700">
-              <AlertCircle className="w-5 h-5 mt-0.5" />
-              Missing agency information detected on the credit report.
-              Additional documentation may be required.
-            </div>
+            <EditableCondition
+              type="condition"
+              value={sourceIntegrityConditions.missingAgency.replace(
+                /{missingFields}/g,
+                missingTextReadable,
+              )}
+              onChange={(val) =>
+                setSourceIntegrityConditions({
+                  missingAgency: val,
+                })
+              }
+            />
           )}
 
         {/* GROUP B — Requested By */}
@@ -168,7 +190,7 @@ const SourceRequestIntegrity = () => {
               </div>
 
               <div className="flex gap-6">
-                {["yes", "no", "unknown"].map((value) => (
+                {["yes", "no"].map((value) => (
                   <label
                     key={value}
                     className="flex items-center gap-2 cursor-pointer"
@@ -198,12 +220,34 @@ const SourceRequestIntegrity = () => {
           </div>
         )}
 
-        {(requestedByBorrower || lastNameMatches) && (
-          <div className="flex items-start gap-2 border border-red-300 bg-red-50 p-4 rounded-lg text-sm text-red-700">
-            <AlertCircle className="w-5 h-5 mt-0.5" />
-            Credit report may have been requested by the borrower or someone
-            with a matching last name. Further verification may be required.
-          </div>
+        {requestedByBorrower && (
+          <EditableCondition
+            type="condition"
+            value={sourceIntegrityConditions.requestedByIssue.replace(
+              /{missingFields}/g,
+              missingTextReadable,
+            )}
+            onChange={(val) =>
+              setSourceIntegrityConditions({
+                requestedByIssue: val,
+              })
+            }
+          />
+        )}
+
+        {lastNameMatch === "no" && (
+          <EditableCondition
+            type="condition"
+            value={sourceIntegrityConditions.requestedByIssue.replace(
+              /{missingFields}/g,
+              missingTextReadable,
+            )}
+            onChange={(val) =>
+              setSourceIntegrityConditions({
+                requestedByIssue: val,
+              })
+            }
+          />
         )}
 
         {/* GROUP C — LOS Alignment */}
@@ -251,11 +295,15 @@ const SourceRequestIntegrity = () => {
         )}
 
         {loanMatch === "no" && (
-          <div className="flex items-start gap-2 border border-red-300 bg-red-50 p-4 rounded-lg text-sm text-red-700">
-            <AlertCircle className="w-5 h-5 mt-0.5" />
-            Loan number mismatch detected with the Loan Origination System.
-            Please verify the loan file details.
-          </div>
+          <EditableCondition
+            type="condition"
+            value={sourceIntegrityConditions.loanMismatch}
+            onChange={(val) =>
+              setSourceIntegrityConditions({
+                loanMismatch: val,
+              })
+            }
+          />
         )}
       </div>
     </div>

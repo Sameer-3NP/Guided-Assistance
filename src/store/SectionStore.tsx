@@ -10,7 +10,9 @@ type Store = {
   setS1: (data: CreditReport[]) => void;
 
   activeCreditReport: string | null;
-  setActiveCreditReport: (label: string) => void;
+  selectedReports: string[];
+  setActiveCreditReport: (label: string | null) => void;
+  setSelectedReports: (reports: string[]) => void;
 
   creditValidityStep: "pullCheck" | "expirationCheck";
   setCreditValidityStep: (step: "pullCheck" | "expirationCheck") => void;
@@ -40,10 +42,47 @@ type Store = {
     losAlign: string | null;
     ausAlign: string | null;
     matchingReport: string | null;
+    creditNewerThanAUS: string | null;
+    matchingCreditAvailable: string | null;
   };
 
   setSystemAlignmentReview: (
     data: Partial<Store["systemAlignmentReview"]>,
+  ) => void;
+
+  CreditCondition: {
+    softPull: string;
+  };
+
+  setCreditCondition: (data: Partial<Store["CreditCondition"]>) => void;
+
+  repositoryConditions: {
+    biMergeFail: string;
+    biMergePass: string;
+  };
+
+  setRepositoryConditions: (
+    data: Partial<Store["repositoryConditions"]>,
+  ) => void;
+
+  sourceIntegrityConditions: {
+    missingAgency: string;
+    requestedByIssue: string;
+    loanMismatch: string;
+  };
+
+  setSourceIntegrityConditions: (
+    data: Partial<Store["sourceIntegrityConditions"]>,
+  ) => void;
+
+  systemAlignmentConditions: {
+    caseA_mismatch: string; // ausAlign === "no" && creditNewer
+    caseB_matchFound: string; // ausNewer && matchingReport === "yes"
+    caseB_noMatch: string; // ausNewer && matchingReport === "no"
+  };
+
+  setSystemAlignmentConditions: (
+    data: Partial<Store["systemAlignmentConditions"]>,
   ) => void;
 
   coreIdentity: {
@@ -570,6 +609,7 @@ export const SectionProvider = ({ children }: any) => {
   const [activeCreditReport, setActiveCreditReport] = useState<string | null>(
     null,
   );
+  const [selectedReports, setSelectedReports] = useState<string[]>([]);
 
   const [creditValidityStep, setCreditValidityStep] = useState<
     "pullCheck" | "expirationCheck"
@@ -597,7 +637,43 @@ export const SectionProvider = ({ children }: any) => {
     losAlign: null,
     ausAlign: null,
     matchingReport: null,
+    creditNewerThanAUS: null,
+    matchingCreditAvailable: null,
   });
+
+  const [CreditCondition, setCreditConditionState] = useState({
+    softPull: "",
+  });
+
+  const [repositoryConditions, setRepositoryConditionsState] = useState({
+    biMergeFail:
+      "Credit report has been pulled with less than three distinct repositories and same is not acceptable. Hence, obtain a Tri-merged credit report in order to proceed further.",
+    biMergePass:
+      "Credit report has been pulled with less than three distinct repositories (available repository names should be Equifax, Experian and TransUnion). As per client requirement, Tri-merge credit report is not required.",
+  });
+
+  const [sourceIntegrityConditions, setSourceIntegrityConditionsState] =
+    useState({
+      missingAgency:
+        "Credit report available in the file does not reflect {missingFields}.Hence,new credit report showing {missingFields} is required to be pulled.",
+
+      requestedByIssue:
+        "Credit report is {missingFields}. Contact LO to pull new credit report requested by LO or LP.",
+
+      loanMismatch: `Credit report available in the file reflects a loan number which is
+            different than the current loan number. The loan number mentioned on
+            credit report is currently active in the LOS. Hence, we need
+            confirmation if the loan is cancelled or will be cancelled. If the
+            loan is not cancelled, then property needs to be updated in LOS
+            along with complete PITIA information.`,
+    });
+
+  const [systemAlignmentConditions, setSystemAlignmentConditionsState] =
+    useState({
+      caseA_mismatch: "",
+      caseB_matchFound: "",
+      caseB_noMatch: "",
+    });
 
   const [coreIdentity, setCoreIdentityState] = useState<Store["coreIdentity"]>({
     firstLastName: null,
@@ -1102,6 +1178,39 @@ export const SectionProvider = ({ children }: any) => {
     }));
   };
 
+  const setCreditCondition = (data: Partial<Store["CreditCondition"]>) => {
+    setCreditConditionState((prev) => ({
+      ...prev,
+      ...data,
+    }));
+  };
+
+  const setRepositoryConditions = (
+    data: Partial<typeof repositoryConditions>,
+  ) => {
+    setRepositoryConditionsState((prev) => ({
+      ...prev,
+      ...data,
+    }));
+  };
+
+  const setSourceIntegrityConditions = (
+    data: Partial<typeof sourceIntegrityConditions>,
+  ) => {
+    setSourceIntegrityConditionsState((prev) => ({
+      ...prev,
+      ...data,
+    }));
+  };
+
+  const setSystemAlignmentConditions = (
+    data: Partial<Store["systemAlignmentConditions"]>,
+  ) =>
+    setSystemAlignmentConditionsState((prev) => ({
+      ...prev,
+      ...data,
+    }));
+
   const setCoreIdentity = (data: Partial<Store["coreIdentity"]>) => {
     setCoreIdentityState((prev) => ({
       ...prev,
@@ -1337,6 +1446,8 @@ export const SectionProvider = ({ children }: any) => {
         setS1,
         activeCreditReport,
         setActiveCreditReport,
+        selectedReports,
+        setSelectedReports,
         creditValidityStep,
         setCreditValidityStep,
         pullType,
@@ -1349,6 +1460,14 @@ export const SectionProvider = ({ children }: any) => {
         setSectionStatus,
         systemAlignmentReview,
         setSystemAlignmentReview,
+        CreditCondition,
+        setCreditCondition,
+        repositoryConditions,
+        setRepositoryConditions,
+        sourceIntegrityConditions,
+        setSourceIntegrityConditions,
+        systemAlignmentConditions,
+        setSystemAlignmentConditions,
         coreIdentity,
         setCoreIdentity,
         coreIdentitySummary,

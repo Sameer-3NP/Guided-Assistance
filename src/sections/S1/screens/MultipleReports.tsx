@@ -7,11 +7,30 @@ import { FileText } from "lucide-react";
 import PopUp from "../../../components/PopUp";
 
 const MultipleReports = () => {
-  const { s1, activeCreditReport, setActiveCreditReport } = useSectionStore();
+  const {
+    s1,
+    selectedReports,
+    setSelectedReports,
+    activeCreditReport,
+    setActiveCreditReport,
+  } = useSectionStore();
   const { registerActions } = useFlowContext();
   const navigate = useNavigate();
   const [showPopup, setShowPopup] = useState(false);
   const [junkReports, setJunkReports] = useState<string[]>([]);
+
+  const getLatestReport = (reports: string[]) => {
+    const selectedObjects = s1.filter((r) => reports.includes(r.label));
+
+    if (selectedObjects.length === 0) return null;
+
+    return selectedObjects.reduce((prev, curr) => {
+      const prevDate = new Date(prev.updateDate || 0).getTime();
+      const currDate = new Date(curr.updateDate || 0).getTime();
+
+      return currDate > prevDate ? curr : prev;
+    }).label;
+  };
 
   const handleConfirm = () => {
     if (!activeCreditReport) {
@@ -56,18 +75,18 @@ const MultipleReports = () => {
         <div className="space-y-4">
           {s1.map((report) => {
             const isActive = activeCreditReport === report.label;
-
+            const isSelected = selectedReports.includes(report.label);
             return (
               <label
                 key={report.label}
                 className={`
                 group flex items-center justify-between p-5 rounded-xl border
                 transition-all cursor-pointer
-                ${
-                  isActive
-                    ? "border-indigo-500 bg-indigo-50 shadow-sm"
-                    : "border-gray-200 hover:border-indigo-300 hover:bg-gray-50"
-                }
+               ${
+                 isSelected
+                   ? "border-indigo-400 bg-indigo-50"
+                   : "border-gray-200 hover:border-indigo-300"
+               }
               `}
               >
                 {/* Left Info */}
@@ -110,10 +129,25 @@ const MultipleReports = () => {
                   )} */}
 
                   <input
-                    type="radio"
-                    name="creditReport"
-                    checked={isActive}
-                    onChange={() => setActiveCreditReport(report.label)}
+                    type="checkbox"
+                    checked={isSelected}
+                    onChange={() => {
+                      let updated: string[];
+
+                      if (isSelected) {
+                        updated = selectedReports.filter(
+                          (r) => r !== report.label,
+                        );
+                      } else {
+                        updated = [...selectedReports, report.label];
+                      }
+
+                      setSelectedReports(updated);
+
+                      // ✅ compute active properly
+                      const latest = getLatestReport(updated);
+                      setActiveCreditReport(latest);
+                    }}
                     className="w-5 h-5 text-blue-600"
                   />
                 </div>

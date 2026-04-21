@@ -4,12 +4,15 @@ import { Outlet, useLocation, useNavigate } from "react-router-dom";
 import { useSectionStore } from "../store/SectionStore";
 import { useFlowContext } from "../store/FlowContext";
 import GlobalHeader from "../sections/S1/components/GlobalHeaderS1";
+import { useEffect } from "react";
+
 
 const MainLayout = () => {
   const { pathname } = useLocation();
   const navigate = useNavigate();
   const { sectionStatus } = useSectionStore();
   const { actions } = useFlowContext();
+  
 
   // Deduce activeSection from pathname
   const activeSection = pathname.startsWith("/s1")

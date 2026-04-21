@@ -8,6 +8,7 @@ import {
   Users,
   Hash,
   User,
+  FileText,
 } from "lucide-react";
 import { useLocation } from "react-router-dom";
 
@@ -48,6 +49,12 @@ const GlobalHeader = () => {
             />
 
             <InfoCard
+              icon={<FileText size={16} />}
+              label="Loan Number"
+              value={String(`XXXXXX${s0.loanNumber}`)}
+            />
+
+            <InfoCard
               icon={<Calendar size={16} />}
               label="Application"
               value={formatDate(s0.applicationDate)}
@@ -73,10 +80,21 @@ const GlobalHeader = () => {
           </>
         )}
 
-        {/* SECTION 2 & 3 BANNER */}
         {(isSection2 || isSection3 || isSection4 || isSection5) &&
           activeReport && (
             <>
+              <InfoCard
+                icon={<Hash size={16} />}
+                label="Session"
+                value={sessionId}
+              />
+
+              <InfoCard
+                icon={<FileText size={16} />}
+                label="Loan Number"
+                value={String(`XXXXXX${s0.loanNumber}`)}
+              />
+
               <InfoCard
                 icon={<Calendar size={16} />}
                 label="Application Date"

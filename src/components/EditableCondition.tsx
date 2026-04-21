@@ -1,0 +1,60 @@
+import { useState } from "react";
+import { AlertTriangle, CheckCircle, Info, Pencil, Check } from "lucide-react";
+
+type Type = "condition" | "success" | "info";
+
+type Props = {
+  type?: Type;
+  value: string;
+  onChange: (val: string) => void;
+};
+
+const styles = {
+  condition: "border-red-400 bg-red-50 text-red-700",
+  success: "border-green-400 bg-green-50 text-green-700",
+  info: "border-blue-400 bg-blue-50 text-blue-700",
+};
+
+const icons = {
+  condition: <AlertTriangle className="w-5 h-5 mt-0.5" />,
+  success: <CheckCircle className="w-5 h-5 mt-0.5" />,
+  info: <Info className="w-5 h-5 mt-0.5" />,
+};
+
+const EditableCondition = ({ type = "info", value, onChange }: Props) => {
+  const [isEditing, setIsEditing] = useState(false);
+
+  return (
+    <div
+      className={`flex items-start gap-2 border p-4 rounded-lg text-sm ${styles[type]}`}
+    >
+      {icons[type]}
+
+      <div className="flex-1">
+        {isEditing ? (
+          <textarea
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            className="w-full bg-transparent outline-none border-b resize-none text-sm"
+            autoFocus
+          />
+        ) : (
+          <p>{value}</p>
+        )}
+      </div>
+
+      <button
+        onClick={() => setIsEditing((prev) => !prev)}
+        className="hover:opacity-80"
+      >
+        {isEditing ? (
+          <Check className="w-4 h-4" />
+        ) : (
+          <Pencil className="w-4 h-4" />
+        )}
+      </button>
+    </div>
+  );
+};
+
+export default EditableCondition;
