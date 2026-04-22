@@ -46,13 +46,11 @@ const JudgmentHandling = () => {
     /* ================= VALIDATION 1 ================= */
     if (!judgmentTypes || judgmentTypes.length === 0) {
       toast.error("Please select Judgment type.");
-      return;
     }
 
     /* ================= VALIDATION 2 ================= */
     if (!selectedAccount?.accountNumber) {
       toast.error("Please select account number and name.");
-      return;
     }
 
     /* ================= PROMPT 1 CHECK ================= */
@@ -63,8 +61,7 @@ const JudgmentHandling = () => {
 
     /* ================= IF NO JUDGMENT ================= */
     if (judgmentStatus === "No") {
-      navigate("/s6/next-section");
-      return;
+      navigate("/s5/last-screen");
     }
 
     /* ================= PROMPT 2 PATH VALIDATION ================= */
@@ -75,7 +72,6 @@ const JudgmentHandling = () => {
 
     if (hasPrompt2Issue) {
       toast.error("Condition triggered in Prompt 2 (Branch A3).");
-      return;
     }
 
     /* ================= PROMPT 3 CHECK ================= */
@@ -94,29 +90,24 @@ const JudgmentHandling = () => {
 
       if (hasPrompt3Issue) {
         toast.error("Condition triggered in Prompt 3 (Branch B2).");
-        return;
       }
     }
 
     /* ================= PROMPT 4 VALIDATION ================= */
     if (!losUpdatedForJudgment) {
       toast.error("Please answer Prompt 4.");
-      return;
     }
 
     if (losUpdatedForJudgment === "No") {
       toast.error("Condition triggered (Branch B1).");
-      return;
     }
 
     if (!payoffAvailable) {
       toast.error("Please answer Prompt 4a.");
-      return;
     }
 
     if (payoffAvailable === "No") {
       toast.error("Condition triggered (Branch B6).");
-      return;
     }
 
     /* ================= FINAL CHECKPOINT ================= */
@@ -124,13 +115,12 @@ const JudgmentHandling = () => {
 
     if (hasPayoffIssue) {
       toast.error("Condition triggered (Branch B7).");
-      return;
     }
 
     /* ================= SUCCESS PATH ================= */
     toast.success("Judgment flow completed successfully.");
 
-    navigate("/s6/next-section");
+    navigate("/s5/last-screen");
   };
 
   const handleCreditInventoryConfirm = () => {
@@ -139,14 +129,14 @@ const JudgmentHandling = () => {
     if (creditReports.length > 0) {
       navigate("/S1/inventory");
     } else {
-      navigate("/S5");
+      navigate("/S5/last-screen");
     }
   };
 
   useEffect(() => {
     registerActions({
       onContinue: handleContinue,
-      onBack: () => navigate("/s5/tax-lien-handling"),
+      onBack: () => navigate("/s5/tax-lien"),
     });
   }, [judgmentTypes]);
 

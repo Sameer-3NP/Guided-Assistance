@@ -164,7 +164,8 @@ const Initialization = () => {
                 {...register("loanNumber")}
                 disabled={isLocked}
                 className="w-full border border-black rounded-lg pl-22.5 pr-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 disabled:bg-gray-100"
-                placeholder="1234"
+                placeholder="Enter last 4-digits of Loan App."
+                title="Enter last 4-digits of Loan Application"
                 inputMode="numeric"
                 onInput={(e) => {
                   e.currentTarget.value = e.currentTarget.value.replace(

@@ -2,7 +2,6 @@ import { createBrowserRouter, Navigate } from "react-router-dom";
 import MainLayout from "./layout/MainLayout";
 // import SessionRestore from "./components/SessionRestore";
 
-
 import Initialization from "./sections/S0/Initialization";
 
 import CreditInventory from "./sections/S1/screens/CreditInventory";
@@ -40,6 +39,8 @@ import BankruptcyWaitingPeriodValidation from "./sections/S5/screens/BankruptcyW
 import MortgageDerogatoryEventHandling from "./sections/S5/screens/MortgageDerogatoryEventHandling";
 import TaxLienHandling from "./sections/S5/screens/TaxLienHandling";
 import JudgmentHandling from "./sections/S5/screens/JudgmentHandling";
+import LastScreen from "./sections/S5/screens/lastScreen";
+
 import DuplicateTradelineHandling from "./sections/S4/screens/DuplicateTradelineHandling";
 import PastAccountHandling from "./sections/S4/screens/PastAccountHandling";
 import ChildSupportHandling from "./sections/S4/screens/ChildSupportHandling";
@@ -48,10 +49,10 @@ export const router = createBrowserRouter([
   {
     path: "/",
     element: (
-    <>
-      {/* <SessionRestore /> */}
-      <MainLayout />
-    </>
+      <>
+        {/* <SessionRestore /> */}
+        <MainLayout />
+      </>
     ),
     children: [
       { index: true, element: <Navigate to="/s0" /> },
@@ -148,6 +149,7 @@ export const router = createBrowserRouter([
       },
       { path: "s5/tax-lien", element: <TaxLienHandling /> },
       { path: "s5/judgment", element: <JudgmentHandling /> },
+      { path: "s5/last-screen", element: <LastScreen /> },
     ],
   },
 ]);

@@ -7,7 +7,6 @@ import EditableCondition from "../../../components/EditableCondition";
 import {
   FileText,
   CheckCircle,
-  XCircle,
   ShieldCheck,
   Database,
   AlertTriangle,

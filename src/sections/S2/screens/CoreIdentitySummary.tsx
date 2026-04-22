@@ -11,6 +11,8 @@ const CoreIdentitySummary = () => {
   const { registerActions } = useFlowContext();
   const navigate = useNavigate();
   const [copiedConditions, setCopiedConditions] = useState<string[]>([]);
+  const [copiedAlerts, setCopiedAlerts] = useState<string[]>([]);
+
   const { firstLastName, middleName, suffix, ssn, dob, akaSsn } = coreIdentity;
   const { conditions: raisedConditions, alerts: raisedAlerts } =
     coreIdentitySummary;
@@ -104,14 +106,28 @@ const CoreIdentitySummary = () => {
           {alerts.map((alert) => (
             <div
               key={alert}
-              className="border border-yellow-400 bg-yellow-50 p-3 rounded space-y-2"
+              className="border border-yellow-400 bg-yellow-50 p-3 rounded-xl space-y-2"
             >
               <div className="flex justify-between">
                 <span>{alert}</span>
 
                 <button
-                  onClick={() => navigator.clipboard.writeText(alert)}
-                  className="text-sm bg-yellow-500 text-white px-3 py-1 rounded flex items-center gap-1"
+                  onClick={() => {
+                    navigator.clipboard.writeText(alert);
+                    toast.success("Copied to LOS");
+
+                    if (!copiedAlerts.includes(alert)) {
+                      setCopiedAlerts((prev) => [...prev, alert]);
+                    }
+
+                    if (!raisedAlerts.includes(alert)) {
+                      setCoreIdentitySummary({
+                        alerts: [...raisedAlerts, alert],
+                        conditions: raisedConditions,
+                      });
+                    }
+                  }}
+                  className="text-sm bg-yellow-500 text-white px-3 py-1 rounded-xl flex items-center gap-1"
                 >
                   <Clipboard className="w-4 h-4" />
                   Copy
@@ -122,7 +138,10 @@ const CoreIdentitySummary = () => {
                 <input
                   type="checkbox"
                   checked={raisedAlerts.includes(alert)}
+                  disabled={!raisedAlerts.includes(alert)}
                   onChange={() => toggleAlert(alert)}
+                  title="Do Copy to LOS before raising alert"
+                  className="accent-yellow-400 disabled:opacity-40"
                 />
                 Mark Alert Raised
               </label>
@@ -142,7 +161,7 @@ const CoreIdentitySummary = () => {
           {conditions.map((condition) => (
             <div
               key={condition}
-              className="border border-red-400 bg-red-50 p-3 rounded space-y-2"
+              className="border border-red-400 bg-red-50 p-3 rounded-xl space-y-2"
             >
               <div className="flex justify-between">
                 <span>{condition}</span>
@@ -163,7 +182,7 @@ const CoreIdentitySummary = () => {
                       });
                     }
                   }}
-                  className="flex items-center gap-1 text-xs bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-md"
+                  className="flex items-center gap-1 text-xs bg-red-500 hover:bg-red-600 text-white px-3 py-1 rounded-xl"
                 >
                   <Clipboard className="w-4 h-4" />
                   Copy

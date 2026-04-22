@@ -3,23 +3,43 @@ import toast from "react-hot-toast";
 import { useFlowContext } from "../../../store/FlowContext";
 import { useNavigate } from "react-router-dom";
 import { useSectionStore } from "../../../store/SectionStore";
+import { MapPin, FileCheck } from "lucide-react";
+import EditableCondition from "../../../components/EditableCondition";
 
-import {
-  // HelpCircle,
-  // CheckCircle,
-  // XCircle,
-  AlertTriangle,
-  MapPin,
-  FileCheck,
-} from "lucide-react";
+type CurrentAddressState = {
+  addressMatch: string | null;
+};
+
+const getIssueText = (value: string) => {
+  if (value === "Does not match") return "does not match";
+  if (value === "Missing") return "is missing";
+  return "";
+};
+
+const buildAddressMessage = (value: string | null) => {
+  if (!value || value === "Matches") return "";
+
+  const issue = getIssueText(value);
+
+  return `Borrower address information - current address on the credit report ${issue} when compared to borrower details reflected in the loan application. Please provide corrected documentation or re-pull the credit report.`;
+};
 
 const CurrentAddress = () => {
   const navigate = useNavigate();
   const { registerActions } = useFlowContext();
 
-  const { currentAddress, setCurrentAddress } = useSectionStore();
+  const {
+    currentAddress,
+    setCurrentAddress,
+    currentAddressConditions,
+    setCurrentAddressConditions,
+  } = useSectionStore();
 
   const { addressMatch } = currentAddress;
+
+  const ctx: CurrentAddressState = {
+    addressMatch,
+  };
 
   const handleContinue = () => {
     if (!addressMatch) {
@@ -55,59 +75,47 @@ const CurrentAddress = () => {
           </div>
 
           {/* QUESTION */}
-          <div className="flex items-start gap-3 bg-blue-100 border border-blue-200 rounded-lg p-3">
-            {/* <HelpCircle className="w-5 h-5 text-red-400 mt-0.5" /> */}
-            <p className="text-md text-black font-semibold">
-              Does the borrower’s current address on the credit report match the
-              loan application?
-            </p>
-          </div>
-
-          {/* OPTIONS */}
-          <div className="flex gap-10">
-            {["Matches", "Does not match", "Missing"].map((opt) => (
-              <label
-                key={opt}
-                className="flex items-center gap-2 cursor-pointer"
-              >
-                <input
-                  type="radio"
-                  checked={addressMatch === opt}
-                  onChange={() => setCurrentAddress({ addressMatch: opt })}
-                  className="accent-blue-500"
-                />
-
-                {/* {opt === "Matches" && (
-                  <CheckCircle className="w-4 h-4 text-green-500" />
-                )}
-
-                {opt === "Does not match" && (
-                  <XCircle className="w-4 h-4 text-red-500" />
-                )}
-
-                {opt === "Missing" && (
-                  <AlertTriangle className="w-4 h-4 text-yellow-500" />
-                )} */}
-
-                <span className="text-sm">{opt}</span>
-              </label>
-            ))}
-          </div>
-
-          {/* ENGINE FEEDBACK */}
-          {addressMatch !== "Matches" && addressMatch !== "Missing" && (
-            <div className="flex items-center gap-2 border border-red-400 bg-red-50 p-3 rounded text-sm text-red-700">
-              <AlertTriangle className="w-4 h-4" />
-              Condition Generated: Address mismatch
+          <div className="space-y-4">
+            <div className="flex items-start gap-3 bg-blue-100 border border-blue-200 rounded-lg p-3">
+              <p className="text-md text-black font-semibold">
+                Does the borrower’s current address on the credit report match
+                the loan application?
+              </p>
             </div>
-          )}
 
-          {addressMatch === "Missing" && (
-            <div className="flex items-center gap-2 border border-yellow-400 bg-yellow-50 p-3 rounded text-sm text-yellow-700">
-              <AlertTriangle className="w-4 h-4" />
-              Alert : Address missing
+            <div className="flex gap-10">
+              {["Matches", "Does not match", "Missing"].map((opt) => (
+                <label
+                  key={opt}
+                  className="flex items-center gap-2 cursor-pointer"
+                >
+                  <input
+                    type="radio"
+                    checked={addressMatch === opt}
+                    onChange={() => setCurrentAddress({ addressMatch: opt })}
+                    className="accent-blue-500"
+                  />
+                  <span className="text-sm">{opt}</span>
+                </label>
+              ))}
             </div>
-          )}
+
+            {/* ✅ CONDITION (NEW) */}
+            {ctx.addressMatch && ctx.addressMatch !== "Matches" && (
+              <EditableCondition
+                type="condition"
+                value={
+                  currentAddressConditions.addressMatch ||
+                  buildAddressMessage(ctx.addressMatch)
+                }
+                onChange={(val) =>
+                  setCurrentAddressConditions({
+                    addressMatch: val,
+                  })
+                }
+              />
+            )}
+          </div>
         </div>
       </div>
     </div>

@@ -5,8 +5,7 @@ import toast from "react-hot-toast";
 import { useSectionStore } from "../../../store/SectionStore";
 import { useFlowContext } from "../../../store/FlowContext";
 import { useNavigate } from "react-router-dom";
-import { FileText } from "lucide-react"; // 📄 icon for Credit Inventory
-
+import { FileText, AlertTriangle } from "lucide-react";
 const MAX_REPORTS = 5;
 
 const createReport = (index: number): CreditReport => ({
@@ -38,11 +37,11 @@ const CreditInventory = () => {
 
         if (creditReports.length > 1) {
           toast(
-            "Multiple credit reports detected. Please select the one used for qualification.",
+            "Multiple credit reports detected. Please select the credit reports used for qualification.",
             {
-              // icon: "⚠️",
+              icon: <AlertTriangle className="text-amber-600 " />,
               style: {
-                background: "#ffffff",
+                background: "#ffffe1",
                 color: "black",
                 border: "1px solid #ddd",
               },

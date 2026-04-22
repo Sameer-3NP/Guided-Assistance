@@ -68,10 +68,12 @@ const CreditReportCard = ({ report, index, updateReport }: Props) => {
             onChange={(e) => updateField("borrowerSlot", e.target.value)}
             className="border border-gray-300 rounded-lg px-3 py-2 w-full focus:ring-2 focus:ring-blue-400 outline-none"
           >
-            <option value="hidden">Select</option>
+            <option value="" hidden>
+              Select
+            </option>
             <option value="B1">B1</option>
-            <option value="B2">A1</option>
-            <option value="B2">A2</option>
+            <option value="A1">A1</option>
+            <option value="A2">A2</option>
             <option value="Joint">Joint</option>
           </select>
         </div>

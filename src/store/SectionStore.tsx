@@ -14,6 +14,12 @@ type Store = {
   setActiveCreditReport: (label: string | null) => void;
   setSelectedReports: (reports: string[]) => void;
 
+  reportQueue: string[];
+  currentReportIndex: number;
+
+  setReportQueue: (queue: string[]) => void;
+  setCurrentReportIndex: (index: number) => void;
+
   creditValidityStep: "pullCheck" | "expirationCheck";
   setCreditValidityStep: (step: "pullCheck" | "expirationCheck") => void;
 
@@ -96,6 +102,19 @@ type Store = {
 
   setCoreIdentity: (data: Partial<Store["coreIdentity"]>) => void;
 
+  coreIdentityConditions: {
+    nameMismatch: string;
+    middleNameIssue: string;
+    suffixIssue: string;
+    ssnIssue: string;
+    dobIssue: string;
+    akaSsnIssue: string;
+  };
+
+  setCoreIdentityConditions: (
+    data: Partial<Store["coreIdentityConditions"]>,
+  ) => void;
+
   coreIdentitySummary: {
     conditions: string[];
     alerts: string[];
@@ -108,6 +127,14 @@ type Store = {
   };
 
   setCurrentAddress: (data: Partial<Store["currentAddress"]>) => void;
+
+  currentAddressConditions: {
+    addressMatch: string;
+  };
+
+  setCurrentAddressConditions: (
+    data: Partial<Store["currentAddressConditions"]>,
+  ) => void;
 
   currentAddressSummary: {
     conditions: string[];
@@ -122,6 +149,14 @@ type Store = {
   };
 
   setPreviousAddress: (data: Partial<Store["previousAddress"]>) => void;
+
+  previousAddressConditions: {
+    requireUpdatedReport: string;
+  };
+
+  setPreviousAddressConditions: (
+    data: Partial<Store["previousAddressConditions"]>,
+  ) => void;
 
   section2Summary: {
     raisedConditions: string[];
@@ -610,6 +645,8 @@ export const SectionProvider = ({ children }: any) => {
     null,
   );
   const [selectedReports, setSelectedReports] = useState<string[]>([]);
+  const [reportQueue, setReportQueue] = useState<string[]>([]);
+  const [currentReportIndex, setCurrentReportIndex] = useState(0);
 
   const [creditValidityStep, setCreditValidityStep] = useState<
     "pullCheck" | "expirationCheck"
@@ -684,11 +721,26 @@ export const SectionProvider = ({ children }: any) => {
     akaSsn: null,
   });
 
+  const [coreIdentityConditions, setCoreIdentityConditionsState] = useState({
+    nameMismatch: "",
+    middleNameIssue: "",
+    suffixIssue: "",
+    ssnIssue: "",
+    dobIssue: "",
+    akaSsnIssue: "",
+  });
+
   const [currentAddress, setCurrentAddressState] = useState<
     Store["currentAddress"]
   >({
     addressMatch: null,
   });
+
+  const [currentAddressConditions, setCurrentAddressConditionsState] = useState(
+    {
+      addressMatch: "",
+    },
+  );
 
   const [previousAddress, setPreviousAddressState] = useState<
     Store["previousAddress"]
@@ -697,6 +749,11 @@ export const SectionProvider = ({ children }: any) => {
     addressMatch: null,
     requireUpdatedReport: null,
   });
+
+  const [previousAddressConditions, setPreviousAddressConditionsState] =
+    useState({
+      requireUpdatedReport: "",
+    });
 
   const [coreIdentitySummary, setCoreIdentitySummaryState] = useState<
     Store["coreIdentitySummary"]
@@ -1218,8 +1275,26 @@ export const SectionProvider = ({ children }: any) => {
     }));
   };
 
+  const setCoreIdentityConditions = (
+    data: Partial<Store["coreIdentityConditions"]>,
+  ) => {
+    setCoreIdentityConditionsState((prev) => ({
+      ...prev,
+      ...data,
+    }));
+  };
+
   const setCoreIdentitySummary = (data: Store["coreIdentitySummary"]) => {
     setCoreIdentitySummaryState((prev) => ({
+      ...prev,
+      ...data,
+    }));
+  };
+
+  const setCurrentAddressConditions = (
+    data: Partial<Store["currentAddressConditions"]>,
+  ) => {
+    setCurrentAddressConditionsState((prev) => ({
       ...prev,
       ...data,
     }));
@@ -1247,6 +1322,15 @@ export const SectionProvider = ({ children }: any) => {
 
   const setPreviousAddress = (data: Partial<Store["previousAddress"]>) => {
     setPreviousAddressState((prev) => ({
+      ...prev,
+      ...data,
+    }));
+  };
+
+  const setPreviousAddressConditions = (
+    data: Partial<Store["previousAddressConditions"]>,
+  ) => {
+    setPreviousAddressConditionsState((prev) => ({
       ...prev,
       ...data,
     }));
@@ -1448,6 +1532,10 @@ export const SectionProvider = ({ children }: any) => {
         setActiveCreditReport,
         selectedReports,
         setSelectedReports,
+        reportQueue,
+        currentReportIndex,
+        setReportQueue,
+        setCurrentReportIndex,
         creditValidityStep,
         setCreditValidityStep,
         pullType,
@@ -1470,14 +1558,20 @@ export const SectionProvider = ({ children }: any) => {
         setSystemAlignmentConditions,
         coreIdentity,
         setCoreIdentity,
+        coreIdentityConditions,
+        setCoreIdentityConditions,
         coreIdentitySummary,
         setCoreIdentitySummary,
         currentAddress,
         setCurrentAddress,
+        currentAddressConditions,
+        setCurrentAddressConditions,
         currentAddressSummary,
         setCurrentAddressSummary,
         previousAddress,
         setPreviousAddress,
+        previousAddressConditions,
+        setPreviousAddressConditions,
         section2Summary,
         setSection2Summary,
         scoreAvailability,

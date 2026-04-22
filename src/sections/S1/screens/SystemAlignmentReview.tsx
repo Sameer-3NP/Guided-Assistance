@@ -3,7 +3,7 @@ import toast from "react-hot-toast";
 import { useSectionStore } from "../../../store/SectionStore";
 import { useFlowContext } from "../../../store/FlowContext";
 import { useNavigate } from "react-router-dom";
-import { Calendar, FileCheck, Database, AlertCircle } from "lucide-react";
+import { Calendar, FileCheck, Database } from "lucide-react";
 import EditableCondition from "../../../components/EditableCondition";
 
 const SystemAlignmentReview = () => {
@@ -46,7 +46,7 @@ const SystemAlignmentReview = () => {
     },
     {
       id: "caseB_matchFound",
-      template: `Credit report date ${ausDate} reflected in AUS does not match with the credit report update date ${creditUpdateDate.toLocaleDateString()} available in the file. i) Review the credit report update date and credit reference id based on the AUS findings. ii) Check the junk or unassigned folder for a credit report matching the AUS credit reference id and date. iii) If the matching credit report is found, move it to the active e-folder and proceed.`,
+      template: `Credit report date ${ausDate} reflected in AUS does not match with the credit report update date ${creditUpdateDate.toISOString().split("T")[0]} available in the file. i) Review the credit report update date and credit reference id based on the AUS findings. ii) Check the junk or unassigned folder for a credit report matching the AUS credit reference id and date. iii) If the matching credit report is found, move it to the active e-folder and proceed.`,
       show: (ctx: any) => ctx.ausNewer && ctx.matchingReport === "yes",
     },
     {

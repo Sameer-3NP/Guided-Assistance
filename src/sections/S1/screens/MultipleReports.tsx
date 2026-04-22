@@ -13,23 +13,79 @@ const MultipleReports = () => {
     setSelectedReports,
     activeCreditReport,
     setActiveCreditReport,
+    reportQueue,
+    setReportQueue,
+    currentReportIndex,
+    setCurrentReportIndex,
   } = useSectionStore();
   const { registerActions } = useFlowContext();
   const navigate = useNavigate();
   const [showPopup, setShowPopup] = useState(false);
   const [junkReports, setJunkReports] = useState<string[]>([]);
 
-  const getLatestReport = (reports: string[]) => {
+  // const getLatestReport = (reports: string[]) => {
+  //   const selectedObjects = s1.filter((r) => reports.includes(r.label));
+
+  //   if (selectedObjects.length === 0) return null;
+
+  //   return selectedObjects.reduce((prev, curr) => {
+  //     const prevDate = new Date(prev.updateDate || 0).getTime();
+  //     const currDate = new Date(curr.updateDate || 0).getTime();
+
+  //     return currDate > prevDate ? curr : prev;
+  //   }).label;
+  // };
+
+  // const getUniqueLatestReports = (reports: string[]) => {
+  //   const selectedObjects = s1.filter((r) => reports.includes(r.label));
+
+  //   if (selectedObjects.length === 0) return [];
+
+  //   const latestBySlot: Record<string, any> = {};
+
+  //   selectedObjects.forEach((report) => {
+  //     const slot = report.borrowerSlot || "UNKNOWN";
+
+  //     if (!latestBySlot[slot]) {
+  //       latestBySlot[slot] = report;
+  //     } else {
+  //       const existing = latestBySlot[slot];
+
+  //       const existingDate = new Date(existing.updateDate || 0).getTime();
+  //       const currentDate = new Date(report.updateDate || 0).getTime();
+
+  //       if (currentDate > existingDate) {
+  //         latestBySlot[slot] = report;
+  //       }
+  //     }
+  //   });
+
+  //   return Object.values(latestBySlot).map((r) => r.label);
+  // };
+
+  const getUniqueLatestReports = (reports: string[]) => {
     const selectedObjects = s1.filter((r) => reports.includes(r.label));
 
-    if (selectedObjects.length === 0) return null;
+    const latestBySlot: Record<string, any> = {};
 
-    return selectedObjects.reduce((prev, curr) => {
-      const prevDate = new Date(prev.updateDate || 0).getTime();
-      const currDate = new Date(curr.updateDate || 0).getTime();
+    selectedObjects.forEach((report) => {
+      const slot = report.borrowerSlot || "UNKNOWN";
 
-      return currDate > prevDate ? curr : prev;
-    }).label;
+      if (!latestBySlot[slot]) {
+        latestBySlot[slot] = report;
+      } else {
+        const prev = latestBySlot[slot];
+
+        if (
+          new Date(report.updateDate).getTime() >
+          new Date(prev.updateDate).getTime()
+        ) {
+          latestBySlot[slot] = report;
+        }
+      }
+    });
+
+    return Object.values(latestBySlot).map((r) => r.label);
   };
 
   const handleConfirm = () => {
@@ -44,6 +100,11 @@ const MultipleReports = () => {
 
     setJunkReports(junkReports);
     setShowPopup(true);
+
+    if (reportQueue.length === 0) {
+      toast.error("No reports available");
+      return;
+    }
 
     // navigate("/s1/repository-check");
   };
@@ -131,22 +192,50 @@ const MultipleReports = () => {
                   <input
                     type="checkbox"
                     checked={isSelected}
-                    onChange={() => {
-                      let updated: string[];
+                    // onChange={() => {
+                    //   let updated: string[];
 
-                      if (isSelected) {
-                        updated = selectedReports.filter(
-                          (r) => r !== report.label,
-                        );
-                      } else {
-                        updated = [...selectedReports, report.label];
-                      }
+                    //   if (isSelected) {
+                    //     updated = selectedReports.filter(
+                    //       (r) => r !== report.label,
+                    //     );
+                    //   } else {
+                    //     updated = [...selectedReports, report.label];
+                    //   }
+
+                    //   setSelectedReports(updated);
+
+                    //   // ✅ compute active properly
+                    //   const filtered = getUniqueLatestReports(updated);
+
+                    //   // optional: store this if needed later
+                    //   setSelectedReports(filtered);
+
+                    //   setActiveCreditReport(filtered[0] || null);
+                    // }}
+                    onChange={() => {
+                      let updated = [...selectedReports];
+
+                      const current = s1.find((r) => r.label === report.label);
+                      const slot = current?.borrowerSlot;
+
+                      // ❌ remove same borrowerSlot reports
+                      updated = updated.filter((label) => {
+                        const r = s1.find((x) => x.label === label);
+                        return r?.borrowerSlot !== slot;
+                      });
+
+                      // ✅ add new one
+                      updated.push(report.label);
 
                       setSelectedReports(updated);
 
-                      // ✅ compute active properly
-                      const latest = getLatestReport(updated);
-                      setActiveCreditReport(latest);
+                      // 🎯 build queue
+                      const queue = getUniqueLatestReports(updated);
+
+                      setReportQueue(queue);
+                      setCurrentReportIndex(0);
+                      setActiveCreditReport(queue[0] || null);
                     }}
                     className="w-5 h-5 text-blue-600"
                   />
