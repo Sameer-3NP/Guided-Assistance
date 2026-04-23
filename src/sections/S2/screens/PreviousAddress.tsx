@@ -14,7 +14,7 @@ type PreviousAddressState = {
 
 const buildPreviousAddressMessage = (ctx: PreviousAddressState) => {
   if (ctx.requireUpdatedReport === "Yes") {
-    return `Previous address reflected on the credit report does not match the loan application. As per lender requirement, an updated credit report is required.`;
+    return `Borrower’s previous address on the credit report does not match the previous address reflected in the loan application. Please provide an updated credit report reflecting the correct previous address.`;
   }
 
   return "";

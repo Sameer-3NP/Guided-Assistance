@@ -6,6 +6,7 @@ import { useSectionStore } from "../../../store/SectionStore";
 import PromptRadio from "../../../components/PromptRadio";
 
 import { FileCheck, AlertTriangle, GitCompare, Database } from "lucide-react";
+import EditableCondition from "../../../components/EditableCondition";
 
 const TradelineStructuralAlignment = () => {
   const { registerActions } = useFlowContext();
@@ -71,11 +72,14 @@ const TradelineStructuralAlignment = () => {
           />
 
           {branch1Condition && (
-            <div className="flex items-center gap-2 border border-red-400 bg-red-50 p-3 rounded-xl text-sm text-red-700">
-              <AlertTriangle className="w-4 h-4" />
-              Condition: LOS reflects more tradelines than the credit report.
-              Manual reconciliation required.
-            </div>
+            <EditableCondition
+              type="condition"
+              value={
+                tradelineAlignment.branch1 ||
+                "Borrower has disclosed tradelines from [[Tradeline Name, Tradeline Account Number]] on LOS however, same is not reflected on credit report. Obtain additional documentation to support the payment."
+              }
+              onChange={(val) => setTradelineAlignment({ branch1: val })}
+            />
           )}
 
           {showPrompt2 && (

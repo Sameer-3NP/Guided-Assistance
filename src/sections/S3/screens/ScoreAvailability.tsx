@@ -5,15 +5,8 @@ import { useNavigate } from "react-router-dom";
 import { useSectionStore } from "../../../store/SectionStore";
 import PromptRadio from "../../../components/PromptRadio";
 
-import {
-  //  CheckCircle,
-  // ShieldAlert,
-  AlertTriangle,
-  FileCheck,
-  Lock,
-  BarChart3,
-  FileWarning,
-} from "lucide-react";
+import { FileCheck, Lock, BarChart3, FileWarning } from "lucide-react";
+import EditableCondition from "../../../components/EditableCondition";
 
 const ScoreAvailability = () => {
   const { registerActions } = useFlowContext();
@@ -127,7 +120,7 @@ const ScoreAvailability = () => {
       onContinue: handleContinue,
       onBack: () => navigate("/s2/section2-summary"),
     });
-  }, [freeze, twoBureaus, oneScore]);
+  }, []);
 
   return (
     <div className="flex justify-center w-full px-6">
@@ -171,10 +164,16 @@ const ScoreAvailability = () => {
           />
 
           {branchACondition && (
-            <div className="flex items-center gap-2 border border-red-400 bg-red-50 p-3 rounded-xl text-sm text-red-700">
-              <AlertTriangle className="w-4 h-4" />
-              Condition: Credit freeze present with insufficient bureau scores.
-            </div>
+            <EditableCondition
+              type="condition"
+              value={
+                scoreAvailability.branchACondition ||
+                "Credit Freeze is marked as Yes and less than 2 scores are noted on credit report. Obtain updated credit report removing freeze."
+              }
+              onChange={(val) =>
+                setScoreAvailability({ branchACondition: val })
+              }
+            />
           )}
         </div>
 
@@ -193,6 +192,19 @@ const ScoreAvailability = () => {
               options={["Yes", "No"]}
               onChange={(v) => setScoreAvailability({ oneScore: v })}
             />
+
+            {oneScore === "No" && (
+              <EditableCondition
+                type="condition"
+                value={
+                  scoreAvailability.freezeCondition ||
+                  "Credit Freeze is marked as No and no scores are noted on credit report. Review the availability of non-traditional credit report."
+                }
+                onChange={(val) =>
+                  setScoreAvailability({ freezeCondition: val })
+                }
+              />
+            )}
           </div>
         )}
 
@@ -227,6 +239,19 @@ const ScoreAvailability = () => {
                 value={nonTradAvailable}
                 options={["Yes", "No"]}
                 onChange={(v) => setScoreAvailability({ nonTradAvailable: v })}
+              />
+            )}
+
+            {nonTradAvailable === "No" && (
+              <EditableCondition
+                type="alert"
+                value={
+                  scoreAvailability.oneScoreCondition ||
+                  "Borrower [Borrower Name] do not have a credit score and non-traditional credit report/credit supplement is missing in file. Please provide the same."
+                }
+                onChange={(val) =>
+                  setScoreAvailability({ oneScoreCondition: val })
+                }
               />
             )}
 
@@ -285,10 +310,89 @@ const ScoreAvailability = () => {
             )}
 
             {discrepancies.length > 0 && (
-              <div className="flex items-center gap-2 border border-red-400 bg-red-50 p-3 rounded text-sm text-red-700">
-                <AlertTriangle className="w-4 h-4" />
-                Condition: Non-traditional credit documentation discrepancy
-                detected.
+              <div className="border rounded-xl bg-white shadow-sm space-y-4 overflow-hidden">
+                {/* Grouped discrepancy list */}
+                <div className="px-6 pt-6 space-y-4">
+                  <div className="flex items-center gap-2">
+                    <FileCheck className="w-4 h-4 text-gray-500" />
+                    <span className="text-sm font-medium text-gray-800">
+                      Selected discrepancies
+                    </span>
+                    <span className="ml-auto text-xs bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 rounded-full">
+                      {discrepancies.length} item
+                      {discrepancies.length !== 1 ? "s" : ""}
+                    </span>
+                  </div>
+
+                  {(() => {
+                    let globalIdx = 0;
+                    return documents.map((doc, docIdx) => {
+                      const items = (checklistMap[doc] || []).filter((item) =>
+                        discrepancies.includes(item),
+                      );
+                      if (!items.length) return null;
+
+                      return (
+                        <div key={doc} className="space-y-1">
+                          {docIdx > 0 && (
+                            <hr className="border-gray-100 mb-3" />
+                          )}
+                          <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-2">
+                            {doc}
+                          </p>
+                          {items.map((item) => {
+                            const letter = String.fromCharCode(
+                              97 + globalIdx++,
+                            );
+                            return (
+                              <div
+                                key={item}
+                                className="flex items-start gap-2.5 py-1.5 border-b border-gray-50 last:border-0"
+                              >
+                                <span className="min-w-[20px] h-5 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center text-[10px] font-medium text-gray-500 mt-0.5 flex-shrink-0">
+                                  {letter}
+                                </span>
+                                <span className="text-sm text-gray-700 leading-relaxed">
+                                  {item}
+                                </span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      );
+                    });
+                  })()}
+                </div>
+
+                <div className="border-t border-gray-100 px-6 pb-6 pt-4">
+                  <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-2">
+                    Generated condition
+                  </p>
+                  <EditableCondition
+                    type="condition"
+                    value={
+                      scoreAvailability.discrepanciesCondition ||
+                      (() => {
+                        const selectedLines: string[] = [];
+                        documents.forEach((doc) => {
+                          (checklistMap[doc] || [])
+                            .filter((item) => discrepancies.includes(item))
+                            .forEach((item) => selectedLines.push(item));
+                        });
+                        const lettered = selectedLines
+                          .map(
+                            (line, i) =>
+                              `${String.fromCharCode(97 + i)}) ${line}`,
+                          )
+                          .join("\n");
+                        return `${documents.join(" / ")} has been received for borrower [Borrower Name] however, same does not meet the agency guidelines requirement and has below discrepancy/missing information:\n\n${lettered}\n\nUpdated nontraditional credit report/credit supplement/supporting document is required.`;
+                      })()
+                    }
+                    onChange={(val) =>
+                      setScoreAvailability({ discrepanciesCondition: val })
+                    }
+                  />
+                </div>
               </div>
             )}
           </div>

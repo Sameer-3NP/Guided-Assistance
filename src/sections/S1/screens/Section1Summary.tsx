@@ -21,6 +21,8 @@ const Section1Summary = () => {
     systemAlignmentReview,
     setSectionStatus,
     CreditCondition,
+    repositoryConditions,
+    sourceIntegrityConditions,
   } = useSectionStore();
 
   const { registerActions } = useFlowContext();
@@ -47,19 +49,17 @@ const Section1Summary = () => {
     }
 
     const expirationDate = new Date(activeReport.expirationDate);
-    if (expirationDate < new Date()) list.push("Expired credit report");
+    if (expirationDate < new Date()) list.push(CreditCondition.expiredCR);
 
     if (repoCount < 3 && biMergeAccepted === "no") {
-      list.push(
-        "Tri-merge credit report required. Current report contains fewer than three repositories.",
-      );
+      list.push(repositoryConditions.biMergeFail);
     }
 
     if (
       systemAlignmentReview?.losAlign === "no" &&
       systemAlignmentReview?.matchingReport === "no"
     ) {
-      list.push("Alignment missing report");
+      list.push(sourceIntegrityConditions.missingAgency);
     }
 
     return list;
@@ -80,16 +80,14 @@ const Section1Summary = () => {
       sourceRequestIntegrity?.agencyAddress === "no" ||
       sourceRequestIntegrity?.agencyPhone === "no"
     ) {
-      list.push("Missing agency information on credit report.");
+      list.push(sourceIntegrityConditions.missingAgency);
     }
 
     if (repoCount < 3 && biMergeAccepted === "yes")
       list.push("Bi-merge accepted as per client policy.");
 
     if (systemAlignmentReview?.losAlign === "no") {
-      list.push(
-        "LOS Credit Reference ID does not match credit report reference ID.",
-      );
+      list.push(sourceIntegrityConditions.loanMismatch);
     }
 
     return list;

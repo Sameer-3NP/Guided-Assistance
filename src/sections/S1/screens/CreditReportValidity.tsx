@@ -6,7 +6,6 @@ import { useNavigate } from "react-router-dom";
 import EditableCondition from "../../../components/EditableCondition";
 import {
   CreditCard,
-  AlertCircle,
   CalendarCheck,
   ShieldAlert,
   CheckCircle,
@@ -41,7 +40,7 @@ const CreditReportValidity = () => {
         softPull: `Credit report provided for borrower ${borrower} is a soft pull. Loan Officer to pull new credit report reflecting credit report type as hard pull.`,
       });
     }
-  }, [borrower]);
+  });
 
   if (!activeReport || !s0) return null;
 
@@ -175,11 +174,20 @@ const CreditReportValidity = () => {
             </div>
 
             {expirationCondition && (
-              <div className="flex items-start gap-2 border border-red-300 bg-red-50 p-4 rounded-lg text-sm text-red-700">
-                <AlertCircle className="w-5 h-5 mt-0.5" />
-                Provide updated credit report valid till closing as provided
-                credit report has expired on DD/MM/YYYY.
-              </div>
+              // <div className="flex items-start gap-2 border border-red-300 bg-red-50 p-4 rounded-lg text-sm text-red-700">
+              //   <AlertCircle className="w-5 h-5 mt-0.5" />
+              //   {`Provide updated credit report valid till closing as provided
+              //   credit report has expired on ${expirationDate.toISOString().split("T")[0]}.`}
+              // </div>
+              <EditableCondition
+                type="condition"
+                value={
+                  CreditCondition.expiredCR ||
+                  `Provide updated credit report valid till closing as provided
+                credit report has expired on ${expirationDate.toISOString().split("T")[0]}.`
+                }
+                onChange={(val) => setCreditCondition({ expiredCR: val })}
+              />
             )}
           </div>
         )}

@@ -21,10 +21,6 @@ const buildMessage = (fieldLabel: string, value: string) => {
   return `Borrower identity information - ${fieldLabel} on the credit report ${issue} when compared to borrower details reflected in the loan application. Please provide corrected documentation or re-pull the credit report.`;
 };
 
-/* =========================
-   📜 JSON CONFIG
-========================= */
-
 const nameConfig = [
   {
     key: "firstLastName",
@@ -52,10 +48,7 @@ const nameConfig = [
       "Does the borrower suffix on the credit report match the borrower’s suffix on the loan application?",
     options: ["Matches", "Does Not Match", "Missing"],
     showCondition: (ctx: any) => ctx.suffix && ctx.suffix !== "Matches",
-    getMessage: (ctx: any) =>
-      ctx.suffix === "Missing"
-        ? "Borrower suffix is missing on the credit report. Please verify."
-        : buildMessage("suffix", ctx.suffix),
+    getMessage: (ctx: any) => buildMessage("suffix", ctx.suffix),
   },
 ];
 

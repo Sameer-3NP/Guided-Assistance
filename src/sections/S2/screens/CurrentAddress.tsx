@@ -10,18 +10,17 @@ type CurrentAddressState = {
   addressMatch: string | null;
 };
 
-const getIssueText = (value: string) => {
-  if (value === "Does not match") return "does not match";
-  if (value === "Missing") return "is missing";
-  return "";
-};
-
 const buildAddressMessage = (value: string | null) => {
   if (!value || value === "Matches") return "";
 
-  const issue = getIssueText(value);
+  if (value === "Does not match") {
+    return `Credit report reflects borrower’s current address as [[Street Address, City, State, Zip]] which does not match the current address reflected in the loan application as [[Street Address, City, State, Zip]]. Please provide an updated credit report reflecting the correct current address.`;
+  }
 
-  return `Borrower address information - current address on the credit report ${issue} when compared to borrower details reflected in the loan application. Please provide corrected documentation or re-pull the credit report.`;
+  if (value === "Missing") {
+    return `Current address on credit report is missing and same is required. Please provide updated credit reflecting current address`;
+  }
+  return "";
 };
 
 const CurrentAddress = () => {

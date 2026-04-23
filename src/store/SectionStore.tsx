@@ -29,6 +29,9 @@ type Store = {
   biMergeAccepted: string | null;
   setBiMergeAccepted: (value: string | null) => void;
 
+  expiredCR: boolean | null;
+  setExpiredCR: (value: boolean | null) => void;
+
   sourceRequestIntegrity: {
     agencyName: string | null;
     agencyAddress: string | null;
@@ -58,6 +61,7 @@ type Store = {
 
   CreditCondition: {
     softPull: string;
+    expiredCR: string;
   };
 
   setCreditCondition: (data: Partial<Store["CreditCondition"]>) => void;
@@ -168,6 +172,7 @@ type Store = {
     freeze: string | null;
     twoBureaus: string | null;
     oneScore: string | null;
+    branchA: string;
 
     ausRequiresNonTrad: string | null;
     validatedByDu: string | null;
@@ -175,6 +180,12 @@ type Store = {
 
     documents: string[];
     discrepancies: string[];
+
+    branchACondition?: string;
+    freezeCondition?: string;
+    oneScoreCondition?: string;
+    nonTradMissingCondition?: string;
+    discrepanciesCondition?: string;
   };
 
   setScoreAvailability: (data: Partial<Store["scoreAvailability"]>) => void;
@@ -211,6 +222,7 @@ type Store = {
     losGreater: string | null;
     creditGreater: string | null;
     fieldsMatch: string | null;
+    branch1?: string;
   };
 
   setTradelineAlignment: (data: Partial<Store["tradelineAlignment"]>) => void;
@@ -654,6 +666,7 @@ export const SectionProvider = ({ children }: any) => {
 
   const [pullType, setPullType] = useState<string | null>(null);
   const [biMergeAccepted, setBiMergeAccepted] = useState<string | null>(null);
+  const [expiredCR, setExpiredCR] = useState<boolean | null>(null);
 
   const [sourceRequestIntegrity, setSourceRequestIntegrityState] = useState<
     Store["sourceRequestIntegrity"]
@@ -680,6 +693,7 @@ export const SectionProvider = ({ children }: any) => {
 
   const [CreditCondition, setCreditConditionState] = useState({
     softPull: "",
+    expiredCR: "",
   });
 
   const [repositoryConditions, setRepositoryConditionsState] = useState({
@@ -768,6 +782,7 @@ export const SectionProvider = ({ children }: any) => {
     freeze: null,
     twoBureaus: null,
     oneScore: null,
+    branchA: "",
 
     ausRequiresNonTrad: null,
     validatedByDu: null,
@@ -775,6 +790,12 @@ export const SectionProvider = ({ children }: any) => {
 
     documents: [],
     discrepancies: [],
+
+    branchACondition: "",
+    freezeCondition: "",
+    oneScoreCondition: "",
+    nonTradMissingCondition: "",
+    discrepanciesCondition: "",
   });
 
   const [qualifyingScore, setQualifyingScoreState] = useState<
@@ -797,6 +818,7 @@ export const SectionProvider = ({ children }: any) => {
     losGreater: null,
     creditGreater: null,
     fieldsMatch: null,
+    branch1: "",
   });
 
   const [missingTradelinePayment, setMissingTradelinePaymentState] = useState<
@@ -1542,6 +1564,8 @@ export const SectionProvider = ({ children }: any) => {
         setPullType,
         biMergeAccepted,
         setBiMergeAccepted,
+        expiredCR,
+        setExpiredCR,
         sourceRequestIntegrity,
         setSourceRequestIntegrity,
         sectionStatus,

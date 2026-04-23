@@ -63,6 +63,41 @@ const MultipleReports = () => {
   //   return Object.values(latestBySlot).map((r) => r.label);
   // };
 
+  const getLatestReportsBySlot = () => {
+    const grouped: Record<string, any[]> = {};
+
+    // 🔹 group by borrowerSlot
+    s1.forEach((report) => {
+      const slot = report.borrowerSlot || "UNKNOWN";
+
+      if (!grouped[slot]) grouped[slot] = [];
+      grouped[slot].push(report);
+    });
+
+    const latestReports: any[] = [];
+    const excludedMap: Record<string, any[]> = {};
+
+    // 🔹 pick latest per slot
+    Object.keys(grouped).forEach((slot) => {
+      const reports = grouped[slot];
+
+      const sorted = [...reports].sort(
+        (a, b) =>
+          new Date(b.updateDate).getTime() - new Date(a.updateDate).getTime(),
+      );
+
+      latestReports.push(sorted[0]);
+
+      if (sorted.length > 1) {
+        excludedMap[slot] = sorted.slice(1); // older ones
+      }
+    });
+
+    return { latestReports, excludedMap };
+  };
+
+  const { latestReports, excludedMap } = getLatestReportsBySlot();
+
   const getUniqueLatestReports = (reports: string[]) => {
     const selectedObjects = s1.filter((r) => reports.includes(r.label));
 
@@ -134,7 +169,7 @@ const MultipleReports = () => {
 
         {/* Report Cards */}
         <div className="space-y-4">
-          {s1.map((report) => {
+          {latestReports.map((report) => {
             const isActive = activeCreditReport === report.label;
             const isSelected = selectedReports.includes(report.label);
             return (
@@ -180,15 +215,31 @@ const MultipleReports = () => {
                     <div className="text-xs text-gray-400">
                       Expiration: {report.expirationDate || "N/A"}
                     </div>
+
+                    {(() => {
+                      const slot = report.borrowerSlot || "UNKNOWN";
+                      const excluded = excludedMap[slot];
+
+                      if (!excluded) return null;
+
+                      const excludedLabels = excluded
+                        .map((r) => r.label)
+                        .join(", ");
+                      const activeLabel = report.label;
+
+                      return (
+                        <div className="text-xs text-yellow-700 bg-yellow-50 border border-yellow-200 rounded-lg px-3 py-2 mt-2">
+                          As same borrower {slot} detected for{" "}
+                          <strong>{excludedLabels}</strong>, the latest credit
+                          report <strong>{activeLabel}</strong> can be used.
+                        </div>
+                      );
+                    })()}
                   </div>
                 </div>
 
                 {/* Right Selection */}
                 <div className="flex items-center gap-3">
-                  {/* {isActive && (
-                    <CheckCircle className="w-5 h-5 text-indigo-600" />
-                  )} */}
-
                   <input
                     type="checkbox"
                     checked={isSelected}
@@ -213,24 +264,80 @@ const MultipleReports = () => {
 
                     //   setActiveCreditReport(filtered[0] || null);
                     // }}
+                    // onChange={() => {
+                    //   let updated = [...selectedReports];
+
+                    //   const current = s1.find((r) => r.label === report.label);
+                    //   const slot = current?.borrowerSlot;
+
+                    //   // ❌ remove same borrowerSlot reports
+                    //   updated = updated.filter((label) => {
+                    //     const r = s1.find((x) => x.label === label);
+                    //     return r?.borrowerSlot !== slot;
+                    //   });
+
+                    //   // ✅ add new one
+                    //   updated.push(report.label);
+
+                    //   setSelectedReports(updated);
+
+                    //   // 🎯 build queue
+                    //   const queue = getUniqueLatestReports(updated);
+
+                    //   setReportQueue(queue);
+                    //   setCurrentReportIndex(0);
+                    //   setActiveCreditReport(queue[0] || null);
+                    // }}
+                    // onChange={() => {
+                    //   let updated = [...selectedReports];
+
+                    //   const current = s1.find((r) => r.label === report.label);
+                    //   const slot = current?.borrowerSlot;
+
+                    //   const isChecked = updated.includes(report.label);
+
+                    //   if (isChecked) {
+                    //     updated = updated.filter((r) => r !== report.label);
+                    //   } else {
+                    //     // remove same borrowerSlot first
+                    //     updated = updated.filter((label) => {
+                    //       const r = s1.find((x) => x.label === label);
+                    //       return r?.borrowerSlot !== slot;
+                    //     });
+
+                    //     updated.push(report.label);
+                    //   }
+
+                    //   // 🔥 FINAL NORMALIZATION (THIS FIXES EVERYTHING)
+                    //   const queue = getUniqueLatestReports(updated);
+
+                    //   setSelectedReports(queue);
+                    //   setReportQueue(queue);
+
+                    //   setCurrentReportIndex(0);
+                    //   setActiveCreditReport(queue[0] || null);
+
+                    //   // 🔥 detect removed items for popup
+                    //   const removed = updated.filter((r) => !queue.includes(r));
+
+                    //   if (removed.length > 0) {
+                    //     setJunkReports(removed);
+                    //     setShowPopup(true);
+                    //   }
+                    // }}
                     onChange={() => {
-                      let updated = [...selectedReports];
+                      let updated: string[];
 
-                      const current = s1.find((r) => r.label === report.label);
-                      const slot = current?.borrowerSlot;
-
-                      // ❌ remove same borrowerSlot reports
-                      updated = updated.filter((label) => {
-                        const r = s1.find((x) => x.label === label);
-                        return r?.borrowerSlot !== slot;
-                      });
-
-                      // ✅ add new one
-                      updated.push(report.label);
+                      if (isSelected) {
+                        updated = selectedReports.filter(
+                          (r) => r !== report.label,
+                        );
+                      } else {
+                        updated = [...selectedReports, report.label];
+                      }
 
                       setSelectedReports(updated);
 
-                      // 🎯 build queue
                       const queue = getUniqueLatestReports(updated);
 
                       setReportQueue(queue);
@@ -250,7 +357,8 @@ const MultipleReports = () => {
           open={showPopup}
           title="Credit Report Selection"
           icon={<FileText className="w-6 h-6 text-blue-600" />}
-          onClose={handlePopupClose}
+          onClose={() => setShowPopup(false)} // only close
+          onConfirm={handlePopupClose}
         >
           {/* Selected Report */}
           <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-sm text-green-800">
