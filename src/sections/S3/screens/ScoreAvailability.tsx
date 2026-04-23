@@ -2,9 +2,8 @@ import { useEffect } from "react";
 import toast from "react-hot-toast";
 import { useFlowContext } from "../../../store/FlowContext";
 import { useNavigate } from "react-router-dom";
-import { useSectionStore } from "../../../store/SectionStore";
+import { useS3Store } from "../../../store/useS3Store";
 import PromptRadio from "../../../components/PromptRadio";
-
 import { FileCheck, Lock, BarChart3, FileWarning } from "lucide-react";
 import EditableCondition from "../../../components/EditableCondition";
 
@@ -12,7 +11,7 @@ const ScoreAvailability = () => {
   const { registerActions } = useFlowContext();
   const navigate = useNavigate();
 
-  const { scoreAvailability, setScoreAvailability } = useSectionStore();
+  const { scoreAvailability, setScoreAvailability } = useS3Store();
   const {
     freeze,
     twoBureaus,

@@ -1,4 +1,4 @@
-import { useSectionStore } from "../../../store/SectionStore";
+import { useS1Store } from "../../../store/useS1Store";
 import toast from "react-hot-toast";
 import { useFlowContext } from "../../../store/FlowContext";
 import { useNavigate } from "react-router-dom";
@@ -15,9 +15,9 @@ const MultipleReports = () => {
     setActiveCreditReport,
     reportQueue,
     setReportQueue,
-    currentReportIndex,
+    // currentReportIndex,
     setCurrentReportIndex,
-  } = useSectionStore();
+  } = useS1Store();
   const { registerActions } = useFlowContext();
   const navigate = useNavigate();
   const [showPopup, setShowPopup] = useState(false);

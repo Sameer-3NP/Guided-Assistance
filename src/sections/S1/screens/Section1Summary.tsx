@@ -1,4 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
+import { useS1Store } from "../../../store/useS1Store";
 import { useSectionStore } from "../../../store/SectionStore";
 import { useFlowContext } from "../../../store/FlowContext";
 import { useNavigate } from "react-router-dom";
@@ -19,11 +20,11 @@ const Section1Summary = () => {
     biMergeAccepted,
     sourceRequestIntegrity,
     systemAlignmentReview,
-    setSectionStatus,
     CreditCondition,
     repositoryConditions,
     sourceIntegrityConditions,
-  } = useSectionStore();
+  } = useS1Store();
+  const { setSectionStatus } = useSectionStore();
 
   const { registerActions } = useFlowContext();
   const navigate = useNavigate();

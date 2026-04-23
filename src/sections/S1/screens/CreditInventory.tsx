@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import CreditReportCard from "../components/CreditReportCard";
 import type { CreditReport } from "../../../types/credit";
 import toast from "react-hot-toast";
-import { useSectionStore } from "../../../store/SectionStore";
+import { useS1Store } from "../../../store/useS1Store";
 import { useFlowContext } from "../../../store/FlowContext";
 import { useNavigate } from "react-router-dom";
 import { FileText, AlertTriangle } from "lucide-react";
@@ -19,7 +19,7 @@ const createReport = (index: number): CreditReport => ({
 });
 
 const CreditInventory = () => {
-  const { s1, setS1 } = useSectionStore();
+  const { s1, setS1 } = useS1Store();
   const { registerActions } = useFlowContext();
   const navigate = useNavigate();
 

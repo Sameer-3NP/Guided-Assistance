@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import toast from "react-hot-toast";
-import { useSectionStore } from "../../../store/SectionStore";
+import { useS1Store } from "../../../store/useS1Store";
 import { useFlowContext } from "../../../store/FlowContext";
 import { useNavigate } from "react-router-dom";
 import { Calendar, FileCheck, Database } from "lucide-react";
@@ -14,7 +14,7 @@ const SystemAlignmentReview = () => {
     setSystemAlignmentReview,
     systemAlignmentConditions,
     setSystemAlignmentConditions,
-  } = useSectionStore();
+  } = useS1Store();
 
   const { registerActions } = useFlowContext();
   const navigate = useNavigate();
