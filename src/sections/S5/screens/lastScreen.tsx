@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useSectionStore } from "../../../store/SectionStore";
+import { useS1Store } from "../../../store/useS1Store";
 import { useFlowContext } from "../../../store/FlowContext";
 import { useNavigate } from "react-router-dom";
 import PopUp from "../../../components/PopUp";
@@ -14,7 +14,7 @@ const LastScreen = () => {
     currentReportIndex,
     setCurrentReportIndex,
     setActiveCreditReport,
-  } = useSectionStore();
+  } = useS1Store();
 
   const [showPopup, setShowPopup] = useState(false);
   const [nextReport, setNextReport] = useState<string | null>(null);

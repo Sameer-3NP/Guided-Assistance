@@ -1,6 +1,5 @@
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import MainLayout from "./layout/MainLayout";
-// import SessionRestore from "./components/SessionRestore";
 
 import Initialization from "./sections/S0/Initialization";
 
@@ -13,10 +12,10 @@ import SystemAlignmentReview from "./sections/S1/screens/SystemAlignmentReview";
 import Section1Summary from "./sections/S1/screens/Section1Summary";
 
 import CoreIdentity from "./sections/S2/screens/CoreIdentity";
-import CurrentAddress from "./sections/S2/screens/CurrentAddress";
-import PreviousAddress from "./sections/S2/screens/PreviousAddress";
 import CoreIdentitySummary from "./sections/S2/screens/CoreIdentitySummary";
+import CurrentAddress from "./sections/S2/screens/CurrentAddress";
 import CurrentAddressSummary from "./sections/S2/screens/CurrentAddressSummary";
+import PreviousAddress from "./sections/S2/screens/PreviousAddress";
 import Section2Summary from "./sections/S2/screens/Section2Summary";
 
 import ScoreAvailability from "./sections/S3/screens/ScoreAvailability";
@@ -33,6 +32,9 @@ import PaymentHistoryRecencyValidation from "./sections/S4/screens/PaymentHistor
 import DelinquencyLateHandling from "./sections/S4/screens/DelinquencyLateHandling";
 import AuthorizedUserAccountHandling from "./sections/S4/screens/AuthorizedUserAccountHandling";
 import LiabilityPaidOffHandling from "./sections/S4/screens/LiabilityPaidOffHandling/LiabilityPaidOffHandling";
+import DuplicateTradelineHandling from "./sections/S4/screens/DuplicateTradelineHandling";
+import PastAccountHandling from "./sections/S4/screens/PastAccountHandling";
+import ChildSupportHandling from "./sections/S4/screens/ChildSupportHandling";
 
 import ActiveBankruptcyHandling from "./sections/S5/screens/ActiveBankruptcyHandling";
 import BankruptcyWaitingPeriodValidation from "./sections/S5/screens/BankruptcyWaitingPeriodValidation";
@@ -41,27 +43,19 @@ import TaxLienHandling from "./sections/S5/screens/TaxLienHandling";
 import JudgmentHandling from "./sections/S5/screens/JudgmentHandling";
 import LastScreen from "./sections/S5/screens/lastScreen";
 
-import DuplicateTradelineHandling from "./sections/S4/screens/DuplicateTradelineHandling";
-import PastAccountHandling from "./sections/S4/screens/PastAccountHandling";
-import ChildSupportHandling from "./sections/S4/screens/ChildSupportHandling";
-
 export const router = createBrowserRouter([
   {
     path: "/",
-    element: (
-      <>
-        {/* <SessionRestore /> */}
-        <MainLayout />
-      </>
-    ),
+    element: <MainLayout />,
     children: [
-      { index: true, element: <Navigate to="/s0" /> },
+      { index: true, element: <Navigate to="/s0" replace /> },
       { path: "s0", element: <Initialization /> },
 
-      // Section 1 wrapper
+      // Section 1
       {
         path: "s1",
         children: [
+          { index: true, element: <Navigate to="inventory" replace /> },
           { path: "inventory", element: <CreditInventory /> },
           { path: "multiple-reports", element: <MultipleReports /> },
           { path: "repository-check", element: <RepositoryCheck /> },
@@ -75,81 +69,104 @@ export const router = createBrowserRouter([
             element: <SystemAlignmentReview />,
           },
           { path: "section1-summary", element: <Section1Summary /> },
-          { index: true, element: <Navigate to="inventory" replace /> },
         ],
       },
 
       // Section 2
-      { path: "s2", element: <Navigate to="/s2/core-identity" replace /> },
-      { path: "s2/core-identity", element: <CoreIdentity /> },
-      { path: "s2/core-identity-summary", element: <CoreIdentitySummary /> },
-      { path: "s2/current-address", element: <CurrentAddress /> },
       {
-        path: "s2/current-address-summary",
-        element: <CurrentAddressSummary />,
+        path: "s2",
+        children: [
+          { index: true, element: <Navigate to="core-identity" replace /> },
+          { path: "core-identity", element: <CoreIdentity /> },
+          { path: "core-identity-summary", element: <CoreIdentitySummary /> },
+          { path: "current-address", element: <CurrentAddress /> },
+          {
+            path: "current-address-summary",
+            element: <CurrentAddressSummary />,
+          },
+          { path: "previous-address", element: <PreviousAddress /> },
+          { path: "section2-summary", element: <Section2Summary /> },
+        ],
       },
-      { path: "s2/previous-address", element: <PreviousAddress /> },
-      { path: "s2/section2-summary", element: <Section2Summary /> },
 
       // Section 3
-      { path: "s3", element: <Navigate to="/s3/score-availability" replace /> },
-      { path: "s3/score-availability", element: <ScoreAvailability /> },
-      { path: "s3/qualifying-score", element: <QualifyingScore /> },
-      { path: "s3/median-score", element: <MedianScore /> },
+      {
+        path: "s3",
+        children: [
+          {
+            index: true,
+            element: <Navigate to="score-availability" replace />,
+          },
+          { path: "score-availability", element: <ScoreAvailability /> },
+          { path: "qualifying-score", element: <QualifyingScore /> },
+          { path: "median-score", element: <MedianScore /> },
+        ],
+      },
 
       // Section 4
       {
         path: "s4",
-        element: <Navigate to="/s4/tradeline-structural-alignment" replace />,
+        children: [
+          {
+            index: true,
+            element: <Navigate to="tradeline-structural-alignment" replace />,
+          },
+          {
+            path: "tradeline-structural-alignment",
+            element: <TradelineStructuralAlignment />,
+          },
+          {
+            path: "missing-tradeline-payment",
+            element: <MissingTradelinePaymentHandling />,
+          },
+          {
+            path: "collection-account",
+            element: <CollectionAccountHandling />,
+          },
+          { path: "disputed-account", element: <DisputedAccountHandling /> },
+          {
+            path: "excluded-tradeline",
+            element: <ExcludedOmittedTradelineValidation />,
+          },
+          {
+            path: "utility-telecom-account",
+            element: <UtilityTelecomAccountHandling />,
+          },
+          {
+            path: "payment-history-recency",
+            element: <PaymentHistoryRecencyValidation />,
+          },
+          { path: "delinquency-late", element: <DelinquencyLateHandling /> },
+          {
+            path: "authorized-user-account",
+            element: <AuthorizedUserAccountHandling />,
+          },
+          { path: "duplicate-trade", element: <DuplicateTradelineHandling /> },
+          { path: "past-due", element: <PastAccountHandling /> },
+          { path: "liability-paid-off", element: <LiabilityPaidOffHandling /> },
+          { path: "child-support", element: <ChildSupportHandling /> },
+        ],
       },
-
-      {
-        path: "s4/tradeline-structural-alignment",
-        element: <TradelineStructuralAlignment />,
-      },
-      {
-        path: "s4/missing-tradeline-payment",
-        element: <MissingTradelinePaymentHandling />,
-      },
-      { path: "s4/collection-account", element: <CollectionAccountHandling /> },
-      { path: "s4/disputed-account", element: <DisputedAccountHandling /> },
-      {
-        path: "s4/excluded-tradeline",
-        element: <ExcludedOmittedTradelineValidation />,
-      },
-      {
-        path: "s4/utility-telecom-account",
-        element: <UtilityTelecomAccountHandling />,
-      },
-      {
-        path: "s4/payment-history-recency",
-        element: <PaymentHistoryRecencyValidation />,
-      },
-      { path: "s4/delinquency-late", element: <DelinquencyLateHandling /> },
-      {
-        path: "s4/authorized-user-account",
-        element: <AuthorizedUserAccountHandling />,
-      },
-      { path: "s4/duplicate-trade", element: <DuplicateTradelineHandling /> },
-      { path: "s4/past-due", element: <PastAccountHandling /> },
-      { path: "s4/liability-paid-off", element: <LiabilityPaidOffHandling /> },
-      { path: "s4/child-support", element: <ChildSupportHandling /> },
 
       // Section 5
-      { path: "s5", element: <Navigate to="/s5/active-bankruptcy" replace /> },
-
-      { path: "s5/active-bankruptcy", element: <ActiveBankruptcyHandling /> },
       {
-        path: "s5/bankruptcy-waiting-period",
-        element: <BankruptcyWaitingPeriodValidation />,
+        path: "s5",
+        children: [
+          { index: true, element: <Navigate to="active-bankruptcy" replace /> },
+          { path: "active-bankruptcy", element: <ActiveBankruptcyHandling /> },
+          {
+            path: "bankruptcy-waiting-period",
+            element: <BankruptcyWaitingPeriodValidation />,
+          },
+          {
+            path: "mortgage-derogatory-event",
+            element: <MortgageDerogatoryEventHandling />,
+          },
+          { path: "tax-lien", element: <TaxLienHandling /> },
+          { path: "judgment", element: <JudgmentHandling /> },
+          { path: "last-screen", element: <LastScreen /> },
+        ],
       },
-      {
-        path: "s5/mortgage-derogatory-event",
-        element: <MortgageDerogatoryEventHandling />,
-      },
-      { path: "s5/tax-lien", element: <TaxLienHandling /> },
-      { path: "s5/judgment", element: <JudgmentHandling /> },
-      { path: "s5/last-screen", element: <LastScreen /> },
     ],
   },
 ]);

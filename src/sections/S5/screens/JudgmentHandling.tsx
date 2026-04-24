@@ -2,7 +2,8 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { useFlowContext } from "../../../store/FlowContext";
-import { useSectionStore } from "../../../store/SectionStore";
+import { useS5Store } from "../../../store/useS5Store";
+import { useS1Store } from "../../../store/useS1Store";
 
 import PromptRadio from "../../../components/PromptRadio";
 import PopUp from "../../../components/PopUp";
@@ -13,7 +14,8 @@ const JudgmentHandling = () => {
   const { registerActions } = useFlowContext();
   const [showCreditInventoryPopup, setShowCreditInventoryPopup] =
     useState(false);
-  const { judgmentHandling, setJudgmentHandling, s1 } = useSectionStore();
+  const { judgmentHandling, setJudgmentHandling } = useS5Store();
+  const { s1 } = useS1Store();
 
   const { judgmentTypes, judgmentStatus } = judgmentHandling;
 
@@ -60,9 +62,9 @@ const JudgmentHandling = () => {
     }
 
     /* ================= IF NO JUDGMENT ================= */
-    if (judgmentStatus === "No") {
-      navigate("/s5/last-screen");
-    }
+    // if (judgmentStatus === "No") {
+    //   navigate("/s5/last-screen");
+    // }
 
     /* ================= PROMPT 2 PATH VALIDATION ================= */
     const hasPrompt2Issue =

@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import toast from "react-hot-toast";
 import { useFlowContext } from "../../../store/FlowContext";
 import { useNavigate } from "react-router-dom";
-import { useSectionStore } from "../../../store/SectionStore";
+import { useS4Store } from "../../../store/useS4Store";
 import PromptRadio from "../../../components/PromptRadio";
 
 import { Phone, AlertCircle } from "lucide-react";
@@ -11,7 +11,7 @@ const UtilityTelecomAccountHandling = () => {
   const { registerActions } = useFlowContext();
   const navigate = useNavigate();
 
-  const { utilityTelecomAccount, setUtilityTelecomAccount } = useSectionStore();
+  const { utilityTelecomAccount, setUtilityTelecomAccount } = useS4Store();
 
   const { hasUtilityAccount, paymentIncludedInDTI } = utilityTelecomAccount;
 

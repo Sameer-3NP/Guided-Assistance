@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useFlowContext } from "../../../store/FlowContext";
 import { useNavigate } from "react-router-dom";
-import { useSectionStore } from "../../../store/SectionStore";
+import { useS5Store } from "../../../store/useS5Store";
 
 import PromptRadio from "../../../components/PromptRadio";
 import PopUp from "../../../components/PopUp";
@@ -14,7 +14,7 @@ const BankruptcyWaitingPeriodValidation = () => {
   const navigate = useNavigate();
 
   const { bankruptcyWaitingValidation, setBankruptcyWaitingValidation } =
-    useSectionStore();
+    useS5Store();
 
   const {
     hasInactiveBankruptcy,

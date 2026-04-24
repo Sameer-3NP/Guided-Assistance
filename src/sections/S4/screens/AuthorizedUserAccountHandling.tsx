@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useFlowContext } from "../../../store/FlowContext";
 import { useNavigate } from "react-router-dom";
-import { useSectionStore } from "../../../store/SectionStore";
+import { useS4Store } from "../../../store/useS4Store";
 
 import PromptRadio from "../../../components/PromptRadio";
 import PopUp from "../../../components/PopUp";
@@ -14,7 +14,7 @@ const AuthorizedUserAccountHandling = () => {
   const navigate = useNavigate();
 
   const { authorizedUserAccountHandling, setAuthorizedUserAccountHandling } =
-    useSectionStore();
+    useS4Store();
 
   const {
     creditorName,

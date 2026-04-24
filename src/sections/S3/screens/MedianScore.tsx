@@ -2,14 +2,17 @@ import { useEffect } from "react";
 import toast from "react-hot-toast";
 import { useFlowContext } from "../../../store/FlowContext";
 import { useNavigate } from "react-router-dom";
-import { useSectionStore } from "../../../store/SectionStore";
+import { useS3Store } from "../../../store/useS3Store";
+import { useAppStore } from "../../../store/useAppStore";
+
 import { Calculator, TrendingDown } from "lucide-react";
 
 const MedianScore = () => {
   const { registerActions } = useFlowContext();
   const navigate = useNavigate();
 
-  const { qualifyingScore, setSectionStatus } = useSectionStore();
+  const { qualifyingScore } = useS3Store();
+  const { setSectionStatus } = useAppStore();
 
   const { borrowerCount, b1QualifyingScore, b2QualifyingScore } =
     qualifyingScore;

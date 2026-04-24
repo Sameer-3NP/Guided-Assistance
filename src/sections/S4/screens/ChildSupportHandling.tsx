@@ -2,21 +2,20 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useFlowContext } from "../../../store/FlowContext";
 import { useNavigate } from "react-router-dom";
-import { useSectionStore } from "../../../store/SectionStore";
-
+import { useS4Store } from "../../../store/useS4Store";
+import { useAppStore } from "../../../store/useAppStore";
 import PromptRadio from "../../../components/PromptRadio";
 import CheckboxGroup from "../../../components/CheckboxGroup";
 import PopUp from "../../../components/PopUp";
-
 import { AlertTriangle, FileWarning } from "lucide-react";
+import { useS1Store } from "../../../store/useS1Store";
 
 const ChildSupportHandling = () => {
   const { registerActions } = useFlowContext();
   const navigate = useNavigate();
-  const [showCreditInventoryPopup, setShowCreditInventoryPopup] =
-    useState(false);
-  const { childSupportHandling, setChildSupportHandling, s1 } =
-    useSectionStore();
+  const { setSectionStatus } = useAppStore();
+  const { childSupportHandling, setChildSupportHandling } = useS4Store();
+  const { s1 } = useS1Store();
 
   const {
     hasChildSupportTradeline,
@@ -29,32 +28,34 @@ const ChildSupportHandling = () => {
     dlaLessThan7Years,
   } = childSupportHandling;
 
-  const creditReports = s1;
-
-  /* ---------- LOCAL POPUP STATE ---------- */
+  /* ---------- LOCAL STATE ---------- */
 
   const [showPopup, setShowPopup] = useState(false);
+  const [showCreditInventoryPopup, setShowCreditInventoryPopup] =
+    useState(false);
   const [creditorName, setCreditorName] = useState("");
   const [accountNumber, setAccountNumber] = useState("");
   const [balance, setBalance] = useState("");
 
+  /* ---------- COMPLETE S4 HELPER ---------- */
+
+  const completeS4AndNavigate = (path = "/s5") => {
+    setSectionStatus((prev) => ({
+      ...prev,
+      S4: "completed",
+      S5: "active",
+    }));
+    navigate(path);
+  };
+
   /* ---------- POPUP SUBMIT ---------- */
 
   const handleAccountSubmit = () => {
-    if (!creditorName || !accountNumber) {
-      toast.error("Please enter account details.");
-      return;
-    }
+    if (!creditorName || !accountNumber)
+      return toast.error("Please enter account details.");
 
     setChildSupportHandling({
-      accounts: [
-        ...accounts,
-        {
-          creditorName,
-          accountNumber,
-          balance,
-        },
-      ],
+      accounts: [...accounts, { creditorName, accountNumber, balance }],
     });
 
     setShowPopup(false);
@@ -69,60 +70,58 @@ const ChildSupportHandling = () => {
     if (!hasChildSupportTradeline)
       return toast.error("Please answer the first prompt.");
 
+    // CASE 1: No tradeline
     if (hasChildSupportTradeline === "No") {
-      navigate("/S5");
+      setShowCreditInventoryPopup(true);
       return;
     }
 
-    if (!selectedAccount) return toast.error("Please select account.");
+    if (!selectedAccount) return toast.error("Please select an account.");
 
     if (!dlaLessThan7Years)
       return toast.error("Please answer the DLA question.");
 
+    // CASE 2: DLA >= 7 years
     if (dlaLessThan7Years === "No") {
-      navigate("/S5");
+      completeS4AndNavigate();
       return;
     }
 
     if (!supportingDocument) return toast.error("Please answer prompt 3.");
 
+    // CASE 3: No supporting document
     if (supportingDocument === "No") {
       if (!lenderRequirement)
         return toast.error("Please answer lender requirement prompt.");
 
-      if (lenderRequirement === "Yes") {
+      if (lenderRequirement === "Yes")
         toast.error("Condition appears as per Branch 3");
-      }
 
-      navigate("/S5");
+      completeS4AndNavigate();
       return;
     }
 
-    if (documentType.length === 0) {
-      toast.error(
+    if (documentType.length === 0)
+      return toast.error(
         "No document selected. Escalate documentation for manager review.",
       );
-      return;
-    }
 
-    if (discrepancies.length > 0) {
+    if (discrepancies.length > 0)
       toast.error(
         `Condition appears as per Branch 4 (${selectedAccount.creditorName} / ${selectedAccount.accountNumber})`,
       );
-    }
 
-    navigate("/S5");
+    completeS4AndNavigate();
   };
+
+  /* ---------- CREDIT INVENTORY CONFIRM ---------- */
 
   const handleCreditInventoryConfirm = () => {
     setShowCreditInventoryPopup(false);
-
-    if (creditReports.length > 0) {
-      navigate("/S1/inventory");
-    } else {
-      navigate("/S5");
-    }
+    completeS4AndNavigate(s1.length > 0 ? "/s1/inventory" : "/s5");
   };
+
+  /* ---------- REGISTER ACTIONS ---------- */
 
   useEffect(() => {
     registerActions({
@@ -136,13 +135,14 @@ const ChildSupportHandling = () => {
     documentType,
     discrepancies,
     lenderRequirement,
+    selectedAccount,
+    accounts,
   ]);
 
   return (
     <div className="flex justify-center w-full px-6">
       <div className="w-full max-w-4xl bg-white p-8 rounded-2xl shadow-sm border border-gray-200 space-y-8">
         {/* HEADER */}
-
         <div className="flex items-center gap-3">
           <AlertTriangle className="w-7 h-7 text-blue-400" />
           <h2 className="text-2xl font-semibold text-gray-800">
@@ -151,22 +151,19 @@ const ChildSupportHandling = () => {
         </div>
 
         {/* PROMPT 1 */}
-
         <div className="border rounded-xl p-6 bg-gray-50 space-y-6">
           <PromptRadio
             label="Does credit report reflect any tradeline with remarks as Child support / Support / Alimony?"
             value={hasChildSupportTradeline}
             options={["Yes", "No"]}
             onChange={(v) => {
-              setChildSupportHandling({
-                hasChildSupportTradeline: v,
-              });
-
+              setChildSupportHandling({ hasChildSupportTradeline: v });
               if (v === "Yes") {
+                setShowCreditInventoryPopup(false);
                 setShowPopup(true);
               }
-
               if (v === "No") {
+                setShowPopup(false);
                 setShowCreditInventoryPopup(true);
               }
             }}
@@ -180,15 +177,14 @@ const ChildSupportHandling = () => {
         </div>
 
         {/* ACCOUNT DROPDOWN */}
-
         {accounts.length > 0 && (
           <div className="border rounded-xl p-6 bg-gray-50 space-y-4">
             <label className="text-sm font-medium">
               Select account number/name
             </label>
-
             <select
               className="border rounded-md p-2 text-sm w-full"
+              value={selectedAccount?.accountNumber || ""}
               onChange={(e) =>
                 setChildSupportHandling({
                   selectedAccount: accounts.find(
@@ -197,8 +193,7 @@ const ChildSupportHandling = () => {
                 })
               }
             >
-              <option>Select account</option>
-
+              <option value="">Select account</option>
               {accounts.map((acc) => (
                 <option key={acc.accountNumber} value={acc.accountNumber}>
                   {acc.creditorName} - {acc.accountNumber}
@@ -209,7 +204,6 @@ const ChildSupportHandling = () => {
         )}
 
         {/* PROMPT 2 */}
-
         {selectedAccount && (
           <div className="border rounded-xl p-6 bg-gray-50 space-y-6">
             <PromptRadio
@@ -217,20 +211,14 @@ const ChildSupportHandling = () => {
               value={dlaLessThan7Years}
               options={["Yes", "No"]}
               onChange={(v) => {
-                setChildSupportHandling({
-                  dlaLessThan7Years: v,
-                });
-
-                if (v === "No") {
-                  setShowCreditInventoryPopup(true);
-                }
+                setChildSupportHandling({ dlaLessThan7Years: v });
+                if (v === "No") setShowCreditInventoryPopup(true);
               }}
             />
           </div>
         )}
 
         {/* PROMPT 3 */}
-
         {dlaLessThan7Years === "Yes" && (
           <div className="border rounded-xl p-6 bg-gray-50 space-y-6">
             <PromptRadio
@@ -238,33 +226,25 @@ const ChildSupportHandling = () => {
               value={supportingDocument}
               options={["Yes", "No"]}
               onChange={(v) =>
-                setChildSupportHandling({
-                  supportingDocument: v,
-                })
+                setChildSupportHandling({ supportingDocument: v })
               }
             />
           </div>
         )}
 
         {/* DOCUMENT TYPE */}
-
         {supportingDocument === "Yes" && (
           <div className="border rounded-xl p-6 bg-blue-50 space-y-6">
             <CheckboxGroup
               label="What document is provided for child support tradeline?"
               options={["Child support agreement", "Divorce decree"]}
               values={documentType}
-              onChange={(v) =>
-                setChildSupportHandling({
-                  documentType: v,
-                })
-              }
+              onChange={(v) => setChildSupportHandling({ documentType: v })}
             />
           </div>
         )}
 
         {/* CHILD SUPPORT AGREEMENT CHECKLIST */}
-
         {documentType.includes("Child support agreement") && (
           <div className="border rounded-xl p-6 bg-blue-50 space-y-6">
             <CheckboxGroup
@@ -278,17 +258,12 @@ const ChildSupportHandling = () => {
                 "Account in collection but document shows no delinquency",
               ]}
               values={discrepancies}
-              onChange={(v) =>
-                setChildSupportHandling({
-                  discrepancies: v,
-                })
-              }
+              onChange={(v) => setChildSupportHandling({ discrepancies: v })}
             />
           </div>
         )}
 
         {/* DIVORCE DECREE CHECKLIST */}
-
         {documentType.includes("Divorce decree") && (
           <div className="border rounded-xl p-6 bg-blue-50 space-y-6">
             <CheckboxGroup
@@ -304,17 +279,12 @@ const ChildSupportHandling = () => {
                 "Additional real estate assigned not included in PITIA",
               ]}
               values={discrepancies}
-              onChange={(v) =>
-                setChildSupportHandling({
-                  discrepancies: v,
-                })
-              }
+              onChange={(v) => setChildSupportHandling({ discrepancies: v })}
             />
           </div>
         )}
 
         {/* PROMPT 4 */}
-
         {supportingDocument === "No" && (
           <div className="border rounded-xl p-6 bg-gray-50 space-y-6">
             <PromptRadio
@@ -322,12 +292,9 @@ const ChildSupportHandling = () => {
               value={lenderRequirement}
               options={["Yes", "No"]}
               onChange={(v) =>
-                setChildSupportHandling({
-                  lenderRequirement: v,
-                })
+                setChildSupportHandling({ lenderRequirement: v })
               }
             />
-
             {lenderRequirement === "Yes" && (
               <div className="border border-red-400 bg-red-50 p-3 rounded text-sm text-red-700">
                 Condition appears as per Branch 3
@@ -336,8 +303,7 @@ const ChildSupportHandling = () => {
           </div>
         )}
 
-        {/* POPUP */}
-
+        {/* ACCOUNT POPUP */}
         <PopUp
           open={showPopup}
           title="Child Support Account Details"
@@ -351,28 +317,27 @@ const ChildSupportHandling = () => {
               <input
                 type="text"
                 value={creditorName}
-                onChange={(e) => {
-                  const value = e.target.value.replace(/[^A-Za-z\s]/g, "");
-                  setCreditorName(value);
-                }}
+                onChange={(e) =>
+                  setCreditorName(e.target.value.replace(/[^A-Za-z\s]/g, ""))
+                }
                 className="w-full mt-1 border rounded-md p-2 text-sm"
               />
             </div>
-
             <div>
               <label className="text-sm font-medium">Account Number</label>
               <input
                 type="number"
+                min="0"
                 value={accountNumber}
                 onChange={(e) => setAccountNumber(e.target.value)}
                 className="w-full mt-1 border rounded-md p-2 text-sm"
               />
             </div>
-
             <div>
               <label className="text-sm font-medium">Balance</label>
               <input
                 type="number"
+                min="0"
                 value={balance}
                 onChange={(e) => setBalance(e.target.value)}
                 className="w-full mt-1 border rounded-md p-2 text-sm"
@@ -381,6 +346,7 @@ const ChildSupportHandling = () => {
           </div>
         </PopUp>
 
+        {/* NAVIGATION POPUP */}
         <PopUp
           open={showCreditInventoryPopup}
           title="Navigation Confirmation"
@@ -388,10 +354,8 @@ const ChildSupportHandling = () => {
           onConfirm={handleCreditInventoryConfirm}
           onClose={() => setShowCreditInventoryPopup(false)}
         >
-          {/* Message Box */}
           <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-sm text-yellow-800">
             <p className="font-medium">No child support tradeline found.</p>
-
             <p className="mt-1">
               Do you want to move to{" "}
               <strong>Credit Inventory (Section-1)</strong>?

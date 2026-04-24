@@ -6,7 +6,8 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { Calendar, CalendarClock, FileText, Lock, Users } from "lucide-react";
 import { useFlowContext } from "../../store/FlowContext";
-import { useSectionStore } from "../../store/SectionStore";
+import { useS0Store } from "../../store/useS0Store";
+import { useAppStore } from "../../store/useAppStore";
 import {
   initializationSchema,
   type InitializationForm,
@@ -16,7 +17,8 @@ import PopUp from "../../components/PopUp";
 const Initialization = () => {
   const navigate = useNavigate();
   const { registerActions } = useFlowContext();
-  const { setS0, s0, setSectionStatus } = useSectionStore();
+  const { setS0, s0 } = useS0Store();
+  const { setSectionStatus } = useAppStore();
   const [showPopup, setShowPopup] = useState(true);
   const isLocked = !!s0;
 

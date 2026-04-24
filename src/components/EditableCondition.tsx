@@ -24,10 +24,10 @@ const styles = {
 };
 
 const icons = {
-  condition: <AlertTriangle className="w-5 h-5 mt-0.5" />,
-  alert: <AlertCircle className="w-5 h-5 mt-0.5" />,
-  success: <CheckCircle className="w-5 h-5 mt-0.5" />,
-  info: <Info className="w-5 h-5 mt-0.5" />,
+  condition: <AlertTriangle className="w-5 h-5 mt-0.5 shrink-0" />,
+  alert: <AlertCircle className="w-5 h-5 mt-0.5 shrink-0" />,
+  success: <CheckCircle className="w-5 h-5 mt-0.5 shrink-0" />,
+  info: <Info className="w-5 h-5 mt-0.5 shrink-0" />,
 };
 
 const EditableCondition = ({ type = "info", value, onChange }: Props) => {
@@ -44,24 +44,28 @@ const EditableCondition = ({ type = "info", value, onChange }: Props) => {
           <textarea
             value={value}
             onChange={(e) => onChange?.(e.target.value)}
+            rows={value.split("\n").length + 1}
             className="w-full bg-transparent outline-none border-b resize-none text-sm"
             autoFocus
           />
         ) : (
-          <p>{value}</p>
+          <p className="whitespace-pre-wrap">{value}</p>
         )}
       </div>
 
-      <button
-        onClick={() => setIsEditing((prev) => !prev)}
-        className="hover:opacity-80"
-      >
-        {isEditing ? (
-          <Check className="w-4 h-4" />
-        ) : (
-          <Pencil className="w-4 h-4" />
-        )}
-      </button>
+      {/* Only show edit button if onChange is provided */}
+      {onChange && (
+        <button
+          onClick={() => setIsEditing((prev) => !prev)}
+          className="hover:opacity-80 shrink-0"
+        >
+          {isEditing ? (
+            <Check className="w-4 h-4" />
+          ) : (
+            <Pencil className="w-4 h-4" />
+          )}
+        </button>
+      )}
     </div>
   );
 };

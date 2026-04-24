@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useFlowContext } from "../../../store/FlowContext";
 import { useNavigate } from "react-router-dom";
-import { useSectionStore } from "../../../store/SectionStore";
+import { useS4Store } from "../../../store/useS4Store";
 import ConditionBanner from "../../../components/ConditionBanner";
 import { FileCheck, FileWarning, Stethoscope } from "lucide-react";
 
@@ -13,7 +13,7 @@ const CollectionAccountHandling = () => {
   const { registerActions } = useFlowContext();
   const navigate = useNavigate();
 
-  const { collectionHandling, setCollectionHandling } = useSectionStore();
+  const { collectionHandling, setCollectionHandling } = useS4Store();
   const [showPopup, setShowPopup] = useState(false);
   const [conditionMessage, setConditionMessage] = useState<string | null>(null);
 
@@ -276,7 +276,7 @@ const CollectionAccountHandling = () => {
               }}
               className="w-full border rounded-md p-2 text-sm"
             />
-            
+
             <input
               type="number"
               placeholder="Account Number"

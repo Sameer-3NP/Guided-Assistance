@@ -2,7 +2,6 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 
 import App from "./App.tsx";
-import { SectionProvider } from "./store/SectionStore.tsx";
 
 import "./index.css";
 import "./App.css";
@@ -15,8 +14,6 @@ if (!rootElement) {
 
 createRoot(rootElement).render(
   <StrictMode>
-    <SectionProvider>
-      <App />
-    </SectionProvider>
+    <App />
   </StrictMode>,
 );

@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { useFlowContext } from "../../../store/FlowContext";
-import { useSectionStore } from "../../../store/SectionStore";
+import { useS5Store } from "../../../store/useS5Store";
 
 import PromptRadio from "../../../components/PromptRadio";
 
@@ -10,7 +10,7 @@ const TaxLienHandling = () => {
   const navigate = useNavigate();
   const { registerActions } = useFlowContext();
 
-  const { taxLienHandling, setTaxLienHandling } = useSectionStore();
+  const { taxLienHandling, setTaxLienHandling } = useS5Store();
 
   const {
     taxLienDetected,

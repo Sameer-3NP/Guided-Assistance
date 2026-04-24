@@ -1,5 +1,6 @@
 // store/useS3Store.ts
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
 type ScoreAvailability = {
   freeze: string | null;
@@ -38,11 +39,16 @@ type S3Store = {
       | Partial<QualifyingScore>
       | ((prev: QualifyingScore) => QualifyingScore),
   ) => void;
+
   updateB1Scores: (data: Partial<QualifyingScore["b1Scores"]>) => void;
   updateB2Scores: (data: Partial<QualifyingScore["b2Scores"]>) => void;
+
+  // ⭐ RESET
+  resetStore: () => void;
 };
 
-export const useS3Store = create<S3Store>((set) => ({
+// ✅ INITIAL STATE
+const initialS3State = {
   scoreAvailability: {
     freeze: null,
     twoBureaus: null,
@@ -51,19 +57,14 @@ export const useS3Store = create<S3Store>((set) => ({
     ausRequiresNonTrad: null,
     validatedByDu: null,
     nonTradAvailable: null,
-    documents: [],
-    discrepancies: [],
+    documents: [] as string[],
+    discrepancies: [] as string[],
     branchACondition: "",
     freezeCondition: "",
     oneScoreCondition: "",
     nonTradMissingCondition: "",
     discrepanciesCondition: "",
   },
-
-  setScoreAvailability: (data) =>
-    set((state) => ({
-      scoreAvailability: { ...state.scoreAvailability, ...data },
-    })),
 
   qualifyingScore: {
     borrowerCount: null,
@@ -74,28 +75,51 @@ export const useS3Store = create<S3Store>((set) => ({
     b1QualifyingScore: null,
     b2QualifyingScore: null,
   },
+};
 
-  setQualifyingScore: (data) =>
-    set((state) => ({
-      qualifyingScore:
-        typeof data === "function"
-          ? data(state.qualifyingScore)
-          : { ...state.qualifyingScore, ...data },
-    })),
+// ✅ STORE
+export const useS3Store = create<S3Store>()(
+  persist(
+    (set) => ({
+      ...initialS3State,
 
-  updateB1Scores: (data) =>
-    set((state) => ({
-      qualifyingScore: {
-        ...state.qualifyingScore,
-        b1Scores: { ...state.qualifyingScore.b1Scores, ...data },
+      setScoreAvailability: (data) =>
+        set((state) => ({
+          scoreAvailability: { ...state.scoreAvailability, ...data },
+        })),
+
+      setQualifyingScore: (data) =>
+        set((state) => ({
+          qualifyingScore:
+            typeof data === "function"
+              ? data(state.qualifyingScore)
+              : { ...state.qualifyingScore, ...data },
+        })),
+
+      updateB1Scores: (data) =>
+        set((state) => ({
+          qualifyingScore: {
+            ...state.qualifyingScore,
+            b1Scores: { ...state.qualifyingScore.b1Scores, ...data },
+          },
+        })),
+
+      updateB2Scores: (data) =>
+        set((state) => ({
+          qualifyingScore: {
+            ...state.qualifyingScore,
+            b2Scores: { ...state.qualifyingScore.b2Scores, ...data },
+          },
+        })),
+
+      // ⭐ RESET (persist-safe)
+      resetStore: () => {
+        set({ ...initialS3State });
+        localStorage.removeItem("s3-store");
       },
-    })),
-
-  updateB2Scores: (data) =>
-    set((state) => ({
-      qualifyingScore: {
-        ...state.qualifyingScore,
-        b2Scores: { ...state.qualifyingScore.b2Scores, ...data },
-      },
-    })),
-}));
+    }),
+    {
+      name: "s3-store",
+    },
+  ),
+);

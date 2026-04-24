@@ -1,5 +1,6 @@
 // store/useS1Store.ts
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 import type { CreditReport } from "../types/credit";
 
 type SourceRequestIntegrity = {
@@ -92,35 +93,25 @@ type S1Store = {
   setSystemAlignmentConditions: (
     data: Partial<SystemAlignmentConditions>,
   ) => void;
+
+  // ⭐ RESET
+  resetStore: () => void;
 };
 
-export const useS1Store = create<S1Store>((set) => ({
-  s1: [],
-  setS1: (data) => set({ s1: data }),
+// ✅ INITIAL STATE
+const initialS1State = {
+  s1: [] as CreditReport[],
 
   activeCreditReport: null,
-  setActiveCreditReport: (label) => set({ activeCreditReport: label }),
-
-  selectedReports: [],
-  setSelectedReports: (reports) => set({ selectedReports: reports }),
-
-  reportQueue: [],
-  setReportQueue: (queue) => set({ reportQueue: queue }),
-
+  selectedReports: [] as string[],
+  reportQueue: [] as string[],
   currentReportIndex: 0,
-  setCurrentReportIndex: (index) => set({ currentReportIndex: index }),
 
-  creditValidityStep: "pullCheck",
-  setCreditValidityStep: (step) => set({ creditValidityStep: step }),
+  creditValidityStep: "pullCheck" as "pullCheck" | "expirationCheck",
 
   pullType: null,
-  setPullType: (type) => set({ pullType: type }),
-
   biMergeAccepted: null,
-  setBiMergeAccepted: (value) => set({ biMergeAccepted: value }),
-
   expiredCR: null,
-  setExpiredCR: (value) => set({ expiredCR: value }),
 
   sourceRequestIntegrity: {
     agencyName: null,
@@ -131,10 +122,6 @@ export const useS1Store = create<S1Store>((set) => ({
     lastNameMatch: null,
     loanMatch: null,
   },
-  setSourceRequestIntegrity: (data) =>
-    set((state) => ({
-      sourceRequestIntegrity: { ...state.sourceRequestIntegrity, ...data },
-    })),
 
   systemAlignmentReview: {
     ausDate: "",
@@ -144,19 +131,11 @@ export const useS1Store = create<S1Store>((set) => ({
     creditNewerThanAUS: null,
     matchingCreditAvailable: null,
   },
-  setSystemAlignmentReview: (data) =>
-    set((state) => ({
-      systemAlignmentReview: { ...state.systemAlignmentReview, ...data },
-    })),
 
   CreditCondition: {
     softPull: "",
     expiredCR: "",
   },
-  setCreditCondition: (data) =>
-    set((state) => ({
-      CreditCondition: { ...state.CreditCondition, ...data },
-    })),
 
   repositoryConditions: {
     biMergeFail:
@@ -164,10 +143,6 @@ export const useS1Store = create<S1Store>((set) => ({
     biMergePass:
       "Credit report has been pulled with less than three distinct repositories (available repository names should be Equifax, Experian and TransUnion). As per client requirement, Tri-merge credit report is not required.",
   },
-  setRepositoryConditions: (data) =>
-    set((state) => ({
-      repositoryConditions: { ...state.repositoryConditions, ...data },
-    })),
 
   sourceIntegrityConditions: {
     missingAgency:
@@ -177,24 +152,84 @@ export const useS1Store = create<S1Store>((set) => ({
     loanMismatch:
       "Credit report available in the file reflects a loan number which is different than the current loan number. The loan number mentioned on credit report is currently active in the LOS. Hence, we need confirmation if the loan is cancelled or will be cancelled. If the loan is not cancelled, then property needs to be updated in LOS along with complete PITIA information.",
   },
-  setSourceIntegrityConditions: (data) =>
-    set((state) => ({
-      sourceIntegrityConditions: {
-        ...state.sourceIntegrityConditions,
-        ...data,
-      },
-    })),
 
   systemAlignmentConditions: {
     caseA_mismatch: "",
     caseB_matchFound: "",
     caseB_noMatch: "",
   },
-  setSystemAlignmentConditions: (data) =>
-    set((state) => ({
-      systemAlignmentConditions: {
-        ...state.systemAlignmentConditions,
-        ...data,
+};
+
+// ✅ STORE
+export const useS1Store = create<S1Store>()(
+  persist(
+    (set) => ({
+      ...initialS1State,
+
+      setS1: (data) => set({ s1: data }),
+      setActiveCreditReport: (label) => set({ activeCreditReport: label }),
+      setSelectedReports: (reports) => set({ selectedReports: reports }),
+      setReportQueue: (queue) => set({ reportQueue: queue }),
+      setCurrentReportIndex: (index) => set({ currentReportIndex: index }),
+
+      setCreditValidityStep: (step) => set({ creditValidityStep: step }),
+      setPullType: (type) => set({ pullType: type }),
+      setBiMergeAccepted: (value) => set({ biMergeAccepted: value }),
+      setExpiredCR: (value) => set({ expiredCR: value }),
+
+      setSourceRequestIntegrity: (data) =>
+        set((state) => ({
+          sourceRequestIntegrity: {
+            ...state.sourceRequestIntegrity,
+            ...data,
+          },
+        })),
+
+      setSystemAlignmentReview: (data) =>
+        set((state) => ({
+          systemAlignmentReview: {
+            ...state.systemAlignmentReview,
+            ...data,
+          },
+        })),
+
+      setCreditCondition: (data) =>
+        set((state) => ({
+          CreditCondition: { ...state.CreditCondition, ...data },
+        })),
+
+      setRepositoryConditions: (data) =>
+        set((state) => ({
+          repositoryConditions: {
+            ...state.repositoryConditions,
+            ...data,
+          },
+        })),
+
+      setSourceIntegrityConditions: (data) =>
+        set((state) => ({
+          sourceIntegrityConditions: {
+            ...state.sourceIntegrityConditions,
+            ...data,
+          },
+        })),
+
+      setSystemAlignmentConditions: (data) =>
+        set((state) => ({
+          systemAlignmentConditions: {
+            ...state.systemAlignmentConditions,
+            ...data,
+          },
+        })),
+
+      // ⭐ RESET (with persist clear)
+      resetStore: () => {
+        set({ ...initialS1State });
+        localStorage.removeItem("s1-store");
       },
-    })),
-}));
+    }),
+    {
+      name: "s1-store",
+    },
+  ),
+);

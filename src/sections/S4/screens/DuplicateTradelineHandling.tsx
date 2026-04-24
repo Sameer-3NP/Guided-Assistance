@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useFlowContext } from "../../../store/FlowContext";
 import { useNavigate } from "react-router-dom";
-import { useSectionStore } from "../../../store/SectionStore";
+import { useS4Store } from "../../../store/useS4Store";
 
 import PromptRadio from "../../../components/PromptRadio";
 import CheckboxGroup from "../../../components/CheckboxGroup";
@@ -15,7 +15,7 @@ const DuplicateTradelineHandling = () => {
   const navigate = useNavigate();
 
   const { duplicateTradelineHandling, setDuplicateTradelineHandling } =
-    useSectionStore();
+    useS4Store();
 
   const {
     creditorName,

@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useNavigate } from "react-router-dom";
 import { useFlowContext } from "../../../store/FlowContext";
-import { useSectionStore } from "../../../store/SectionStore";
+import { useS4Store } from "../../../store/useS4Store";
 import PromptRadio from "../../../components/PromptRadio";
 import PopUp from "../../../components/PopUp";
 import DocumentChecklist from "../../../components/DocumentChecklist";
@@ -16,7 +16,7 @@ const PaymentHistoryRecencyValidation = () => {
   const {
     paymentHistoryRecencyValidation,
     setPaymentHistoryRecencyValidation,
-  } = useSectionStore();
+  } = useS4Store();
 
   const {
     hasDLA,

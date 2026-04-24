@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useFlowContext } from "../../../../store/FlowContext";
 import { useNavigate } from "react-router-dom";
-import { useSectionStore } from "../../../../store/SectionStore";
+import { useS4Store } from "../../../../store/useS4Store";
 import AccountFlow from "./AccountFlow";
 import PromptRadio from "../../../../components/PromptRadio";
 import CheckboxGroup from "../../../../components/CheckboxGroup";
@@ -27,7 +27,7 @@ const ExcludedOmittedTradelineValidation = () => {
   const navigate = useNavigate();
 
   const { excludedTradelineValidation, setExcludedTradelineValidation } =
-    useSectionStore();
+    useS4Store();
 
   const { excludedFromVOL, accountTypes, accounts } =
     excludedTradelineValidation;

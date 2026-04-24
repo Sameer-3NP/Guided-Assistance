@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useFlowContext } from "../../../store/FlowContext";
 import { useNavigate } from "react-router-dom";
-import { useSectionStore } from "../../../store/SectionStore";
+import { useS4Store } from "../../../store/useS4Store";
 import PromptRadio from "../../../components/PromptRadio";
 
 import {
@@ -18,8 +18,7 @@ const MissingTradelinePaymentHandling = () => {
   const { registerActions } = useFlowContext();
   const navigate = useNavigate();
 
-  const { missingTradelinePayment, setMissingTradelinePayment } =
-    useSectionStore();
+  const { missingTradelinePayment, setMissingTradelinePayment } = useS4Store();
 
   const { allPayments, accountType, loanType, creditorName, accountNumber } =
     missingTradelinePayment;

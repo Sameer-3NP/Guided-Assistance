@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import toast from "react-hot-toast";
 import { useFlowContext } from "../../../store/FlowContext";
 import { useNavigate } from "react-router-dom";
-import { useSectionStore } from "../../../store/SectionStore";
+import { useS4Store } from "../../../store/useS4Store";
 import PromptRadio from "../../../components/PromptRadio";
 
 import { FileCheck, AlertTriangle, GitCompare, Database } from "lucide-react";
@@ -12,7 +12,7 @@ const TradelineStructuralAlignment = () => {
   const { registerActions } = useFlowContext();
   const navigate = useNavigate();
 
-  const { tradelineAlignment, setTradelineAlignment } = useSectionStore();
+  const { tradelineAlignment, setTradelineAlignment } = useS4Store();
 
   const { losGreater, creditGreater, fieldsMatch } = tradelineAlignment;
 

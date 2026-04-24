@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useFlowContext } from "../../../../store/FlowContext";
 import { useNavigate } from "react-router-dom";
-import { useSectionStore } from "../../../../store/SectionStore";
+import { useS4Store } from "../../../../store/useS4Store";
 
 import RevolvingHandling from "./RevolvingHandling";
 import InstallmentHandling from "./InstallmentHandling";
@@ -19,7 +19,7 @@ const LiabilityPaidOffHandling = () => {
   const navigate = useNavigate();
 
   const { liabilityPaidOffHandling, setLiabilityPaidOffHandling } =
-    useSectionStore();
+    useS4Store();
 
   const {
     accounts,

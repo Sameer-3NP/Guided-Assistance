@@ -1,14 +1,10 @@
 import { useEffect } from "react";
 import toast from "react-hot-toast";
 import { useFlowContext } from "../../../store/FlowContext";
-import { useSectionStore } from "../../../store/SectionStore";
+import { useS2Store } from "../../../store/useS2Store";
 import { useNavigate } from "react-router-dom";
 import { User, Shield, Calendar, FileCheck } from "lucide-react";
 import EditableCondition from "../../../components/EditableCondition";
-
-/* =========================
-   🧠 Dynamic Message Builder
-========================= */
 
 const getIssueText = (value: string) => {
   if (value === "Does Not Match") return "does not match";
@@ -135,7 +131,7 @@ const CoreIdentity = () => {
     setCoreIdentity,
     coreIdentityConditions,
     setCoreIdentityConditions,
-  } = useSectionStore();
+  } = useS2Store();
 
   const ctx = coreIdentity;
   type CoreIdentityKey =

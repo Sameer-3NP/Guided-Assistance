@@ -1,4 +1,5 @@
-import { useSectionStore } from "../../../store/SectionStore";
+import { useS0Store } from "../../../store/useS0Store";
+import { useS1Store } from "../../../store/useS1Store";
 import { v4 as uuidv4 } from "uuid";
 import { useMemo } from "react";
 import {
@@ -13,7 +14,8 @@ import {
 import { useLocation } from "react-router-dom";
 
 const GlobalHeader = () => {
-  const { s0, s1, activeCreditReport } = useSectionStore();
+  const { s0 } = useS0Store();
+  const { s1, activeCreditReport } = useS1Store();
   const location = useLocation();
 
   const sessionId = useMemo(() => uuidv4().slice(0, 8), []);
@@ -154,34 +156,34 @@ const InfoCard = ({
 
 /* ---------------- SECTION PROGRESS ---------------- */
 
-const SectionProgress = () => {
-  const sections = ["S1", "S2", "S3", "S4", "S5"];
-  const activeSection = "S1";
+// const SectionProgress = () => {
+//   const sections = ["S1", "S2", "S3", "S4", "S5"];
+//   const activeSection = "S1";
 
-  return (
-    <div className="flex items-center gap-3">
-      {sections.map((section, i) => {
-        const active = section === activeSection;
+//   return (
+//     <div className="flex items-center gap-3">
+//       {sections.map((section, i) => {
+//         const active = section === activeSection;
 
-        return (
-          <div key={section} className="flex items-center gap-2">
-            <div
-              className={`w-8 h-8 flex items-center justify-center rounded-full text-xs font-semibold transition
-                ${
-                  active
-                    ? "bg-black text-white shadow-md"
-                    : "bg-gray-200 text-gray-600"
-                }`}
-            >
-              {section}
-            </div>
+//         return (
+//           <div key={section} className="flex items-center gap-2">
+//             <div
+//               className={`w-8 h-8 flex items-center justify-center rounded-full text-xs font-semibold transition
+//                 ${
+//                   active
+//                     ? "bg-black text-white shadow-md"
+//                     : "bg-gray-200 text-gray-600"
+//                 }`}
+//             >
+//               {section}
+//             </div>
 
-            {i !== sections.length - 1 && (
-              <div className="w-6 h-0.5 bg-gray-300"></div>
-            )}
-          </div>
-        );
-      })}
-    </div>
-  );
-};
+//             {i !== sections.length - 1 && (
+//               <div className="w-6 h-0.5 bg-gray-300"></div>
+//             )}
+//           </div>
+//         );
+//       })}
+//     </div>
+//   );
+// };
