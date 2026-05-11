@@ -9,6 +9,8 @@ type TradelineAlignment = {
   creditGreater: string | null;
   fieldsMatch: string | null;
   branch1: string;
+  updateLos1: string;
+  updateLos2: string;
 };
 
 type MissingTradelinePayment = {
@@ -17,6 +19,10 @@ type MissingTradelinePayment = {
   loanType: string | null;
   creditorName: string | null;
   accountNumber: string | null;
+  revolving: string;
+  fnma: string;
+  fhlmc: string;
+  installmentCondition: string;
 };
 
 type CollectionHandling = {
@@ -28,6 +34,7 @@ type CollectionHandling = {
   unit: string | null;
   accountName: string;
   accountNumber: string;
+  conditionMsg: string;
 };
 
 type DisputedHandling = {
@@ -143,6 +150,7 @@ type ChildSupportHandling = {
 };
 
 type ExcludedTradelineValidation = {
+  // ── existing fields ──────────────────────────────────────
   excludedFromVOL: string | null;
   accountTypes: string[];
   accounts: {
@@ -155,8 +163,42 @@ type ExcludedTradelineValidation = {
   installmentReason: string[];
   installmentDocuments: string[];
   installmentChecklist: string[];
-};
 
+  // ── 2b ───────────────────────────────────────────────────
+  installmentLessThan10?: string;
+  selectedInstallmentAccount?: string;
+  selectedInstallmentAccountNo?: string;
+
+  // ── 2c ───────────────────────────────────────────────────
+  installmentReasonBusiness?: boolean;
+  installmentReasonBorrower?: boolean;
+  installmentReasonGift?: boolean;
+  installmentAccountBusiness?: string;
+  installmentAccountBorrower?: string;
+  installmentAccountGift?: string;
+
+  // ── 2d / 2e / 2f docs ────────────────────────────────────
+  installmentDocs2d?: string[];
+  installmentDocs2e?: string[];
+  installmentDocs2f?: string[];
+
+  // ── 2d / 2e / 2f checklists ──────────────────────────────
+  installmentChecklist2d?: Record<string, boolean>;
+  installmentChecklist2e?: Record<string, boolean>;
+  installmentChecklist2f?: Record<string, boolean>;
+
+  // ── conditions ───────────────────────────────────────────
+  conditionMessage?: string;
+  conditionTriggered_branch2?: boolean;
+  conditionTriggered_branch3?: boolean;
+  conditionTriggered_branch4?: boolean;
+  conditionAccount_branch2?: string;
+  conditionAccount_branch3?: string;
+  conditionAccount_branch4?: string;
+
+  // ── index signature (required for dynamic storeKey access)
+  [key: string]: unknown;
+};
 type S4Store = {
   tradelineAlignment: TradelineAlignment;
   setTradelineAlignment: (data: Partial<TradelineAlignment>) => void;
@@ -218,6 +260,8 @@ const initialS4State = {
     creditGreater: null,
     fieldsMatch: null,
     branch1: "",
+    updateLos1: "",
+    updateLos2: "",
   },
 
   missingTradelinePayment: {
@@ -226,6 +270,10 @@ const initialS4State = {
     loanType: null,
     creditorName: null,
     accountNumber: null,
+    revolving: "",
+    fnma: "",
+    fhlmc: "",
+    installmentCondition: "",
   },
 
   collectionHandling: {
@@ -237,6 +285,7 @@ const initialS4State = {
     unit: null,
     accountName: "",
     accountNumber: "",
+    conditionMsg: "",
   },
 
   disputedHandling: {

@@ -4,7 +4,6 @@ import { useFlowContext } from "../../../store/FlowContext";
 import { useNavigate } from "react-router-dom";
 import { useS3Store } from "../../../store/useS3Store";
 import { useAppStore } from "../../../store/useAppStore";
-
 import { Calculator, TrendingDown } from "lucide-react";
 
 const MedianScore = () => {

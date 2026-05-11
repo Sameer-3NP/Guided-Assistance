@@ -46,7 +46,7 @@ const GlobalHeader = () => {
           <>
             <InfoCard
               icon={<Hash size={16} />}
-              label="Session"
+              label="UUID"
               value={sessionId}
             />
 
@@ -87,7 +87,7 @@ const GlobalHeader = () => {
             <>
               <InfoCard
                 icon={<Hash size={16} />}
-                label="Session"
+                label="UUID"
                 value={sessionId}
               />
 

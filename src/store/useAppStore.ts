@@ -1,23 +1,20 @@
-// store/useAppStore.ts
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
+import { v4 as uuidv4 } from "uuid";
 
 type SectionStatus = Record<string, string>;
 
 type AppStore = {
+  sessionId: string;
   sectionStatus: SectionStatus;
   setSectionStatus: (
     status: SectionStatus | ((prev: SectionStatus) => SectionStatus),
   ) => void;
-
-  // ⭐ RESET
   resetStore: () => void;
 };
 
-// ✅ INITIAL STATE (typed properly — no `as` needed)
-const initialAppState: {
-  sectionStatus: SectionStatus;
-} = {
+const initialAppState = {
+  sessionId: uuidv4().slice(0, 8).toUpperCase(),
   sectionStatus: {
     S0: "active",
     S1: "locked",
@@ -39,14 +36,12 @@ export const useAppStore = create<AppStore>()(
             typeof status === "function" ? status(state.sectionStatus) : status,
         })),
 
-      // ⭐ RESET (very important for flow restart)
-      resetStore: () => {
-        set({ ...initialAppState });
-        localStorage.removeItem("app-store");
-      },
+      resetStore: () =>
+        set(() => ({
+          ...initialAppState,
+          sessionId: uuidv4().slice(0, 8).toUpperCase(),
+        })),
     }),
-    {
-      name: "app-store",
-    },
+    { name: "app-store" },
   ),
 );

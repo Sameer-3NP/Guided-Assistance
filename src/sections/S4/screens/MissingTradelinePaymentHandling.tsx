@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 
 import PopUp from "../../../components/PopUp";
+import EditableCondition from "../../../components/EditableCondition";
 
 const MissingTradelinePaymentHandling = () => {
   const { registerActions } = useFlowContext();
@@ -27,11 +28,15 @@ const MissingTradelinePaymentHandling = () => {
 
   const handleInstallmentSubmit = () => {
     if (!creditorName || !accountNumber) {
-      toast.error("Please fill all fields.");
+      toast.error("Please fill all details");
       return;
     }
 
-    toast("Condition logged for missing installment payment", { icon: "⚠️" });
+    const condition = `Payment for installment account ${creditorName}, ${accountNumber} is not reflected on credit report. Obtain account statement reflecting monthly payment.`;
+
+    setMissingTradelinePayment({
+      installmentCondition: condition,
+    });
 
     setShowPopup(false);
   };
@@ -74,7 +79,6 @@ const MissingTradelinePaymentHandling = () => {
     <div className="flex justify-center w-full px-6">
       <div className="w-full max-w-4xl bg-white p-8 rounded-xl shadow-sm border border-gray-200 space-y-8">
         {/* HEADER */}
-
         <div className="flex items-center gap-3">
           <FileCheck className="w-7 h-7 text-blue-400" />
           <h2 className="text-2xl font-semibold text-gray-800">
@@ -139,11 +143,16 @@ const MissingTradelinePaymentHandling = () => {
             />
 
             {accountType === "Revolving" && (
-              <div className="flex items-center gap-2 border border-yellow-400 bg-yellow-50 p-3 rounded-xl text-sm text-yellow-800">
-                <CreditCard className="w-4 h-4" />
-                Action: Consider 5% of the outstanding balance or $10, whichever
-                is higher.
-              </div>
+              <EditableCondition
+                type="alert"
+                value={
+                  missingTradelinePayment.revolving ||
+                  "Update the monthly payment in LOS as 5% of the outstanding balance or $10, whichever is higher, for [[Creditor Name, Account Number]]. "
+                }
+                onChange={(val) =>
+                  setMissingTradelinePayment({ revolving: val })
+                }
+              />
             )}
 
             {accountType === "Installment" && (
@@ -153,7 +162,7 @@ const MissingTradelinePaymentHandling = () => {
                 icon={<FileWarning className="w-5 h-5 text-blue-500" />}
                 onClose={() => setShowPopup(false)}
                 onConfirm={handleInstallmentSubmit}
-                confirmText="Submit"
+                confirmText="OK"
               >
                 <div className="space-y-4">
                   <div>
@@ -193,8 +202,19 @@ const MissingTradelinePaymentHandling = () => {
               </PopUp>
             )}
 
+            {accountType === "Installment" &&
+              missingTradelinePayment.installmentCondition && (
+                <EditableCondition
+                  type="condition"
+                  value={missingTradelinePayment.installmentCondition}
+                  onChange={(val) =>
+                    setMissingTradelinePayment({ installmentCondition: val })
+                  }
+                />
+              )}
+
             {accountType === "Student loan" && (
-              <div className="border rounded-xl p-6 bg-white shadow-sm space-y-6">
+              <div className="border rounded-xl p-6 bg-gray-50 shadow-sm space-y-6">
                 <div className="flex items-center gap-2 font-semibold text-gray-800">
                   <GraduationCap className="w-4 h-4" />
                   Student Loan Handling
@@ -208,15 +228,29 @@ const MissingTradelinePaymentHandling = () => {
                 />
 
                 {loanType === "FHLMC" && (
-                  <div className="flex items-center gap-2 border border-yellow-400 bg-yellow-50 p-3 rounded-xl text-sm text-yellow-800">
-                    Update LOS based on FHLMC student loan guidelines.
-                  </div>
+                  <EditableCondition
+                    type="alert"
+                    value={
+                      missingTradelinePayment.fhlmc ||
+                      "Update the monthly payment in LOS as 0.5% of the outstanding balance for [[Account Name, Account Number]] as per FHLMC overlay."
+                    }
+                    onChange={(val) =>
+                      setMissingTradelinePayment({ fhlmc: val })
+                    }
+                  />
                 )}
 
                 {loanType === "FNMA" && (
-                  <div className="flex items-center gap-2 border border-yellow-400 bg-yellow-50 p-3 rounded-xl text-sm text-yellow-800">
-                    Update LOS based on FNMA student loan guidelines.
-                  </div>
+                  <EditableCondition
+                    type="alert"
+                    value={
+                      missingTradelinePayment.fnma ||
+                      "Update the monthly payment in LOS as 1% of the outstanding balance for [[Account Name, Account Number]] as per FNMA overlay. "
+                    }
+                    onChange={(val) =>
+                      setMissingTradelinePayment({ fnma: val })
+                    }
+                  />
                 )}
               </div>
             )}
