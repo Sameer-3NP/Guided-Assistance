@@ -35,6 +35,7 @@ const segmentNames: Record<string, string> = {
   "duplicate-trade": "4.10 - Duplicate Tradeline Handling ",
   "past-due": "4.11 - Past Due Account Handling",
   "liability-paid-off": "4.12 - Liability Being Paid Off Handling",
+  "child-support": "4.13 - Child Support Account Handling",
   s5: "Derogatory Events Rule",
   "active-bankruptcy": "5.1 - Active Bankruptcy Handling",
   "bankruptcy-waiting-period":

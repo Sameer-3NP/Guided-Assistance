@@ -8,6 +8,7 @@ import PopUp from "../../../components/PopUp";
 import DocumentChecklist from "../../../components/DocumentChecklist";
 
 import { Clock, AlertCircle } from "lucide-react";
+import EditableCondition from "../../../components/EditableCondition";
 
 const PaymentHistoryRecencyValidation = () => {
   const navigate = useNavigate();
@@ -220,10 +221,10 @@ const PaymentHistoryRecencyValidation = () => {
             )}
 
             {subjectProperty.hasSupportingDocs === "No" && (
-              <div className="flex items-center gap-2 border border-yellow-400 bg-yellow-50 p-3 rounded-xl text-sm text-yellow-800">
-                <AlertCircle className="w-4 h-4" />
-                Condition appears based on Branch 4
-              </div>
+              <EditableCondition
+                type="condition"
+                value={`Obtain credit supplement to verify the payment history of mortgage account [[Account Name_Number]] to be current as of closing date [[Closing date]] as payment history is verified till [DLA:MM/YY] and closing date is [[Closing date]].`}
+              />
             )}
 
             {subjectProperty.hasSupportingDocs === "Yes" && (
@@ -351,11 +352,130 @@ const PaymentHistoryRecencyValidation = () => {
         )}
 
         {subjectProperty.discrepancies.length > 0 && (
-          <div className="flex items-center gap-2 border border-yellow-400 bg-yellow-50 p-3 rounded text-sm text-yellow-800">
-            ⚠ Condition appears as per Branch 3
+          <div className="border rounded-xl bg-white shadow-sm space-y-4 overflow-hidden">
+            {/* Selected discrepancies */}
+            <div className="px-6 pt-6 space-y-4">
+              <div className="flex items-center gap-2">
+                <AlertCircle className="w-4 h-4 text-gray-500" />
+
+                <span className="text-sm font-medium text-gray-800">
+                  Selected discrepancies
+                </span>
+
+                <span className="ml-auto text-xs bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 rounded-full">
+                  {subjectProperty.discrepancies.length} item
+                  {subjectProperty.discrepancies.length !== 1 ? "s" : ""}
+                </span>
+              </div>
+
+              {(() => {
+                const sections = [
+                  {
+                    title: "Credit supplement",
+                    items: [
+                      "Credit supplement does not reflect the correct borrower details like SSN,DOB,Borrower name.",
+                      "Mortgage Tradeline",
+                      "Mortgage Tradeline does not reflect DLA covering the closing date minus 1 month.",
+                      "Credit supplement reflects a new tradeline which was not reported on credit report and after including the same in LOS, DTI exceeds 50%",
+                    ],
+                  },
+
+                  {
+                    title: "Mortgage statement",
+                    items: [
+                      "Mortgage statement does not reflect the subject property address.",
+                      "Next due date on mortgage statement is not verified till closing date",
+                      "The mortgage statement reflects late charges, which is higher and is a trigger for borrower making late payments.",
+                      "Mortgage statements reflect inconsistent information.",
+                    ],
+                  },
+
+                  {
+                    title: "Payoff statement",
+                    items: [
+                      "Payoff statement does not reflect the subject property address.",
+                      "Next due date on payoff statement is not verified till closing date.",
+                      "The payoff statement reflects late charges, which is higher and is a trigger for borrowers making late payments.",
+                      "Payoff statements reflect inconsistent information.",
+                    ],
+                  },
+
+                  {
+                    title: "Bank statement/transaction history",
+                    items: [
+                      "Bank statement/transaction history does not reflect any withdrawal which can cover the payment history till closing",
+                      "Bank statement/transaction history reflects undisclosed withdrawal for which additional clarification is required.",
+                      "Bank statement/transaction history reflects large deposits which were used to pay off the 30-day charge account. Hence, the source of funds required for the large deposit is noted.",
+                      "Bank statement/Transaction History provided reflects other discrepancy.",
+                    ],
+                  },
+                ];
+
+                let globalIdx = 0;
+
+                return sections.map((section, sectionIdx) => {
+                  const matchedItems = section.items.filter((item) =>
+                    subjectProperty.discrepancies.includes(item),
+                  );
+
+                  if (!matchedItems.length) return null;
+
+                  return (
+                    <div key={section.title} className="space-y-1">
+                      {sectionIdx > 0 && (
+                        <hr className="border-gray-100 mb-3" />
+                      )}
+
+                      <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-2">
+                        {section.title}
+                      </p>
+
+                      {matchedItems.map((item) => {
+                        const letter = String.fromCharCode(97 + globalIdx++);
+
+                        return (
+                          <div
+                            key={item}
+                            className="flex items-start gap-2.5 py-1.5 border-b border-gray-50 last:border-0"
+                          >
+                            <span className="min-w-[20px] h-5 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center text-[10px] font-medium text-gray-500 mt-0.5 flex-shrink-0">
+                              {letter}
+                            </span>
+
+                            <span className="text-sm text-gray-700 leading-relaxed">
+                              {item}
+                            </span>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  );
+                });
+              })()}
+            </div>
+
+            {/* Generated condition */}
+            <div className="border-t border-gray-100 px-6 pb-6 pt-4">
+              <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-2">
+                Generated condition
+              </p>
+
+              <EditableCondition
+                type="condition"
+                value={(() => {
+                  const lettered = subjectProperty.discrepancies
+                    .map(
+                      (item, idx) =>
+                        `${String.fromCharCode(97 + idx)}) ${item}`,
+                    )
+                    .join("\n");
+
+                  return `Supporting documents received for mortgage payment history validation have below discrepancies:\n\n${lettered}\n\nUpdated supporting documentation is required.`;
+                })()}
+              />
+            </div>
           </div>
         )}
-
         {/* PROMPT 2e */}
 
         {reoSelected && (
@@ -396,10 +516,10 @@ const PaymentHistoryRecencyValidation = () => {
             />
 
             {nonMortgageLien.dlaMoreThan90Days === "Yes" && (
-              <div className="flex items-center gap-2 border border-yellow-400 bg-yellow-50 p-3 rounded-xl text-sm text-yellow-800">
-                <AlertCircle className="w-4 h-4" />
-                Condition appears as per Branch 1.
-              </div>
+              <EditableCondition
+                type="condition"
+                value={`Obtain credit supplement to verify the current payment history for account [[Account Name_Number]] as DLA of the account is more than 90 days old from credit report date [[Credit report date]].`}
+              />
             )}
           </div>
         )}

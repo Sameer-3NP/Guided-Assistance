@@ -257,12 +257,12 @@ export const router = createBrowserRouter([
           },
 
           {
-            path: "duplicate-tradeline",
+            path: "duplicate-trade",
             element: <DuplicateTradelineHandling />,
           },
 
           {
-            path: "past-account",
+            path: "past-due",
             element: <PastAccountHandling />,
           },
 

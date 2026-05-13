@@ -7,4 +7,4 @@ export const SECTION_THRESHOLDS: Record<string, number> = {
   S5: 5 * 60,
 };
 
-export const SCREEN_THRESHOLD = 1 * 60; // 5 minutes per screen
+export const SCREEN_THRESHOLD = 1 * 60; // 1 minutes per screen

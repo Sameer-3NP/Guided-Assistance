@@ -24,6 +24,8 @@ const DisputedAccountHandling = () => {
     accountNumber,
     supplementAvailable,
     checklist = [],
+    disputedCondition,
+    disputedChecklistCondition,
   } = disputedHandling;
 
   const [showPopup, setShowPopup] = useState(false);
@@ -214,7 +216,15 @@ const DisputedAccountHandling = () => {
             {supplementAvailable === "No" && (
               <EditableCondition
                 type="condition"
-                value={`Credit report reflects disputed account: ${accountName}, ${accountNumber} and DU/LPA does not give ‘Approve/Eligible’/‘Accept/Eligible’ recommendation because of the disputed account hence, need to confirm if borrower is responsible for the accounts or if the account information is accurate or complete. Supporting documentation might be needed based on the explanation received.`}
+                value={
+                  disputedCondition ||
+                  `Credit report reflects disputed account: ${accountName}, ${accountNumber} and DU/LPA does not give ‘Approve/Eligible’/‘Accept/Eligible’ recommendation because of the disputed account hence, need to confirm if borrower is responsible for the accounts or if the account information is accurate or complete. Supporting documentation might be needed based on the explanation received.`
+                }
+                onChange={(value) =>
+                  setDisputedHandling({
+                    disputedCondition: value,
+                  })
+                }
               />
             )}
           </div>

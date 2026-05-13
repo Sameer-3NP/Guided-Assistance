@@ -130,10 +130,10 @@ const BankruptcyWaitingPeriodValidation = () => {
             <div>
               <label className="text-sm font-medium">Case Number</label>
               <input
-                type="text"
+                type="number"
                 value={caseNumber ?? ""}
                 onChange={(e) => {
-                  const value = e.target.value.replace(/[^A-Za-z\s]/g, "");
+                  const value = e.target.value.replace(/[^0-9]/g, "");
                   setBankruptcyWaitingValidation({
                     caseNumber: value,
                   });

@@ -62,8 +62,7 @@ const AccountFlow = ({ flow, onContinue }) => {
           const letter = String.fromCharCode(97 + index);
           return `${letter}) ${item}`;
         })
-        .join("\n");  
-         
+        .join("\n");
 
       // ✅ final message
       const conditionMessage = `${
@@ -71,7 +70,11 @@ const AccountFlow = ({ flow, onContinue }) => {
       } is an installment account and excluded in VOL However, ${docText} received in file has below concerns:\n\n${checklistPoints}`;
 
       setExcludedTradelineValidation({
-        conditionMessage,
+        conditionMessages: {
+          ...(excludedTradelineValidation.conditionMessages || {}),
+          [`branch${step.conditionBranch}`]: conditionMessage,
+        },
+
         [`conditionTriggered_branch${step.conditionBranch}`]: true,
       });
     }
@@ -256,12 +259,18 @@ const AccountFlow = ({ flow, onContinue }) => {
                     <EditableCondition
                       type="condition"
                       value={
-                        excludedTradelineValidation.conditionMessage ||
+                        excludedTradelineValidation.conditionMessages?.[
+                          `branch${step.conditionBranch}`
+                        ] ||
                         `Condition required for Branch ${step.conditionBranch}`
                       }
                       onChange={(v) =>
                         setExcludedTradelineValidation({
-                          conditionMessage: v,
+                          conditionMessages: {
+                            ...(excludedTradelineValidation.conditionMessages ||
+                              {}),
+                            [`branch${step.conditionBranch}`]: v,
+                          },
                         })
                       }
                     />

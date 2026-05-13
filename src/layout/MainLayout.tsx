@@ -5,8 +5,8 @@ import { useAppStore } from "../store/useAppStore";
 import { useFlowContext } from "../store/FlowContext";
 import GlobalHeader from "../sections/S1/components/GlobalHeaderS1";
 import useRouteTracker from "../hooks/useRouteTracker";
-import useTimeTracker from "../hooks/useTimeTracker";
-import TimeWarningPopup from "../components/TimeWarningPopup";
+// import useTimeTracker from "../hooks/useTimeTracker";
+// import TimeWarningPopup from "../components/TimeWarningPopup";
 import SessionRestoreLoader from "../components/SessionRestoreLoader";
 
 const MainLayout = () => {
@@ -19,8 +19,8 @@ const MainLayout = () => {
   useRouteTracker();
 
   // time tracker — tracks section + screen time, shows warning
-  const { warning, handleWarningClose, handleWarningContinue } =
-    useTimeTracker();
+  // const { warning, handleWarningClose, handleWarningContinue } =
+  //   useTimeTracker();
 
   const match = pathname.match(/^\/(s[0-5])/i);
   const activeSection = match ? match[1].toUpperCase() : "S0";
@@ -66,7 +66,7 @@ const MainLayout = () => {
         </div>
 
         {/* Time Warning Popup */}
-        <TimeWarningPopup
+        {/* <TimeWarningPopup
           open={warning.open}
           type={warning.type}
           name={warning.name}
@@ -74,7 +74,7 @@ const MainLayout = () => {
           threshold={warning.threshold}
           onContinue={handleWarningContinue}
           onClose={handleWarningClose}
-        />
+        /> */}
       </div>
     </SessionRestoreLoader>
   );

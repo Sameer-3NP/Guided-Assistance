@@ -45,6 +45,9 @@ type DisputedHandling = {
   accountNumber: string | null;
   supplementAvailable: string | null;
   checklist: string[];
+
+  disputedCondition: string;
+  disputedChecklistCondition: string;
 };
 
 type UtilityTelecomAccount = {
@@ -149,6 +152,14 @@ type ChildSupportHandling = {
   };
 };
 
+type ChecklistItems = {
+  [checklistLabel: string]: boolean;
+};
+
+type ChecklistDocuments = {
+  [documentType: string]: ChecklistItems;
+};
+
 type ExcludedTradelineValidation = {
   // ── existing fields ──────────────────────────────────────
   excludedFromVOL: string | null;
@@ -183,15 +194,49 @@ type ExcludedTradelineValidation = {
   installmentDocs2f?: string[];
 
   // ── 2d / 2e / 2f checklists ──────────────────────────────
-  installmentChecklist2d?: Record<string, boolean>;
-  installmentChecklist2e?: Record<string, boolean>;
-  installmentChecklist2f?: Record<string, boolean>;
+  installmentChecklist2d?: ChecklistDocuments;
+  installmentChecklist2e?: ChecklistDocuments;
+  installmentChecklist2f?: ChecklistDocuments;
+
+  // Revolving
+  revolvingChecklist3c?: ChecklistDocuments;
+  revolvingChecklist3d?: ChecklistDocuments;
+
+  // Mortgage
+  mortgageChecklist4c?: ChecklistDocuments;
+  mortgageChecklist4d?: ChecklistDocuments;
+  mortgageChecklist4e?: ChecklistDocuments;
+  mortgageChecklist4f?: ChecklistDocuments;
+
+  // HELOC
+  helocChecklist5c?: ChecklistDocuments;
+  helocChecklist5d?: ChecklistDocuments;
+  helocChecklist5e?: ChecklistDocuments;
+  helocChecklist5f?: ChecklistDocuments;
+  helocChecklist5g?: ChecklistDocuments;
+
+  // Lease
+  leaseChecklist6c?: ChecklistDocuments;
+
+  // Charge
+  chargeChecklist7c?: ChecklistDocuments;
+  chargeChecklist7d?: ChecklistDocuments;
+  chargeChecklist7e?: ChecklistDocuments;
+
+  // Taxes
+  taxChecklist8c?: ChecklistDocuments;
+  taxChecklist8d?: ChecklistDocuments;
+
+  // Tax Lien
+  taxLienChecklist9c?: ChecklistDocuments;
+  taxLienChecklist9d?: ChecklistDocuments;
 
   // ── conditions ───────────────────────────────────────────
-  conditionMessage?: string;
+  conditionMessages?: Record<string, string>;
   conditionTriggered_branch2?: boolean;
   conditionTriggered_branch3?: boolean;
   conditionTriggered_branch4?: boolean;
+
   conditionAccount_branch2?: string;
   conditionAccount_branch3?: string;
   conditionAccount_branch4?: string;
@@ -199,6 +244,7 @@ type ExcludedTradelineValidation = {
   // ── index signature (required for dynamic storeKey access)
   [key: string]: unknown;
 };
+
 type S4Store = {
   tradelineAlignment: TradelineAlignment;
   setTradelineAlignment: (data: Partial<TradelineAlignment>) => void;
@@ -296,6 +342,9 @@ const initialS4State = {
     accountNumber: null,
     supplementAvailable: null,
     checklist: [] as string[],
+
+    disputedCondition: "",
+    disputedChecklistCondition: "",
   },
 
   utilityTelecomAccount: {
@@ -387,6 +436,7 @@ const initialS4State = {
     installmentReason: [] as string[],
     installmentDocuments: [] as string[],
     installmentChecklist: [] as string[],
+    conditionMessages: {},
   },
 };
 

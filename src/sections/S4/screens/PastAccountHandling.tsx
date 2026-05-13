@@ -8,7 +8,8 @@ import PromptRadio from "../../../components/PromptRadio";
 import CheckboxGroup from "../../../components/CheckboxGroup";
 import PopUp from "../../../components/PopUp";
 
-import { AlertTriangle, FileWarning } from "lucide-react";
+import { AlertCircle, AlertTriangle, FileWarning } from "lucide-react";
+import EditableCondition from "../../../components/EditableCondition";
 
 const PastAccountHandling = () => {
   const { registerActions } = useFlowContext();
@@ -164,9 +165,10 @@ const PastAccountHandling = () => {
             />
 
             {supportingDocument === "No" && (
-              <div className="border border-red-400 bg-red-50 p-3 rounded-xl text-sm text-red-700">
-                Condition appears as per Branch 1
-              </div>
+              <EditableCondition
+                type="condition"
+                value="Tradeline [[Account name_Number]] is reflecting past due. Provide credit supplement to bring the past due account as current and also provide the source of funds."
+              />
             )}
           </div>
         )}
@@ -254,8 +256,60 @@ const PastAccountHandling = () => {
             )}
 
             {discrepancies.length > 0 && (
-              <div className="border border-red-400 bg-red-50 p-3 rounded-xl text-sm text-red-700">
-                Condition appears as per branch 3
+              <div className="border rounded-xl bg-white shadow-sm space-y-4 overflow-hidden">
+                {/* Selected discrepancies */}
+                <div className="px-6 pt-6 space-y-4">
+                  <div className="flex items-center gap-2">
+                    <AlertCircle className="w-4 h-4 text-gray-500" />
+
+                    <span className="text-sm font-medium text-gray-800">
+                      Selected discrepancies
+                    </span>
+
+                    <span className="ml-auto text-xs bg-blue-50 text-blue-700 border border-blue-200 px-2 py-0.5 rounded-full">
+                      {discrepancies.length} item
+                      {discrepancies.length !== 1 ? "s" : ""}
+                    </span>
+                  </div>
+
+                  {discrepancies.map((item, idx) => {
+                    const letter = String.fromCharCode(97 + idx);
+
+                    return (
+                      <div
+                        key={item}
+                        className="flex items-start gap-2.5 py-1.5 border-b border-gray-50 last:border-0"
+                      >
+                        <span className="min-w-[20px] h-5 rounded-full bg-gray-100 border border-gray-200 flex items-center justify-center text-[10px] font-medium text-gray-500 mt-0.5 flex-shrink-0">
+                          {letter}
+                        </span>
+
+                        <span className="text-sm text-gray-700 leading-relaxed">
+                          {item}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
+
+                {/* Generated condition */}
+                <div className="border-t border-gray-100 px-6 pb-6 pt-4">
+                  <p className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider mb-2">
+                    Generated condition
+                  </p>
+
+                  <EditableCondition
+                    type="condition"
+                    value={`Tradeline [[Account name_Number]] is reflecting past due and [credit supplement/bank statement/transaction history/credit card statement] is provided in file. However, document reflects below issues:\n\n${discrepancies
+                      .map(
+                        (item, idx) =>
+                          `${String.fromCharCode(97 + idx)}) ${item}`,
+                      )
+                      .join(
+                        "\n",
+                      )}\n\nProvide updated supporting documentation along with the source of funds.`}
+                  />
+                </div>
               </div>
             )}
           </div>
