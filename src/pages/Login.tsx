@@ -5,12 +5,12 @@ import { useAuthStore } from "../store/useAuthStore";
 import { useAppStore } from "../store/useAppStore";
 import { sessionApi } from "../utils/sessionApi";
 import { metadataApi } from "../utils/metadataApi";
+import { restoreStoreData } from "../utils/sessionSync";
 import toast from "react-hot-toast";
 
 const Login = () => {
   const navigate = useNavigate();
   const { setUser } = useAuthStore();
-  const { sessionId } = useAppStore();
 
   const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
@@ -22,7 +22,6 @@ const Login = () => {
     try {
       const data = await authApi.login(form.email, form.password);
 
-      // store user
       setUser({
         userId: data.userId,
         name: data.name,
@@ -31,16 +30,41 @@ const Login = () => {
 
       localStorage.setItem("userId", data.userId);
 
-      // start session
-      await sessionApi.start(sessionId, data.userId);
+      // start or resume session
+      const sessionData = await sessionApi.start(
+        data.userId,
+        data.name,
+        data.email,
+      );
+
+      const session = sessionData.session;
+      const sessionId = session.sessionId;
+
+      // store sessionId + section status
+      useAppStore.getState().setSessionId(sessionId);
+      useAppStore.getState().setSectionStatus(session.sectionStatus);
+
+      // restore all store data
+      if (session.storeData) {
+        restoreStoreData(session.storeData);
+      }
 
       // init metadata
       await metadataApi.init(sessionId, data.userId);
 
       toast.success(`Welcome back, ${data.name}!`);
-      navigate("/s0");
+
+      // navigate to last screen
+      navigate(session.currentScreen || "/s0");
     } catch (err: any) {
-      toast.error(err.response?.data?.detail || "Login failed");
+      const detail = err.response?.data?.detail;
+      const message =
+        typeof detail === "string"
+          ? detail
+          : Array.isArray(detail)
+            ? detail[0]?.msg || "Something went wrong"
+            : "Something went wrong";
+      toast.error(message);
     } finally {
       setLoading(false);
     }

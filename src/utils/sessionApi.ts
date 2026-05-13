@@ -1,8 +1,8 @@
 import api from "./api";
 
 export const sessionApi = {
-  start: async (sessionId: string, userId: string) => {
-    const res = await api.post("/api/session/start", { sessionId, userId });
+  start: async (userId: string, name: string, email: string) => {
+    const res = await api.post("/api/session/start", { userId, name, email });
     return res.data;
   },
 

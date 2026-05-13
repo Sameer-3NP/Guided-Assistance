@@ -5,12 +5,13 @@ import { useAuthStore } from "../store/useAuthStore";
 import { useAppStore } from "../store/useAppStore";
 import { sessionApi } from "../utils/sessionApi";
 import { metadataApi } from "../utils/metadataApi";
+import { restoreStoreData } from "../utils/sessionSync";
+import { resetAllStores } from "../utils/resetAllStores";
 import toast from "react-hot-toast";
 
 const Register = () => {
   const navigate = useNavigate();
   const { setUser } = useAuthStore();
-  const { sessionId } = useAppStore();
 
   const [form, setForm] = useState({ name: "", email: "", password: "" });
   const [loading, setLoading] = useState(false);
@@ -22,7 +23,9 @@ const Register = () => {
     try {
       const data = await authApi.register(form.name, form.email, form.password);
 
-      // store user
+      // ← clear all previous store data first
+      resetAllStores();
+
       setUser({
         userId: data.userId,
         name: data.name,
@@ -31,16 +34,31 @@ const Register = () => {
 
       localStorage.setItem("userId", data.userId);
 
-      // start session
-      await sessionApi.start(sessionId, data.userId);
+      const sessionData = await sessionApi.start(
+        data.userId,
+        data.name,
+        data.email,
+      );
 
-      // init metadata
+      const session = sessionData.session;
+      const sessionId = session.sessionId;
+
+      useAppStore.getState().setSessionId(sessionId);
+      useAppStore.getState().setSectionStatus(session.sectionStatus);
+
       await metadataApi.init(sessionId, data.userId);
 
       toast.success(`Welcome, ${data.name}!`);
       navigate("/s0");
     } catch (err: any) {
-      toast.error(err.response?.data?.detail || "Registration failed");
+      const detail = err.response?.data?.detail;
+      const message =
+        typeof detail === "string"
+          ? detail
+          : Array.isArray(detail)
+            ? detail[0]?.msg || "Something went wrong"
+            : "Something went wrong";
+      toast.error(message);
     } finally {
       setLoading(false);
     }

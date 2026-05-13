@@ -1,7 +1,6 @@
 import { useS0Store } from "../../../store/useS0Store";
 import { useS1Store } from "../../../store/useS1Store";
-import { v4 as uuidv4 } from "uuid";
-import { useMemo } from "react";
+import { useAppStore } from "../../../store/useAppStore";
 import {
   Calendar,
   CalendarCheck,
@@ -18,8 +17,7 @@ const GlobalHeader = () => {
   const { s1, activeCreditReport } = useS1Store();
   const location = useLocation();
 
-  const sessionId = useMemo(() => uuidv4().slice(0, 8), []);
-
+  const { sessionId } = useAppStore();
   if (!s0) return null;
 
   const formatDate = (date: string) =>
@@ -38,6 +36,11 @@ const GlobalHeader = () => {
   const activeReport =
     s1.length === 1 ? s1[0] : s1.find((r) => r.label === activeCreditReport);
 
+  // show first 8 chars of UUID in uppercase for display
+  const displaySessionId = sessionId
+    ? sessionId.split("-")[0].toUpperCase()
+    : "-";
+
   return (
     <header className="sticky top-0 z-40 backdrop-blur-md bg-white/80 border-b border-gray-200 px-10 py-2 shadow-sm  flex items-center">
       <div className="flex flex-wrap items-center gap-x-15 gap-y-2">
@@ -47,7 +50,7 @@ const GlobalHeader = () => {
             <InfoCard
               icon={<Hash size={16} />}
               label="UUID"
-              value={sessionId}
+              value={displaySessionId}
             />
 
             <InfoCard
@@ -88,7 +91,7 @@ const GlobalHeader = () => {
               <InfoCard
                 icon={<Hash size={16} />}
                 label="UUID"
-                value={sessionId}
+                value={displaySessionId}
               />
 
               <InfoCard

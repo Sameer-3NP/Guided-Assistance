@@ -26,7 +26,7 @@ const CreditInventory = () => {
   const creditReports = s1;
 
   useEffect(() => {
-    localStorage.setItem("S1_data", JSON.stringify(creditReports));
+    // localStorage.setItem("S1_data", JSON.stringify(creditReports));
 
     registerActions({
       onContinue: () => {
@@ -54,7 +54,7 @@ const CreditInventory = () => {
       },
       onBack: () => navigate("/s0"),
       onSave: () => {
-        localStorage.setItem("S1_data", JSON.stringify(creditReports));
+        // localStorage.setItem("S1_data", JSON.stringify(creditReports));
         toast.success("Credit report data saved");
       },
     });
