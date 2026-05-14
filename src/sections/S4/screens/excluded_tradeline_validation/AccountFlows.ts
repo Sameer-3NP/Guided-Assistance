@@ -1,3 +1,5 @@
+import type { ExcludedTradelineValidation } from "../../../../store/useS4Store";
+
 export const InstallmentFlow = [
   /* ---------------- PROMPT 2a ---------------- */
   {
@@ -16,7 +18,8 @@ export const InstallmentFlow = [
       "Check if any supporting documents are available for excluding the installment account?",
     options: ["Yes", "No"],
     storeKey: "installmentSupportingDocs",
-    condition: (s) => s.installmentLessThan10Payments === "No",
+    condition: (s: ExcludedTradelineValidation) =>
+      s.installmentLessThan10Payments === "No",
   },
   /* ---------------- DROPDOWN (FOR YES & NO) ---------------- */
 
@@ -25,7 +28,7 @@ export const InstallmentFlow = [
     type: "select", // ✅ NEW TYPE
     label: "Select account number/name",
     storeKey: "selectedInstallmentAccount",
-    condition: (s: any) =>
+    condition: (s: ExcludedTradelineValidation) =>
       s.installmentSupportingDocs === "Yes" ||
       s.installmentSupportingDocs === "No",
   },
@@ -34,12 +37,13 @@ export const InstallmentFlow = [
     id: "2b-condition",
     type: "alert",
     variant: "error",
-    label: (s: any) => {
+    label: (s: ExcludedTradelineValidation) => {
       const selected =
         s.selectedInstallmentAccount || "[[Account Name_Number]]";
       return `${selected} is excluded in VOL and does not have less than 10 months payment remaining. Obtain supporting document to omit the liability along with source of funds if paid recently.`;
     },
-    condition: (s) => s.installmentSupportingDocs === "No",
+    condition: (s: ExcludedTradelineValidation) =>
+      s.installmentSupportingDocs === "No",
   },
 
   {
@@ -67,7 +71,8 @@ export const InstallmentFlow = [
         nextPromptId: "2f",
       },
     ],
-    condition: (s: any) => s.installmentSupportingDocs === "Yes",
+    condition: (s: ExcludedTradelineValidation) =>
+      s.installmentSupportingDocs === "Yes",
   },
 
   // ─── PROMPT 2d ───────────────────────────────────────────────
@@ -77,7 +82,8 @@ export const InstallmentFlow = [
     label: "What documents are received (Select all that apply)",
     docsStoreKey: "installmentDocs2d",
     checklistStoreKey: "installmentChecklist2d",
-    condition: (s: any) => !!s.installmentReasonBusiness,
+    condition: (s: ExcludedTradelineValidation) =>
+      !!s.installmentReasonBusiness,
     documents: [
       {
         label: "Most recent 12 months cancelled checks",
@@ -115,7 +121,8 @@ export const InstallmentFlow = [
     label: "What documents are received (Select all that apply)",
     docsStoreKey: "installmentDocs2e",
     checklistStoreKey: "installmentChecklist2e",
-    condition: (s: any) => !!s.installmentReasonBorrower,
+    condition: (s: ExcludedTradelineValidation) =>
+      !!s.installmentReasonBorrower,
     documents: [
       {
         label: "Credit supplement reflecting account is paid in full",
@@ -170,7 +177,7 @@ export const InstallmentFlow = [
     label: "What documents are received (Select all that apply)",
     docsStoreKey: "installmentDocs2f",
     checklistStoreKey: "installmentChecklist2f",
-    condition: (s: any) => !!s.installmentReasonGift,
+    condition: (s: ExcludedTradelineValidation) => !!s.installmentReasonGift,
     documents: [
       {
         label: "Credit supplement reflecting account is paid in full",
@@ -246,7 +253,7 @@ export const RevolvingFlow = [
     type: "select",
     label: "Select account number/name",
     storeKey: "selectedRevolvingAccount",
-    condition: (s: any) =>
+    condition: (s: ExcludedTradelineValidation) =>
       s.revolvingSupportingDocs === "Yes" || s.revolvingSupportingDocs === "No",
   },
 
@@ -254,11 +261,12 @@ export const RevolvingFlow = [
     id: "3a-condition",
     type: "alert",
     variant: "error",
-    label: (s: any) => {
+    label: (s: ExcludedTradelineValidation) => {
       const selected = s.selectedRevolvingAccount || "[[Account Name_Number]]";
       return `${selected} is excluded in VOL and does not have supporting documents available. Obtain supporting document to omit the liability along with source of funds if paid recently.`;
     },
-    condition: (s: any) => s.revolvingSupportingDocs === "No",
+    condition: (s: ExcludedTradelineValidation) =>
+      s.revolvingSupportingDocs === "No",
   },
 
   /* ---------------- PROMPT 3b ---------------- */
@@ -281,7 +289,8 @@ export const RevolvingFlow = [
         nextPromptId: "3d",
       },
     ],
-    condition: (s: any) => s.revolvingSupportingDocs === "Yes",
+    condition: (s: ExcludedTradelineValidation) =>
+      s.revolvingSupportingDocs === "Yes",
   },
 
   // ─── PROMPT 3c ───────────────────────────────────────────────
@@ -291,7 +300,7 @@ export const RevolvingFlow = [
     label: "What documents are received (Select all that apply)",
     docsStoreKey: "revolvingDocs3c",
     checklistStoreKey: "revolvingChecklist3c",
-    condition: (s: any) => !!s.revolvingReasonBorrower,
+    condition: (s: ExcludedTradelineValidation) => !!s.revolvingReasonBorrower,
     documents: [
       {
         label: "Credit supplement reflecting account is paid in full",
@@ -346,7 +355,7 @@ export const RevolvingFlow = [
     label: "What documents are received (Select all that apply)",
     docsStoreKey: "revolvingDocs3d",
     checklistStoreKey: "revolvingChecklist3d",
-    condition: (s: any) => !!s.revolvingReasonGift,
+    condition: (s: ExcludedTradelineValidation) => !!s.revolvingReasonGift,
     documents: [
       {
         label: "Credit supplement reflecting account is paid in full",
@@ -422,7 +431,7 @@ export const MortgageFlow = [
     type: "select",
     label: "Select account number/name",
     storeKey: "selectedMortgageAccount",
-    condition: (s: any) =>
+    condition: (s: ExcludedTradelineValidation) =>
       s.mortgageSupportingDocs === "Yes" || s.mortgageSupportingDocs === "No",
   },
 
@@ -430,11 +439,12 @@ export const MortgageFlow = [
     id: "4a-condition",
     type: "alert",
     variant: "error",
-    label: (s: any) => {
+    label: (s: ExcludedTradelineValidation) => {
       const selected = s.selectedMortgageAccount || "[[Account Name_Number]]";
       return `${selected} is excluded in VOL and does not have supporting documents available. Obtain supporting document to omit the liability along with source of funds if paid recently.`;
     },
-    condition: (s: any) => s.mortgageSupportingDocs === "No",
+    condition: (s: ExcludedTradelineValidation) =>
+      s.mortgageSupportingDocs === "No",
   },
 
   /* ---------------- PROMPT 4b ---------------- */
@@ -469,7 +479,8 @@ export const MortgageFlow = [
         nextPromptId: "4f",
       },
     ],
-    condition: (s: any) => s.mortgageSupportingDocs === "Yes",
+    condition: (s: ExcludedTradelineValidation) =>
+      s.mortgageSupportingDocs === "Yes",
   },
 
   // ─── PROMPT 4c — BUSINESS/OTHER PARTY ────────────────────────
@@ -479,7 +490,7 @@ export const MortgageFlow = [
     label: "What documents are received (Select all that apply)",
     docsStoreKey: "mortgageDocs4c",
     checklistStoreKey: "mortgageChecklist4c",
-    condition: (s: any) => !!s.mortgageReasonBusiness,
+    condition: (s: ExcludedTradelineValidation) => !!s.mortgageReasonBusiness,
     documents: [
       {
         label: "Most recent 12 months cancelled checks",
@@ -519,7 +530,7 @@ export const MortgageFlow = [
     label: "What documents are received (Select all that apply)",
     docsStoreKey: "mortgageDocs4d",
     checklistStoreKey: "mortgageChecklist4d",
-    condition: (s: any) => !!s.mortgageReasonBorrower,
+    condition: (s: ExcludedTradelineValidation) => !!s.mortgageReasonBorrower,
     documents: [
       {
         label: "Credit supplement reflecting account is paid in full",
@@ -572,7 +583,7 @@ export const MortgageFlow = [
     label: "What documents are received (Select all that apply)",
     docsStoreKey: "mortgageDocs4e",
     checklistStoreKey: "mortgageChecklist4e",
-    condition: (s: any) => !!s.mortgageReasonTransfer,
+    condition: (s: ExcludedTradelineValidation) => !!s.mortgageReasonTransfer,
     documents: [
       {
         label: "Credit supplement reflecting account is transferred",
@@ -594,7 +605,7 @@ export const MortgageFlow = [
     label: "What documents are received (Select all that apply)",
     docsStoreKey: "mortgageDocs4f",
     checklistStoreKey: "mortgageChecklist4f",
-    condition: (s: any) => !!s.mortgageReasonSale,
+    condition: (s: ExcludedTradelineValidation) => !!s.mortgageReasonSale,
     documents: [
       {
         label: "Estimated CD",
@@ -637,7 +648,7 @@ export const HelocFlow = [
     type: "select",
     label: "Select account number/name",
     storeKey: "selectedHelocAccount",
-    condition: (s: any) =>
+    condition: (s: ExcludedTradelineValidation) =>
       s.helocSupportingDocs === "Yes" || s.helocSupportingDocs === "No",
   },
 
@@ -645,11 +656,12 @@ export const HelocFlow = [
     id: "5a-condition",
     type: "alert",
     variant: "error",
-    label: (s: any) => {
+    label: (s: ExcludedTradelineValidation) => {
       const selected = s.selectedHelocAccount || "[[Account Name_Number]]";
       return `${selected} is excluded in VOL and does not have supporting documents available. Obtain supporting document to omit the liability along with source of funds if paid recently.`;
     },
-    condition: (s: any) => s.helocSupportingDocs === "No",
+    condition: (s: ExcludedTradelineValidation) =>
+      s.helocSupportingDocs === "No",
   },
 
   /* ---------------- PROMPT 5b ---------------- */
@@ -690,7 +702,8 @@ export const HelocFlow = [
         nextPromptId: "5g",
       },
     ],
-    condition: (s: any) => s.helocSupportingDocs === "Yes",
+    condition: (s: ExcludedTradelineValidation) =>
+      s.helocSupportingDocs === "Yes",
   },
 
   // ─── PROMPT 5c — BUSINESS/OTHER PARTY ────────────────────────
@@ -700,7 +713,7 @@ export const HelocFlow = [
     label: "What documents are received (Select all that apply)",
     docsStoreKey: "helocDocs5c",
     checklistStoreKey: "helocChecklist5c",
-    condition: (s: any) => !!s.helocReasonBusiness,
+    condition: (s: ExcludedTradelineValidation) => !!s.helocReasonBusiness,
     documents: [
       {
         label: "Most recent 12 months cancelled checks",
@@ -740,7 +753,7 @@ export const HelocFlow = [
     label: "What documents are received (Select all that apply)",
     docsStoreKey: "helocDocs5d",
     checklistStoreKey: "helocChecklist5d",
-    condition: (s: any) => !!s.helocReasonBorrower,
+    condition: (s: ExcludedTradelineValidation) => !!s.helocReasonBorrower,
     documents: [
       {
         label: "Credit supplement reflecting account is paid in full",
@@ -788,7 +801,7 @@ export const HelocFlow = [
     label: "What documents are received (Select all that apply)",
     docsStoreKey: "helocDocs5e",
     checklistStoreKey: "helocChecklist5e",
-    condition: (s: any) => !!s.helocReasonTransfer,
+    condition: (s: ExcludedTradelineValidation) => !!s.helocReasonTransfer,
     documents: [
       {
         label: "Credit supplement reflecting account is transferred",
@@ -810,7 +823,7 @@ export const HelocFlow = [
     label: "What documents are received (Select all that apply)",
     docsStoreKey: "helocDocs5f",
     checklistStoreKey: "helocChecklist5f",
-    condition: (s: any) => !!s.helocReasonSale,
+    condition: (s: ExcludedTradelineValidation) => !!s.helocReasonSale,
     documents: [
       {
         label: "Estimated CD",
@@ -841,7 +854,7 @@ export const HelocFlow = [
     label: "What documents are received (Select all that apply)",
     docsStoreKey: "helocDocs5g",
     checklistStoreKey: "helocChecklist5g",
-    condition: (s: any) => !!s.helocReasonNoDraw,
+    condition: (s: ExcludedTradelineValidation) => !!s.helocReasonNoDraw,
     documents: [
       {
         label:
@@ -876,7 +889,7 @@ export const LeaseFlow = [
     type: "select",
     label: "Select account number/name",
     storeKey: "selectedLeaseAccount",
-    condition: (s: any) =>
+    condition: (s: ExcludedTradelineValidation) =>
       s.leaseSupportingDocs === "Yes" || s.leaseSupportingDocs === "No",
   },
 
@@ -884,11 +897,12 @@ export const LeaseFlow = [
     id: "6a-condition",
     type: "alert",
     variant: "error",
-    label: (s: any) => {
+    label: (s: ExcludedTradelineValidation) => {
       const selected = s.selectedLeaseAccount || "[[Account Name_Number]]";
       return `${selected} is excluded in VOL and does not have supporting documents available. Obtain supporting document to omit the liability along with source of funds if paid recently.`;
     },
-    condition: (s: any) => s.leaseSupportingDocs === "No",
+    condition: (s: ExcludedTradelineValidation) =>
+      s.leaseSupportingDocs === "No",
   },
 
   /* ---------------- PROMPT 6b ---------------- */
@@ -905,7 +919,8 @@ export const LeaseFlow = [
         nextPromptId: "6c",
       },
     ],
-    condition: (s: any) => s.leaseSupportingDocs === "Yes",
+    condition: (s: ExcludedTradelineValidation) =>
+      s.leaseSupportingDocs === "Yes",
   },
 
   // ─── PROMPT 6c — LEASE TERMINATED ────────────────────────────
@@ -915,7 +930,7 @@ export const LeaseFlow = [
     label: "What documents are received (Select all that apply)",
     docsStoreKey: "leaseDocs6c",
     checklistStoreKey: "leaseChecklist6c",
-    condition: (s: any) => !!s.leaseReasonTerminated,
+    condition: (s: ExcludedTradelineValidation) => !!s.leaseReasonTerminated,
     documents: [
       {
         label: "Credit Supplement",
@@ -957,7 +972,7 @@ export const ChargeAccountFlow = [
     type: "select",
     label: "Select account number/name",
     storeKey: "selectedChargeAccount",
-    condition: (s: any) =>
+    condition: (s: ExcludedTradelineValidation) =>
       s.chargeSupportingDocs === "Yes" || s.chargeSupportingDocs === "No",
   },
 
@@ -965,11 +980,12 @@ export const ChargeAccountFlow = [
     id: "7a-condition",
     type: "alert",
     variant: "error",
-    label: (s: any) => {
+    label: (s: ExcludedTradelineValidation) => {
       const selected = s.selectedChargeAccount;
       return `${selected} is excluded in VOL and does not have supporting documents available. Obtain supporting document to omit the liability along with source of funds if paid recently.`;
     },
-    condition: (s: any) => s.chargeSupportingDocs === "No",
+    condition: (s: ExcludedTradelineValidation) =>
+      s.chargeSupportingDocs === "No",
   },
 
   /* ---------------- PROMPT 7b ---------------- */
@@ -998,7 +1014,8 @@ export const ChargeAccountFlow = [
         nextPromptId: "7e",
       },
     ],
-    condition: (s: any) => s.chargeSupportingDocs === "Yes",
+    condition: (s: ExcludedTradelineValidation) =>
+      s.chargeSupportingDocs === "Yes",
   },
 
   // ─── PROMPT 7c — PAID OFF BY BORROWER ────────────────────────
@@ -1008,7 +1025,7 @@ export const ChargeAccountFlow = [
     label: "What documents are received (Select all that apply)",
     docsStoreKey: "chargeDocs7c",
     checklistStoreKey: "chargeChecklist7c",
-    condition: (s: any) => !!s.chargeReasonPaidOff,
+    condition: (s: ExcludedTradelineValidation) => !!s.chargeReasonPaidOff,
     documents: [
       {
         label: "Credit supplement reflecting account is paid in full",
@@ -1063,7 +1080,7 @@ export const ChargeAccountFlow = [
     label: "What documents are received (Select all that apply)",
     docsStoreKey: "chargeDocs7d",
     checklistStoreKey: "chargeChecklist7d",
-    condition: (s: any) => !!s.chargeReasonReserves,
+    condition: (s: ExcludedTradelineValidation) => !!s.chargeReasonReserves,
     documents: [
       {
         label:
@@ -1099,7 +1116,7 @@ export const ChargeAccountFlow = [
     label: "What documents are received (Select all that apply)",
     docsStoreKey: "chargeDocs7e",
     checklistStoreKey: "chargeChecklist7e",
-    condition: (s: any) => !!s.chargeReasonMinimum,
+    condition: (s: ExcludedTradelineValidation) => !!s.chargeReasonMinimum,
     documents: [
       {
         label: "Credit card statement",
@@ -1141,7 +1158,7 @@ export const TaxesFlow = [
     type: "select",
     label: "Select account number/name",
     storeKey: "selectedTaxAccount",
-    condition: (s: any) =>
+    condition: (s: ExcludedTradelineValidation) =>
       s.taxDocsAvailable === "Yes" || s.taxDocsAvailable === "No",
   },
 
@@ -1149,11 +1166,11 @@ export const TaxesFlow = [
     id: "8a-condition",
     type: "alert",
     variant: "error",
-    label: (s: any) => {
+    label: (s: ExcludedTradelineValidation) => {
       const selected = s.selectedTaxAccount || "[[Account Name_Number]]";
       return `${selected} is excluded in VOL and does not have supporting documents available. Obtain supporting document to omit the liability along with source of funds if paid recently.`;
     },
-    condition: (s: any) => s.taxDocsAvailable === "No",
+    condition: (s: ExcludedTradelineValidation) => s.taxDocsAvailable === "No",
   },
 
   /* ---------------- PROMPT 8b ---------------- */
@@ -1176,7 +1193,7 @@ export const TaxesFlow = [
         nextPromptId: "8d",
       },
     ],
-    condition: (s: any) => s.taxDocsAvailable === "Yes",
+    condition: (s: ExcludedTradelineValidation) => s.taxDocsAvailable === "Yes",
   },
 
   // ─── PROMPT 8c — PAID OFF BY BORROWER ────────────────────────
@@ -1186,7 +1203,7 @@ export const TaxesFlow = [
     label: "What documents are received (Select all that apply)",
     docsStoreKey: "taxDocs8c",
     checklistStoreKey: "taxChecklist8c",
-    condition: (s: any) => !!s.taxReasonBorrower,
+    condition: (s: ExcludedTradelineValidation) => !!s.taxReasonBorrower,
     documents: [
       {
         label: "Tax statement reflecting 0 balance",
@@ -1231,7 +1248,7 @@ export const TaxesFlow = [
     label: "What documents are received (Select all that apply)",
     docsStoreKey: "taxDocs8d",
     checklistStoreKey: "taxChecklist8d",
-    condition: (s: any) => !!s.taxReasonGift,
+    condition: (s: ExcludedTradelineValidation) => !!s.taxReasonGift,
     documents: [
       {
         label: "Account statement from creditor reflecting 0 balance",
@@ -1289,7 +1306,7 @@ export const TaxLienFlow = [
     type: "select",
     label: "Select account number/name",
     storeKey: "selectedTaxLienAccount",
-    condition: (s: any) =>
+    condition: (s: ExcludedTradelineValidation) =>
       s.taxLienDocsAvailable === "Yes" || s.taxLienDocsAvailable === "No",
   },
 
@@ -1297,11 +1314,12 @@ export const TaxLienFlow = [
     id: "9a-condition",
     type: "alert",
     variant: "error",
-    label: (s: any) => {
+    label: (s: ExcludedTradelineValidation) => {
       const selected = s.selectedTaxLienAccount || "[[Account Name_Number]]";
       return `${selected} is excluded in VOL and does not have supporting documents available. Obtain supporting document to omit the liability along with source of funds if paid recently.`;
     },
-    condition: (s: any) => s.taxLienDocsAvailable === "No",
+    condition: (s: ExcludedTradelineValidation) =>
+      s.taxLienDocsAvailable === "No",
   },
 
   /* ---------------- PROMPT 9b ---------------- */
@@ -1324,7 +1342,8 @@ export const TaxLienFlow = [
         nextPromptId: "9d",
       },
     ],
-    condition: (s: any) => s.taxLienDocsAvailable === "Yes",
+    condition: (s: ExcludedTradelineValidation) =>
+      s.taxLienDocsAvailable === "Yes",
   },
 
   // ─── PROMPT 9c — PAID OFF BY BORROWER ────────────────────────
@@ -1334,7 +1353,7 @@ export const TaxLienFlow = [
     label: "What documents are received (Select all that apply)",
     docsStoreKey: "taxLienDocs9c",
     checklistStoreKey: "taxLienChecklist9c",
-    condition: (s: any) => !!s.taxLienReasonBorrower,
+    condition: (s: ExcludedTradelineValidation) => !!s.taxLienReasonBorrower,
     documents: [
       {
         label: "Tax statement reflecting 0 balance",
@@ -1379,7 +1398,7 @@ export const TaxLienFlow = [
     label: "What documents are received (Select all that apply)",
     docsStoreKey: "taxLienDocs9d",
     checklistStoreKey: "taxLienChecklist9d",
-    condition: (s: any) => !!s.taxLienReasonGift,
+    condition: (s: ExcludedTradelineValidation) => !!s.taxLienReasonGift,
     documents: [
       {
         label: "Account statement from creditor reflecting 0 balance",

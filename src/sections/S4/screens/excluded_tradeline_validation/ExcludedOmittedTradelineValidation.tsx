@@ -37,7 +37,7 @@ const ExcludedOmittedTradelineValidation = () => {
 
   const [showPopup, setShowPopup] = useState(false);
   const [currentType, setCurrentType] = useState<string | null>(null);
-  const [selectedAccount, setSelectedAccount] = useState<string>("");
+  // const [selectedAccount, setSelectedAccount] = useState<string>("");
   const [accountRows, setAccountRows] = useState([
     { creditorName: "", accountNumber: "" },
   ]);

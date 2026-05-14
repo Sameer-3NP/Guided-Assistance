@@ -21,21 +21,62 @@ const MissingTradelinePaymentHandling = () => {
 
   const { missingTradelinePayment, setMissingTradelinePayment } = useS4Store();
 
-  const { allPayments, accountType, loanType, creditorName, accountNumber } =
-    missingTradelinePayment;
+  const {
+    allPayments,
+    accountType = [],
+    loanType,
+    accounts = [],
+    selectedAccount,
+  } = missingTradelinePayment;
 
   const [showPopup, setShowPopup] = useState(false);
+  const [accountRows, setAccountRows] = useState([
+    { creditorName: "", accountNumber: "" },
+  ]);
+
+  const handleRowChange = (
+    index: number,
+    field: "creditorName" | "accountNumber",
+    value: string,
+  ) => {
+    const updated = [...accountRows];
+    updated[index][field] = value;
+    setAccountRows(updated);
+  };
+
+  const addRow = () => {
+    setAccountRows([...accountRows, { creditorName: "", accountNumber: "" }]);
+  };
+
+  const removeRow = (index: number) => {
+    const updated = accountRows.filter((_, i) => i !== index);
+    setAccountRows(updated);
+  };
 
   const handleInstallmentSubmit = () => {
-    if (!creditorName || !accountNumber) {
-      toast.error("Please fill all details");
+    // if (!selectedAccount)
+    //   return toast.error("Please select installment account.");
+
+    const hasEmpty = accountRows.some(
+      (row) => !row.creditorName || !row.accountNumber,
+    );
+
+    if (hasEmpty) {
+      toast.error("Please fill all account details.");
       return;
     }
 
-    const condition = `Payment for installment account ${creditorName}, ${accountNumber} is not reflected on credit report. Obtain account statement reflecting monthly payment.`;
+    const condition = `Payment for installment account ${accountRows[0].creditorName}=${accountRows[0].accountNumber} is not reflected on credit report. Obtain account statement reflecting monthly payment.`;
+
+    const formattedAccounts = accountRows.map((row) => ({
+      creditorName: row.creditorName,
+      accountNumber: row.accountNumber,
+    }));
 
     setMissingTradelinePayment({
       installmentCondition: condition,
+      accounts: formattedAccounts,
+      selectedAccount: `${formattedAccounts[0].creditorName}#${formattedAccounts[0].accountNumber}`,
     });
 
     setShowPopup(false);
@@ -44,6 +85,25 @@ const MissingTradelinePaymentHandling = () => {
   /* ---------- BRANCH RULES ---------- */
 
   const showPrompt2 = allPayments === "No";
+
+  const handleAccountTypeChange = (type: string) => {
+    let updatedTypes = [...accountType];
+
+    if (updatedTypes.includes(type)) {
+      updatedTypes = updatedTypes.filter((t) => t !== type);
+    } else {
+      updatedTypes.push(type);
+    }
+
+    setMissingTradelinePayment({
+      accountType: updatedTypes,
+    });
+
+    // Open popup only for Installment
+    if (type === "Installment" && !accountType.includes("Installment")) {
+      setShowPopup(true);
+    }
+  };
 
   /* ---------- CONTINUE ---------- */
 
@@ -58,8 +118,8 @@ const MissingTradelinePaymentHandling = () => {
     if (!accountType) return toast.error("Please select the account type.");
 
     if (accountType === "Installment") {
-      if (!creditorName || !accountNumber)
-        return toast.error("Please complete installment account details.");
+      if (!selectedAccount)
+        return toast.error("Please select installment account.");
     }
 
     if (accountType === "Student loan" && !loanType)
@@ -73,7 +133,7 @@ const MissingTradelinePaymentHandling = () => {
       onContinue: handleContinue,
       onBack: () => navigate("/s4/tradeline-structural-alignment"),
     });
-  }, [allPayments, accountType, loanType, creditorName, accountNumber]);
+  }, [allPayments, accountType, loanType, selectedAccount, accountRows]);
 
   return (
     <div className="flex justify-center w-full px-6">
@@ -119,30 +179,29 @@ const MissingTradelinePaymentHandling = () => {
               Identify Tradeline Without Payment
             </div>
 
-            <PromptRadio
-              label="Which account does not have a payment?"
-              value={accountType}
-              options={["Revolving", "Installment", "Student loan"]}
-              onChange={(v) => {
-                setMissingTradelinePayment({ accountType: v });
+            <div className="font-semibold items-start gap-3 bg-blue-100 border border-blue-200 rounded-xl p-3 ">
+              Which account does not have a payment?
+            </div>
 
-                // if (v === "Installment") {
-                //   setShowPopup(true);
-                // }
+            <div className="space-y-3">
+              {["Revolving", "Installment", "Student loan"].map((type) => (
+                <label
+                  key={type}
+                  className="flex items-center gap-3 border rounded-lg p-3 cursor-pointer hover:bg-gray-50"
+                >
+                  <input
+                    type="checkbox"
+                    checked={accountType.includes(type)}
+                    onChange={() => handleAccountTypeChange(type)}
+                    className="w-4 h-4"
+                  />
 
-                if (v === "Installment") {
-                  setMissingTradelinePayment({
-                    accountType: v,
-                    creditorName: "",
-                    accountNumber: "",
-                  });
+                  <span className="text-sm text-gray-700">{type}</span>
+                </label>
+              ))}
+            </div>
 
-                  setShowPopup(true);
-                }
-              }}
-            />
-
-            {accountType === "Revolving" && (
+            {accountType.includes("Revolving") && (
               <EditableCondition
                 type="alert"
                 value={
@@ -155,65 +214,122 @@ const MissingTradelinePaymentHandling = () => {
               />
             )}
 
-            {accountType === "Installment" && (
+            {accountType.includes("Installment") && (
               <PopUp
                 open={showPopup}
                 title="Installment Tradeline Details"
                 icon={<FileWarning className="w-5 h-5 text-blue-500" />}
                 onClose={() => setShowPopup(false)}
                 onConfirm={handleInstallmentSubmit}
-                confirmText="OK"
+                confirmText="Continue"
               >
                 <div className="space-y-4">
-                  <div>
-                    <label className="text-sm font-medium">Creditor Name</label>
-                    <input
-                      type="text"
-                      placeholder="Account Name"
-                      value={creditorName ?? ""}
-                      name="fullname"
-                      onChange={(e) => {
-                        const value = e.target.value.replace(
-                          /[^A-Za-z\s]/g,
-                          "",
-                        );
-                        setMissingTradelinePayment({ creditorName: value });
-                      }}
-                      className="w-full border rounded-md p-2 text-sm"
-                    />
-                  </div>
+                  {accountRows.map((row, index) => (
+                    <div key={index} className="flex gap-3 items-end">
+                      {/* Creditor Name */}
+                      <div className="flex-1">
+                        <label className="text-sm font-medium">
+                          Creditor name
+                        </label>
+                        <input
+                          type="text"
+                          value={row.creditorName}
+                          onChange={(e) =>
+                            handleRowChange(
+                              index,
+                              "creditorName",
+                              e.target.value,
+                            )
+                          }
+                          className="w-full mt-1 border rounded-md p-2 text-sm"
+                        />
+                      </div>
 
-                  <div>
-                    <label className="text-sm font-medium">
-                      Account Number
-                    </label>
-                    <input
-                      type="number"
-                      value={accountNumber ?? " "}
-                      onChange={(e) =>
-                        setMissingTradelinePayment({
-                          accountNumber: e.target.value,
-                        })
-                      }
-                      className="w-full mt-1 border rounded-md p-2 text-sm"
-                    />
-                  </div>
+                      {/* Account Number */}
+                      <div className="flex-1">
+                        <label className="text-sm font-medium">
+                          Account Number
+                        </label>
+                        <input
+                          type="number"
+                          value={row.accountNumber}
+                          onChange={(e) =>
+                            handleRowChange(
+                              index,
+                              "accountNumber",
+                              e.target.value,
+                            )
+                          }
+                          className="w-full mt-1 border rounded-md p-2 text-sm"
+                        />
+                      </div>
+
+                      {/* Remove Button */}
+                      {accountRows.length > 1 && (
+                        <button
+                          onClick={() => removeRow(index)}
+                          className="text-red-500 text-sm"
+                        >
+                          Remove
+                        </button>
+                      )}
+                    </div>
+                  ))}
+
+                  {/* Add Row Button */}
+                  <button
+                    onClick={addRow}
+                    className="text-blue-600 text-sm font-medium"
+                  >
+                    + Add another account
+                  </button>
                 </div>
               </PopUp>
             )}
 
-            {accountType === "Installment" &&
-              missingTradelinePayment.installmentCondition && (
+            {accountType.includes("Installment") && (
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium">
+                    Select account number/name
+                  </label>
+
+                  <select
+                    className="w-full mt-1 border rounded-md p-2 text-sm"
+                    value={selectedAccount || ""}
+                    onChange={(e) =>
+                      setMissingTradelinePayment({
+                        selectedAccount: e.target.value,
+                        installmentCondition: `Payment for installment account ${e.target.value} is not reflected on credit report. Obtain account statement reflecting monthly payment.`,
+                      })
+                    }
+                  >
+                    <option value="">Select account</option>
+
+                    {accounts.map((acc, index) => (
+                      <option
+                        key={index}
+                        value={`${acc.creditorName}#${acc.accountNumber}`}
+                      >
+                        {acc.creditorName} - {acc.accountNumber}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
                 <EditableCondition
                   type="condition"
-                  value={missingTradelinePayment.installmentCondition}
+                  value={missingTradelinePayment.installmentCondition || ""}
                   onChange={(val) =>
-                    setMissingTradelinePayment({ installmentCondition: val })
+                    setMissingTradelinePayment({
+                      installmentCondition: val,
+                    })
                   }
                 />
-              )}
+              </div>
+            )}
 
-            {accountType === "Student loan" && (
+            {accountType.includes("Student loan") && (
               <div className="border rounded-xl p-6 bg-gray-50 shadow-sm space-y-6">
                 <div className="flex items-center gap-2 font-semibold text-gray-800">
                   <GraduationCap className="w-4 h-4" />

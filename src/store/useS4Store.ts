@@ -15,7 +15,7 @@ type TradelineAlignment = {
 
 type MissingTradelinePayment = {
   allPayments: string | null;
-  accountType: string | null;
+  accountType: string[];
   loanType: string | null;
   creditorName: string | null;
   accountNumber: string | null;
@@ -23,28 +23,42 @@ type MissingTradelinePayment = {
   fnma: string;
   fhlmc: string;
   installmentCondition: string;
+
+  accounts: {
+    creditorName: string;
+    accountNumber: string;
+  }[];
+
+  selectedAccount: string;
 };
 
 type CollectionHandling = {
   hasCollection: string | null;
   collectionType: string | null;
-  individualBalance: string | null;
   cumulativeBalance: string | null;
   occupancy: string | null;
   unit: string | null;
-  accountName: string;
-  accountNumber: string;
+
   conditionMsg: string;
+
+  accounts: {
+    accountName: string;
+    accountNumber: string;
+    individualBalance: string;
+  }[];
 };
 
 type DisputedHandling = {
   hasDispute: string | null;
   ausEligible: string | null;
   disputeDueToAccount: string | null;
-  accountName: string | null;
-  accountNumber: string | null;
   supplementAvailable: string | null;
   checklist: string[];
+  otherChecklist: string[]; // ← add this
+  accounts: {
+    accountName: string;
+    accountNumber: string;
+  }[];
 
   disputedCondition: string;
   disputedChecklistCondition: string;
@@ -160,7 +174,7 @@ type ChecklistDocuments = {
   [documentType: string]: ChecklistItems;
 };
 
-type ExcludedTradelineValidation = {
+export type ExcludedTradelineValidation = {
   // ── existing fields ──────────────────────────────────────
   excludedFromVOL: string | null;
   accountTypes: string[];
@@ -173,7 +187,7 @@ type ExcludedTradelineValidation = {
   installmentSupportingDocs: string | null;
   installmentReason: string[];
   installmentDocuments: string[];
-  installmentChecklist: string[];
+  installmentChecklist: Record<string, boolean>;
 
   // ── 2b ───────────────────────────────────────────────────
   installmentLessThan10?: string;
@@ -240,6 +254,9 @@ type ExcludedTradelineValidation = {
   conditionAccount_branch2?: string;
   conditionAccount_branch3?: string;
   conditionAccount_branch4?: string;
+
+  dynamicChecklist: string[]; // tracks which preset items are checked
+  dynamicCustomChecklist: string[]; // tracks custom typed items
 
   // ── index signature (required for dynamic storeKey access)
   [key: string]: unknown;
@@ -312,7 +329,7 @@ const initialS4State = {
 
   missingTradelinePayment: {
     allPayments: null,
-    accountType: null,
+    accountType: [],
     loanType: null,
     creditorName: null,
     accountNumber: null,
@@ -320,28 +337,31 @@ const initialS4State = {
     fnma: "",
     fhlmc: "",
     installmentCondition: "",
+
+    accounts: [],
+    selectedAccount: "",
   },
 
   collectionHandling: {
     hasCollection: null,
     collectionType: null,
-    individualBalance: null,
     cumulativeBalance: null,
     occupancy: null,
     unit: null,
-    accountName: "",
-    accountNumber: "",
+
     conditionMsg: "",
+
+    accounts: [],
   },
 
   disputedHandling: {
     hasDispute: null,
     ausEligible: null,
     disputeDueToAccount: null,
-    accountName: null,
-    accountNumber: null,
     supplementAvailable: null,
     checklist: [] as string[],
+    otherChecklist: [] as string[],
+    accounts: [],
 
     disputedCondition: "",
     disputedChecklistCondition: "",
@@ -435,8 +455,10 @@ const initialS4State = {
     installmentSupportingDocs: null,
     installmentReason: [] as string[],
     installmentDocuments: [] as string[],
-    installmentChecklist: [] as string[],
+    installmentChecklist: {},
     conditionMessages: {},
+    dynamicChecklist: [],
+    dynamicCustomChecklist: [],
   },
 };
 

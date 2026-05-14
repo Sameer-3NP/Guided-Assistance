@@ -17,7 +17,8 @@ const PromptRadio = ({ label, value, options, onChange }: Props) => {
             <input
               type="radio"
               checked={value === opt}
-              onChange={() => onChange(opt)}
+              onClick={() => onChange(opt)}
+              onChange={() => {}}
             />
             <span className="text-sm">{opt}</span>
           </label>

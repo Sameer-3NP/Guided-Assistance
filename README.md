@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 store/
 useAppStore.ts ✅ sectionStatus
 useS0Store.ts ✅ initialization
@@ -29,5 +28,3 @@ value={freeze} // PromptRadio already handles null fine since you pass null as i
 =======
 
 # guided-assistance-frontend
-
-> > > > > > > dbcb1d655b2305fc47371c8d6b30eb76abf0c4b3
