@@ -2,20 +2,21 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useFlowContext } from "../../../store/FlowContext";
 import { useNavigate } from "react-router-dom";
-import { useSectionStore } from "../../../store/SectionStore";
+import { useS4Store } from "../../../store/useS4Store";
 
 import PromptRadio from "../../../components/PromptRadio";
 import CheckboxGroup from "../../../components/CheckboxGroup";
 import PopUp from "../../../components/PopUp";
 
 import { AlertTriangle, FileWarning } from "lucide-react";
+import EditableCondition from "../../../components/EditableCondition";
 
 const DuplicateTradelineHandling = () => {
   const { registerActions } = useFlowContext();
   const navigate = useNavigate();
 
   const { duplicateTradelineHandling, setDuplicateTradelineHandling } =
-    useSectionStore();
+    useS4Store();
 
   const {
     creditorName,
@@ -197,9 +198,10 @@ const DuplicateTradelineHandling = () => {
             />
 
             {creditSupplementAvailable === "No" && (
-              <div className="border border-yellow-400 bg-yellow-50 p-3 rounded-xl text-sm text-yellow-800">
-                Condition appears as per Branch 2
-              </div>
+              <EditableCondition
+                type="condition"
+                value="[[Account name_Number]] and [[Account name_Number]] seem to be duplicate and to qualify the borrower [[Account name_Number]] has been excluded from DTI. Provide credit supplement to confirm that both accounts are duplicate."
+              />
             )}
           </div>
         )}
@@ -224,8 +226,16 @@ const DuplicateTradelineHandling = () => {
             />
 
             {supplementFailures.length > 0 && (
-              <div className="border border-red-400 bg-red-50 p-3 rounded-xl text-sm text-red-700">
-                Condition appears as per branch 3
+              <div className="border rounded-xl bg-white shadow-sm space-y-4 overflow-hidden">
+                <EditableCondition
+                  type="condition"
+                  value={`[[Account name_Number]] and [[Account name_Number]] seem to be duplicate and to qualify the borrower [[Account name_Number]] has been excluded from DTI. Credit supplement received in file has below issues:\n\n${supplementFailures
+                    .map(
+                      (item, idx) =>
+                        `${String.fromCharCode(97 + idx)}) ${item}`,
+                    )
+                    .join("\n")}`}
+                />
               </div>
             )}
           </div>

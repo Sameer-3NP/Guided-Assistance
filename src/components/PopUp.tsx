@@ -8,7 +8,7 @@ type Props = {
   onClose?: () => void;
   onConfirm?: () => void;
   confirmText?: string;
-  cancelText?: string;
+  cancelText?: string;  
   hideFooter?: boolean;
   width?: string;
 };

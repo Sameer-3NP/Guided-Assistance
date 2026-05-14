@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import toast from "react-hot-toast";
 import { useFlowContext } from "../../../store/FlowContext";
-import { useSectionStore } from "../../../store/SectionStore";
+import { useS1Store } from "../../../store/useS1Store";
 import { useNavigate } from "react-router-dom";
 import { Building, UserCheck, ShieldCheck, FileSearch } from "lucide-react";
 import EditableCondition from "../../../components/EditableCondition";
@@ -15,7 +15,7 @@ const SourceRequestIntegrity = () => {
     setSourceRequestIntegrity,
     sourceIntegrityConditions,
     setSourceIntegrityConditions,
-  } = useSectionStore();
+  } = useS1Store();
 
   const {
     agencyName,

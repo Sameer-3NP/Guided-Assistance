@@ -6,7 +6,8 @@ import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import { Calendar, CalendarClock, FileText, Lock, Users } from "lucide-react";
 import { useFlowContext } from "../../store/FlowContext";
-import { useSectionStore } from "../../store/SectionStore";
+import { useS0Store } from "../../store/useS0Store";
+import { useAppStore } from "../../store/useAppStore";
 import {
   initializationSchema,
   type InitializationForm,
@@ -16,7 +17,8 @@ import PopUp from "../../components/PopUp";
 const Initialization = () => {
   const navigate = useNavigate();
   const { registerActions } = useFlowContext();
-  const { setS0, s0, setSectionStatus } = useSectionStore();
+  const { setS0, s0 } = useS0Store();
+  const { setSectionStatus } = useAppStore();
   const [showPopup, setShowPopup] = useState(true);
   const isLocked = !!s0;
 
@@ -81,6 +83,39 @@ const Initialization = () => {
           )}
           className="grid grid-cols-1 md:grid-cols-2 gap-6"
         >
+          {/* Loan Number */}
+          <div className="flex flex-col">
+            <div className="flex items-center gap-2 mb-2">
+              <FileText className="w-4 h-4 text-blue-400" />
+              <label className="text-sm font-medium text-gray-700">
+                Loan Number
+              </label>
+            </div>
+
+            <div className="relative">
+              {/* Masked prefix */}
+              <span className="absolute left-3 top-2 text-gray-600 pointer-events-none">
+                XXXXXXXX
+              </span>
+
+              <input
+                type="text"
+                maxLength={4}
+                {...register("loanNumber")}
+                disabled={isLocked}
+                className="w-full border border-black rounded-lg pl-22.5 pr-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 disabled:bg-gray-100"
+                placeholder="Enter last 4-digits of Loan App."
+                title="Enter last 4-digits of Loan Application"
+                inputMode="numeric"
+                onInput={(e) => {
+                  e.currentTarget.value = e.currentTarget.value.replace(
+                    /\D/g,
+                    "",
+                  );
+                }}
+              />
+            </div>
+          </div>
           {/* Application Date */}
           <div className="flex flex-col">
             <div className="flex items-center gap-2 mb-2">
@@ -142,39 +177,6 @@ const Initialization = () => {
               disabled={isLocked}
               className="w-full border border-black rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 disabled:bg-gray-100"
             />
-          </div>
-          {/* Loan Number */}
-          <div className="flex flex-col">
-            <div className="flex items-center gap-2 mb-2">
-              <FileText className="w-4 h-4 text-blue-400" />
-              <label className="text-sm font-medium text-gray-700">
-                Loan Number
-              </label>
-            </div>
-
-            <div className="relative">
-              {/* Masked prefix */}
-              <span className="absolute left-3 top-2 text-gray-600 pointer-events-none">
-                XXXXXXXX
-              </span>
-
-              <input
-                type="text"
-                maxLength={4}
-                {...register("loanNumber")}
-                disabled={isLocked}
-                className="w-full border border-black rounded-lg pl-22.5 pr-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-400 focus:border-blue-400 disabled:bg-gray-100"
-                placeholder="Enter last 4-digits of Loan App."
-                title="Enter last 4-digits of Loan Application"
-                inputMode="numeric"
-                onInput={(e) => {
-                  e.currentTarget.value = e.currentTarget.value.replace(
-                    /\D/g,
-                    "",
-                  );
-                }}
-              />
-            </div>
           </div>
         </form>
       </div>

@@ -1,4 +1,4 @@
-import { useSectionStore } from "../../../store/SectionStore";
+import { useS1Store } from "../../../store/useS1Store";
 import { useEffect } from "react";
 import toast from "react-hot-toast";
 import { useFlowContext } from "../../../store/FlowContext";
@@ -23,7 +23,7 @@ const RepositoryCheck = () => {
     setBiMergeAccepted,
     repositoryConditions,
     setRepositoryConditions,
-  } = useSectionStore();
+  } = useS1Store();
 
   const activeReport =
     s1.length === 1

@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
-import { useSectionStore } from "../../../store/SectionStore";
+import { useS2Store } from "../../../store/useS2Store";
+import { useAppStore } from "../../../store/useAppStore";
 import { useFlowContext } from "../../../store/FlowContext";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
@@ -13,8 +14,8 @@ import {
 } from "lucide-react";
 
 const Section2Summary = () => {
-  const { coreIdentity, currentAddress, previousAddress, setSectionStatus } =
-    useSectionStore();
+  const { coreIdentity, currentAddress, previousAddress } = useS2Store();
+  const { setSectionStatus } = useAppStore();
 
   const { registerActions } = useFlowContext();
   const navigate = useNavigate();
@@ -79,7 +80,7 @@ const Section2Summary = () => {
 
   /* ---------------- LOCAL STATE ---------------- */
 
-  const { section2Summary, setSection2Summary } = useSectionStore();
+  const { section2Summary, setSection2Summary } = useS2Store();
 
   const { raisedConditions } = section2Summary;
 

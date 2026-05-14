@@ -1,20 +1,19 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import toast from "react-hot-toast";
 import { useFlowContext } from "../../../store/FlowContext";
 import { useNavigate } from "react-router-dom";
-import { useSectionStore } from "../../../store/SectionStore";
-
+import { useS4Store } from "../../../store/useS4Store";
 import PromptRadio from "../../../components/PromptRadio";
 import PopUp from "../../../components/PopUp";
-
 import { UserCheck, FileWarning } from "lucide-react";
+import EditableCondition from "../../../components/EditableCondition";
 
 const AuthorizedUserAccountHandling = () => {
   const { registerActions } = useFlowContext();
   const navigate = useNavigate();
 
   const { authorizedUserAccountHandling, setAuthorizedUserAccountHandling } =
-    useSectionStore();
+    useS4Store();
 
   const {
     creditorName,
@@ -28,8 +27,8 @@ const AuthorizedUserAccountHandling = () => {
     lpaClauses,
   } = authorizedUserAccountHandling;
 
-  const [showPopup, setShowPopup] = useState(true);
-  //const [showPopup, setShowPopup] = useState(!(creditorName && accountNumber));
+  // const [showPopup, setShowPopup] = useState(true);
+  const [showPopup, setShowPopup] = useState(!(creditorName && accountNumber));
 
   /* ---------- POPUP ---------- */
 
@@ -44,7 +43,7 @@ const AuthorizedUserAccountHandling = () => {
 
   /* ---------- CONTINUE ---------- */
 
-  const handleContinue = () => {
+  const handleContinue = useCallback(() => {
     if (!loanType) return toast.error("Please select loan type.");
 
     if (loanType === "DU") {
@@ -75,14 +74,7 @@ const AuthorizedUserAccountHandling = () => {
         return toast.error("Please answer prompt 3b.");
     }
 
-    navigate("/s4/duplicate-trade"); // screen 4.10
-  };
-
-  useEffect(() => {
-    registerActions({
-      onContinue: handleContinue,
-      onBack: () => navigate("/s4/delinquency-late"),
-    });
+    navigate("/s4/duplicate-trade");
   }, [
     loanType,
     duAuthorizedAccount,
@@ -91,7 +83,15 @@ const AuthorizedUserAccountHandling = () => {
     lpaAuthorizedAccount,
     lpaBorrowerQualify,
     lpaClauses,
+    navigate,
   ]);
+
+  useEffect(() => {
+    registerActions({
+      onContinue: handleContinue,
+      onBack: () => navigate("/s4/delinquency-late"),
+    });
+  }, [registerActions, navigate, handleContinue]);
 
   return (
     <div className="flex justify-center w-full px-6">
@@ -199,9 +199,10 @@ const AuthorizedUserAccountHandling = () => {
             )}
 
             {duClauses === "Yes" && (
-              <div className="border border-red-400 bg-red-50 p-3 rounded-xl text-sm text-red-700">
-                Conditions appears as per Branch 2
-              </div>
+              <EditableCondition
+                type="condition"
+                value="[[Account Name_Number]] is an authorized user account and additional documentation is required to verify ownership of the liability."
+              />
             )}
           </div>
         )}
@@ -248,9 +249,10 @@ const AuthorizedUserAccountHandling = () => {
             )}
 
             {lpaClauses === "Yes" && (
-              <div className="border border-red-400 bg-red-50 p-3 rounded-xl text-sm text-red-700">
-                Conditions appears as per Branch 1
-              </div>
+              <EditableCondition
+                type="condition"
+                value="[[Account Name_Number]] is an authorized user account and borrower does not qualify after including the payment in DTI and LPA requires additional documentation to verify that the account is owned by another borrower on the mortgage or the account is owned by the borrower’s spouse."
+              />
             )}
           </div>
         )}

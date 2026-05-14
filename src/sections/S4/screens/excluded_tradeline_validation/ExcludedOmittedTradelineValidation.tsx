@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import toast from "react-hot-toast";
 import { useFlowContext } from "../../../../store/FlowContext";
 import { useNavigate } from "react-router-dom";
-import { useSectionStore } from "../../../../store/SectionStore";
+import { useS4Store } from "../../../../store/useS4Store";
 import AccountFlow from "./AccountFlow";
 import PromptRadio from "../../../../components/PromptRadio";
 import CheckboxGroup from "../../../../components/CheckboxGroup";
@@ -27,56 +27,84 @@ const ExcludedOmittedTradelineValidation = () => {
   const navigate = useNavigate();
 
   const { excludedTradelineValidation, setExcludedTradelineValidation } =
-    useSectionStore();
+    useS4Store();
 
-  const { excludedFromVOL, accountTypes, accounts } =
-    excludedTradelineValidation;
+  const {
+    excludedFromVOL,
+    accountTypes = [],
+    accounts = [],
+  } = excludedTradelineValidation;
 
   const [showPopup, setShowPopup] = useState(false);
   const [currentType, setCurrentType] = useState<string | null>(null);
+  // const [selectedAccount, setSelectedAccount] = useState<string>("");
+  const [accountRows, setAccountRows] = useState([
+    { creditorName: "", accountNumber: "" },
+  ]);
 
-  const [creditorName, setCreditorName] = useState("");
-  const [accountNumber, setAccountNumber] = useState("");
+  const handleRowChange = (
+    index: number,
+    field: "creditorName" | "accountNumber",
+    value: string,
+  ) => {
+    const updated = [...accountRows];
+    updated[index][field] = value;
+    setAccountRows(updated);
+  };
+
+  const addRow = () => {
+    setAccountRows([...accountRows, { creditorName: "", accountNumber: "" }]);
+  };
+
+  const removeRow = (index: number) => {
+    const updated = accountRows.filter((_, i) => i !== index);
+    setAccountRows(updated);
+  };
 
   /* ---------------- POPUP SUBMIT ---------------- */
 
   const handleAccountSubmit = () => {
-    if (!creditorName || !accountNumber) {
-      toast.error("Please enter account details.");
+    const hasEmpty = accountRows.some(
+      (row) => !row.creditorName || !row.accountNumber,
+    );
+
+    if (hasEmpty) {
+      toast.error("Please fill all account details.");
       return;
     }
 
-    // setExcludedTradelineValidation({
-    //   accounts: [
-    //     ...accounts,
-    //     {
-    //       type: currentType,
-    //       creditorName,
-    //       accountNumber,
-    //     },
-    //   ],
-    // });
+    // ✅ Save to store
+    setExcludedTradelineValidation({
+      accounts: [
+        ...accounts,
+        ...accountRows.map((row) => ({
+          type: currentType!, // safe because popup only opens when type exists
+          creditorName: row.creditorName,
+          accountNumber: row.accountNumber,
+        })),
+      ],
+    });
 
-    setCreditorName("");
-    setAccountNumber("");
+    // reset
+    setAccountRows([{ creditorName: "", accountNumber: "" }]);
     setShowPopup(false);
   };
 
   /* ---------------- CONTINUE ---------------- */
 
-  const handleContinue = () => {
+  const handleContinue = useCallback(() => {
     if (!excludedFromVOL) return toast.error("Please answer prompt 1.");
 
     if (excludedFromVOL === "No") {
-      navigate("/s4/utility-telecom-account"); // screen 4.6
+      navigate("/s4/utility-telecom-account");
       return;
     }
 
     if (accountTypes.length === 0)
       return toast.error("Please select account type.");
 
-    navigate("/s4/utility-telecom-account"); // screen 4.6
-  };
+    navigate("/s4/utility-telecom-account");
+  }, [excludedFromVOL, accountTypes, navigate]);
 
   /* ---------------- REGISTER ACTIONS ---------------- */
 
@@ -85,18 +113,23 @@ const ExcludedOmittedTradelineValidation = () => {
       onContinue: handleContinue,
       onBack: () => navigate("/s4/disputed-account"),
     });
-  }, [excludedFromVOL, accountTypes]);
+  }, [handleContinue, navigate, registerActions]);
 
   /* ---------------- ACCOUNT TYPE CHANGE ---------------- */
 
   const handleAccountTypeChange = (types: string[]) => {
+    const previousTypes = accountTypes || [];
+
+    // detect newly added type
+    const addedType = types.find((t) => !previousTypes.includes(t));
+
     setExcludedTradelineValidation({
       accountTypes: types,
     });
 
-    if (types.length > 0) {
-      const latest = types[types.length - 1];
-      setCurrentType(latest);
+    // ✅ Only open popup on NEW selection
+    if (addedType && !accounts.find((a) => a.type === addedType)) {
+      setCurrentType(addedType);
       setShowPopup(true);
     }
   };
@@ -111,36 +144,67 @@ const ExcludedOmittedTradelineValidation = () => {
             Excluded / Omitted Tradeline Validation
           </h2>
         </div>
-        {/* ACCOUNT DETAILS POPUP */}
+
+        {/* POPUP */}
         <PopUp
           open={showPopup}
           title="Excluded Account Details"
           icon={<FileWarning className="w-5 h-5 text-blue-500" />}
           onConfirm={handleAccountSubmit}
           confirmText="Continue"
+          onClose={() => setShowPopup(false)}
         >
           <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium">Creditor name</label>
-              <input
-                type="text"
-                value={creditorName}
-                onChange={(e) => setCreditorName(e.target.value)}
-                className="w-full mt-1 border rounded-md p-2 text-sm"
-              />
-            </div>
+            {accountRows.map((row, index) => (
+              <div key={index} className="flex gap-3 items-end">
+                {/* Creditor Name */}
+                <div className="flex-1">
+                  <label className="text-sm font-medium">Creditor name</label>
+                  <input
+                    type="text"
+                    value={row.creditorName}
+                    onChange={(e) =>
+                      handleRowChange(index, "creditorName", e.target.value)
+                    }
+                    className="w-full mt-1 border rounded-md p-2 text-sm"
+                  />
+                </div>
 
-            <div>
-              <label className="text-sm font-medium">Account Number</label>
-              <input
-                type="number"
-                value={accountNumber}
-                onChange={(e) => setAccountNumber(e.target.value)}
-                className="w-full mt-1 border rounded-md p-2 text-sm"
-              />
-            </div>
+                {/* Account Number */}
+                <div className="flex-1">
+                  <label className="text-sm font-medium">Account Number</label>
+                  <input
+                    type="number"
+                    value={row.accountNumber}
+                    onChange={(e) =>
+                      handleRowChange(index, "accountNumber", e.target.value)
+                    }
+                    className="w-full mt-1 border rounded-md p-2 text-sm"
+                  />
+                </div>
+
+                {/* Remove Button */}
+                {accountRows.length > 1 && (
+                  <button
+                    onClick={() => removeRow(index)}
+                    className="text-red-500 text-sm"
+                  >
+                    Remove
+                  </button>
+                )}
+              </div>
+            ))}
+
+            {/* Add Row Button */}
+            <button
+              onClick={addRow}
+              className="text-blue-600 text-sm font-medium"
+            >
+              + Add another account
+            </button>
           </div>
         </PopUp>
+
         {/* PROMPT 1 */}
         <div className="border rounded-xl p-6 bg-gray-50 space-y-6">
           <PromptRadio
@@ -160,6 +224,7 @@ const ExcludedOmittedTradelineValidation = () => {
             </div>
           )}
         </div>
+
         {/* PROMPT 2 */}
         {excludedFromVOL === "Yes" && (
           <div className="border rounded-xl p-6 bg-gray-50 space-y-6">
@@ -180,25 +245,33 @@ const ExcludedOmittedTradelineValidation = () => {
             />
           </div>
         )}
+
         {/* ACCOUNT FLOWS */}
         {accountTypes.includes("Installment") && (
           <AccountFlow flow={InstallmentFlow} />
-        )}{" "}
+        )}
+
         {accountTypes.includes("Revolving") && (
           <AccountFlow flow={RevolvingFlow} />
-        )}{" "}
+        )}
+
         {accountTypes.includes("Mortgage") && (
           <AccountFlow flow={MortgageFlow} />
-        )}{" "}
-        {accountTypes.includes("HELOC") && <AccountFlow flow={HelocFlow} />}{" "}
-        {accountTypes.includes("Lease") && <AccountFlow flow={LeaseFlow} />}{" "}
+        )}
+
+        {accountTypes.includes("HELOC") && <AccountFlow flow={HelocFlow} />}
+
+        {accountTypes.includes("Lease") && <AccountFlow flow={LeaseFlow} />}
+
         {accountTypes.includes("Open 30 days Charge account") && (
           <AccountFlow flow={ChargeAccountFlow} />
-        )}{" "}
-        {accountTypes.includes("Taxes") && <AccountFlow flow={TaxesFlow} />}{" "}
+        )}
+
+        {accountTypes.includes("Taxes") && <AccountFlow flow={TaxesFlow} />}
+
         {accountTypes.includes("Tax lien") && (
           <AccountFlow flow={TaxLienFlow} />
-        )}{" "}
+        )}
       </div>
     </div>
   );

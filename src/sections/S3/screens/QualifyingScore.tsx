@@ -4,13 +4,13 @@ import { useFlowContext } from "../../../store/FlowContext";
 import { useNavigate } from "react-router-dom";
 import PromptRadio from "../../../components/PromptRadio";
 import { BarChart3, Users, Calculator } from "lucide-react";
-import { useSectionStore } from "../../../store/SectionStore";
+import { useS3Store } from "../../../store/useS3Store";
 
 const QualifyingScore = () => {
   const { registerActions } = useFlowContext();
   const navigate = useNavigate();
 
-  const { qualifyingScore, setQualifyingScore } = useSectionStore();
+  const { qualifyingScore, setQualifyingScore } = useS3Store();
 
   const { borrowerCount, b1ScoresCount, b2ScoresCount, b1Scores, b2Scores } =
     qualifyingScore;

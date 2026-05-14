@@ -1,13 +1,13 @@
 import { useState, useEffect, useMemo } from "react";
 import { useFlowContext } from "../../../store/FlowContext";
 import { useNavigate } from "react-router-dom";
-import { useSectionStore } from "../../../store/SectionStore";
+import { useS2Store } from "../../../store/useS2Store";
 import toast from "react-hot-toast";
 import { AlertTriangle, Clipboard, CheckCircle } from "lucide-react";
 
 const CoreIdentitySummary = () => {
-  const { coreIdentity } = useSectionStore();
-  const { coreIdentitySummary, setCoreIdentitySummary } = useSectionStore();
+  const { coreIdentity } = useS2Store();
+  const { coreIdentitySummary, setCoreIdentitySummary } = useS2Store();
   const { registerActions } = useFlowContext();
   const navigate = useNavigate();
   const [copiedConditions, setCopiedConditions] = useState<string[]>([]);

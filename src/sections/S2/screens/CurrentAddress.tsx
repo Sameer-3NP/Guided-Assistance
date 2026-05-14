@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import toast from "react-hot-toast";
 import { useFlowContext } from "../../../store/FlowContext";
 import { useNavigate } from "react-router-dom";
-import { useSectionStore } from "../../../store/SectionStore";
+import { useS2Store } from "../../../store/useS2Store";
 import { MapPin, FileCheck } from "lucide-react";
 import EditableCondition from "../../../components/EditableCondition";
 
@@ -32,7 +32,7 @@ const CurrentAddress = () => {
     setCurrentAddress,
     currentAddressConditions,
     setCurrentAddressConditions,
-  } = useSectionStore();
+  } = useS2Store();
 
   const { addressMatch } = currentAddress;
 

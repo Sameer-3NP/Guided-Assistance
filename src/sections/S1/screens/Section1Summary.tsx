@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from "react";
-import { useSectionStore } from "../../../store/SectionStore";
+import { useS1Store } from "../../../store/useS1Store";
+import { useAppStore } from "../../../store/useAppStore";
 import { useFlowContext } from "../../../store/FlowContext";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
@@ -19,11 +20,11 @@ const Section1Summary = () => {
     biMergeAccepted,
     sourceRequestIntegrity,
     systemAlignmentReview,
-    setSectionStatus,
     CreditCondition,
     repositoryConditions,
     sourceIntegrityConditions,
-  } = useSectionStore();
+  } = useS1Store();
+  const { setSectionStatus } = useAppStore();
 
   const { registerActions } = useFlowContext();
   const navigate = useNavigate();

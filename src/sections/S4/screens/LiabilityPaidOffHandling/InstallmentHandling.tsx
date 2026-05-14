@@ -1,10 +1,10 @@
 import PromptRadio from "../../../../components/PromptRadio";
 import CheckboxGroup from "../../../../components/CheckboxGroup";
-import { useSectionStore } from "../../../../store/SectionStore";
+import { useS4Store } from "../../../../store/useS4Store";
 
 const InstallmentHandling = () => {
   const { liabilityPaidOffHandling, setLiabilityPaidOffHandling } =
-    useSectionStore();
+    useS4Store();
 
   const { supportingDocument, documentType, discrepancies } =
     liabilityPaidOffHandling;

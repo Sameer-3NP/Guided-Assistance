@@ -1,5 +1,6 @@
 import { useEffect } from "react";
-import { useSectionStore } from "../../../store/SectionStore";
+import { useS1Store } from "../../../store/useS1Store";
+import { useS0Store } from "../../../store/useS0Store";
 import toast from "react-hot-toast";
 import { useFlowContext } from "../../../store/FlowContext";
 import { useNavigate } from "react-router-dom";
@@ -16,7 +17,6 @@ const CreditReportValidity = () => {
   const navigate = useNavigate();
 
   const {
-    s0,
     s1,
     activeCreditReport,
     creditValidityStep,
@@ -25,7 +25,9 @@ const CreditReportValidity = () => {
     setPullType,
     CreditCondition,
     setCreditCondition,
-  } = useSectionStore();
+  } = useS1Store();
+
+  const { s0 } = useS0Store();
 
   const activeReport =
     s1.length === 1

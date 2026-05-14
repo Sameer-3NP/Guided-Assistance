@@ -2,20 +2,20 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useFlowContext } from "../../../store/FlowContext";
 import { useNavigate } from "react-router-dom";
-import { useSectionStore } from "../../../store/SectionStore";
+import { useS4Store } from "../../../store/useS4Store";
 
 import PromptRadio from "../../../components/PromptRadio";
 import CheckboxGroup from "../../../components/CheckboxGroup";
 import PopUp from "../../../components/PopUp";
 
 import { AlertTriangle, FileWarning } from "lucide-react";
+import EditableCondition from "../../../components/EditableCondition";
 
 const DelinquencyLateHandling = () => {
   const { registerActions } = useFlowContext();
   const navigate = useNavigate();
 
-  const { delinquencyLateHandling, setDelinquencyLateHandling } =
-    useSectionStore();
+  const { delinquencyLateHandling, setDelinquencyLateHandling } = useS4Store();
 
   const {
     creditorName,
@@ -159,9 +159,10 @@ const DelinquencyLateHandling = () => {
             {/* BRANCH ALERT */}
 
             {lateAccountTypes.includes("Mortgage account") && (
-              <div className="border border-yellow-400 bg-yellow-50 p-3 rounded-xl text-sm text-yellow-800">
-                Alert appears as per Branch 1
-              </div>
+              <EditableCondition
+                type="alert"
+                value="Mortgage Lien [[Account Name_Number]] has more than 30 days lates reported. Please review the credit delinquencies as per client requirement and proceed accordingly."
+              />
             )}
           </div>
         )}
@@ -182,9 +183,10 @@ const DelinquencyLateHandling = () => {
             />
 
             {lenderRequireExplanation === "Yes" && (
-              <div className="border border-red-400 bg-red-50 p-3 rounded-xl text-sm text-red-700">
-                Condition appears as per branch 1
-              </div>
+              <EditableCondition
+                type="condition"
+                value="Mortgage Lien [[Account Name_Number]] has more than 30 days lates reported and explanation from borrower is required for multiple lates noted in last 12 months."
+              />
             )}
           </div>
         )}

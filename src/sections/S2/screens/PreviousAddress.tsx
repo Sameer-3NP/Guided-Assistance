@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import toast from "react-hot-toast";
 import { useFlowContext } from "../../../store/FlowContext";
 import { useNavigate } from "react-router-dom";
-import { useSectionStore } from "../../../store/SectionStore";
+import { useS2Store } from "../../../store/useS2Store";
 import EditableCondition from "../../../components/EditableCondition";
 import { FileCheck } from "lucide-react";
 
@@ -29,7 +29,7 @@ const PreviousAddress = () => {
     setPreviousAddress,
     previousAddressConditions,
     setPreviousAddressConditions,
-  } = useSectionStore();
+  } = useS2Store();
 
   const { hasPreviousAddress, addressMatch, requireUpdatedReport } =
     previousAddress;

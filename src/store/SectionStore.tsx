@@ -650,7 +650,11 @@ type Store = {
 
 const SectionContext = createContext<Store | null>(null);
 
-export const SectionProvider = ({ children }: any) => {
+export const SectionProvider = ({
+  children,
+}: {
+  children: React.ReactNode;
+}) => {
   const [s0, setS0] = useState<InventoryItem | null>(null);
   const [s1, setS1] = useState<CreditReport[]>([]);
   const [activeCreditReport, setActiveCreditReport] = useState<string | null>(

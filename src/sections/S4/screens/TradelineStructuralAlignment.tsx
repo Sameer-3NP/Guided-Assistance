@@ -2,17 +2,17 @@ import { useEffect } from "react";
 import toast from "react-hot-toast";
 import { useFlowContext } from "../../../store/FlowContext";
 import { useNavigate } from "react-router-dom";
-import { useSectionStore } from "../../../store/SectionStore";
+import { useS4Store } from "../../../store/useS4Store";
 import PromptRadio from "../../../components/PromptRadio";
 
-import { FileCheck, AlertTriangle, GitCompare, Database } from "lucide-react";
+import { FileCheck, GitCompare, Database } from "lucide-react";
 import EditableCondition from "../../../components/EditableCondition";
 
 const TradelineStructuralAlignment = () => {
   const { registerActions } = useFlowContext();
   const navigate = useNavigate();
 
-  const { tradelineAlignment, setTradelineAlignment } = useSectionStore();
+  const { tradelineAlignment, setTradelineAlignment } = useS4Store();
 
   const { losGreater, creditGreater, fieldsMatch } = tradelineAlignment;
 
@@ -92,11 +92,14 @@ const TradelineStructuralAlignment = () => {
           )}
 
           {creditGreater === "Yes" && (
-            <div className="flex items-center gap-2 border border-yellow-400 bg-yellow-50 p-3 rounded-xl text-sm text-yellow-800">
-              <AlertTriangle className="w-4 h-4" />
-              Action Required: Update LOS based on tradelines reflected on the
-              credit report.
-            </div>
+            <EditableCondition
+              type="alert"
+              value={
+                tradelineAlignment.updateLos1 ||
+                "Update the LOS VOL screen to include tradeline [[Creditor Name, Account Number]] as reflected on the credit report. "
+              }
+              onChange={(val) => setTradelineAlignment({ updateLos1: val })}
+            />
           )}
         </div>
 
@@ -117,11 +120,14 @@ const TradelineStructuralAlignment = () => {
             />
 
             {fieldsMatch === "Mismatch" && (
-              <div className="flex items-center gap-2 border border-yellow-400 bg-yellow-50 p-3 rounded-xl text-sm text-yellow-800">
-                <AlertTriangle className="w-4 h-4" />
-                Action Required: Update LOS tradeline fields based on credit
-                report data.
-              </div>
+              <EditableCondition
+                type="alert"
+                value={
+                  tradelineAlignment.updateLos2 ||
+                  "Update the LOS VOL screen to reflect the tradeline details exactly as shown on the credit report for [[Creditor Name, Account Number]]. "
+                }
+                onChange={(val) => setTradelineAlignment({ updateLos2: val })}
+              />
             )}
 
             {fieldsMatch === "Matches" && (

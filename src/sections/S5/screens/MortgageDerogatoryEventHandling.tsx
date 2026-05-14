@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
 import { useFlowContext } from "../../../store/FlowContext";
 import { useNavigate } from "react-router-dom";
-import { useSectionStore } from "../../../store/SectionStore";
+import { useS5Store } from "../../../store/useS5Store";
 
 import PopUp from "../../../components/PopUp";
 
@@ -16,7 +16,7 @@ const MortgageDerogatoryEventHandling = () => {
   const {
     mortgageDerogatoryEventHandling,
     setMortgageDerogatoryEventHandling,
-  } = useSectionStore();
+  } = useS5Store();
 
   const {
     derogatoryTypes,

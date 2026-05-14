@@ -1,32 +1,38 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import toast from "react-hot-toast";
 import { useFlowContext } from "../../../store/FlowContext";
 import { useNavigate } from "react-router-dom";
-import { useSectionStore } from "../../../store/SectionStore";
+import { useS4Store } from "../../../store/useS4Store";
 import PromptRadio from "../../../components/PromptRadio";
-
 import { FileCheck, FileWarning, FileSearch } from "lucide-react";
-
 import PopUp from "../../../components/PopUp";
-import ConditionBanner from "../../../components/ConditionBanner";
+import EditableCondition from "../../../components/EditableCondition";
+import DynamicChecklist from "../../../components/DynamicChecklist";
 
 const DisputedAccountHandling = () => {
   const { registerActions } = useFlowContext();
   const navigate = useNavigate();
 
-  const { disputedHandling, setDisputedHandling } = useSectionStore();
+  const { disputedHandling, setDisputedHandling } = useS4Store();
+  const [accountRows, setAccountRows] = useState([
+    {
+      accountName: "",
+      accountNumber: "",
+    },
+  ]);
 
   const {
     hasDispute,
     ausEligible,
     disputeDueToAccount,
-    accountName,
-    accountNumber,
+    accounts,
     supplementAvailable,
-    checklist,
+    checklist = [],
+    disputedCondition,
+    otherChecklist = [],
   } = disputedHandling;
 
-  const [showPopup, setShowPopup] = useState(true);
+  const [showPopup, setShowPopup] = useState(false);
 
   const checklistItems = [
     "Credit supplement reflects incorrect borrower name.",
@@ -37,6 +43,14 @@ const DisputedAccountHandling = () => {
     "Credit supplement is not the latest but reflects dispute has been removed. Updated credit supplement is required.",
   ];
 
+  const setOtherChecklist = (
+    updater: string[] | ((prev: string[]) => string[]),
+  ) => {
+    const next =
+      typeof updater === "function" ? updater(otherChecklist) : updater;
+    setDisputedHandling({ otherChecklist: next });
+  };
+
   /* ---------- BRANCH VISIBILITY ---------- */
 
   const showPrompt2 = hasDispute === "Yes";
@@ -46,18 +60,58 @@ const DisputedAccountHandling = () => {
 
   /* ---------- POPUP SAVE ---------- */
 
+  const handleRowChange = (
+    index: number,
+    field: "accountName" | "accountNumber",
+    value: string,
+  ) => {
+    const updated = [...accountRows];
+
+    updated[index][field] = value;
+
+    setAccountRows(updated);
+  };
+
+  const addRow = () => {
+    setAccountRows([
+      ...accountRows,
+      {
+        accountName: "",
+        accountNumber: "",
+      },
+    ]);
+  };
+
+  const removeRow = (index: number) => {
+    const updated = accountRows.filter((_, i) => i !== index);
+
+    setAccountRows(updated);
+  };
+
   const handleAccountSave = () => {
-    if (!accountName || !accountNumber) {
-      toast.error("Please enter account name and number.");
-      return;
+    const hasEmpty = accountRows.some(
+      (acc) => !acc.accountName || !acc.accountNumber,
+    );
+
+    if (hasEmpty) {
+      return toast.error("Please fill all account details.");
     }
+
+    const formattedAccounts = accountRows.map((acc) => ({
+      accountName: acc.accountName,
+      accountNumber: acc.accountNumber,
+    }));
+
+    setDisputedHandling({
+      accounts: formattedAccounts,
+    });
 
     setShowPopup(false);
   };
 
   /* ---------- CONTINUE ---------- */
 
-  const handleContinue = () => {
+  const handleContinue = useCallback(() => {
     if (!hasDispute) return toast.error("Please answer the first prompt.");
 
     if (hasDispute === "No") {
@@ -80,24 +134,21 @@ const DisputedAccountHandling = () => {
       return;
     }
 
-    if (!accountName || !accountNumber)
+    if (!accounts?.length)
       return toast.error("Please update disputed account details.");
 
     if (!supplementAvailable)
       return toast.error("Please confirm credit supplement availability.");
 
-    if (supplementAvailable === "No") {
-      toast.error("Condition appears as per Branch 2.");
-      navigate("/s4/excluded-tradeline");
-      return;
-    }
-
-    if (supplementAvailable === "Yes" && checklist?.length > 0) {
-      toast.error("Condition appears as per Branch 3.");
-    }
-
     navigate("/s4/excluded-tradeline");
-  };
+  }, [
+    hasDispute,
+    ausEligible,
+    disputeDueToAccount,
+    supplementAvailable,
+    accounts,
+    navigate,
+  ]);
 
   /* ---------- REGISTER FLOW ---------- */
 
@@ -106,13 +157,7 @@ const DisputedAccountHandling = () => {
       onContinue: handleContinue,
       onBack: () => navigate("/s4/collection-account"),
     });
-  }, [
-    hasDispute,
-    ausEligible,
-    disputeDueToAccount,
-    supplementAvailable,
-    checklist,
-  ]);
+  }, [handleContinue, navigate, registerActions]);
 
   /* ---------- CHECKLIST HANDLER ---------- */
 
@@ -124,11 +169,14 @@ const DisputedAccountHandling = () => {
     setDisputedHandling({ checklist: updated });
   };
 
+  const accountText =
+    accounts
+      ?.map((acc) => `${acc.accountName}#${acc.accountNumber}`)
+      .join(", ") || "";
+
   return (
     <div className="flex justify-center w-full px-6">
       <div className="w-full max-w-4xl bg-white p-8 rounded-2xl shadow-sm border border-gray-200 space-y-8">
-        {/* HEADER */}
-
         <div className="flex items-center gap-3">
           <FileCheck className="w-7 h-7 text-blue-400" />
           <h2 className="text-2xl font-semibold text-gray-800">
@@ -136,14 +184,10 @@ const DisputedAccountHandling = () => {
           </h2>
         </div>
 
-        {/* INSTRUCTION */}
-
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-sm text-blue-800">
           Review disputed accounts and determine whether they impact the AUS
           recommendation or require underwriting conditions.
         </div>
-
-        {/* PROMPT 1 */}
 
         <div className="border rounded-xl p-6 bg-gray-50 space-y-6">
           <PromptRadio
@@ -153,8 +197,6 @@ const DisputedAccountHandling = () => {
             onChange={(v) => setDisputedHandling({ hasDispute: v })}
           />
         </div>
-
-        {/* PROMPT 2 */}
 
         {showPrompt2 && (
           <div className="border rounded-xl p-6 bg-gray-50 space-y-6">
@@ -167,8 +209,6 @@ const DisputedAccountHandling = () => {
           </div>
         )}
 
-        {/* PROMPT 3 */}
-
         {showPrompt3 && (
           <div className="border rounded-xl p-6 bg-gray-50 space-y-6">
             <PromptRadio
@@ -177,16 +217,11 @@ const DisputedAccountHandling = () => {
               options={["Yes", "No"]}
               onChange={(v) => {
                 setDisputedHandling({ disputeDueToAccount: v });
-
-                if (v === "Yes") {
-                  setShowPopup(true);
-                }
+                if (v === "Yes") setShowPopup(true);
               }}
             />
           </div>
         )}
-
-        {/* POPUP FOR ACCOUNT UPDATE */}
 
         <PopUp
           open={showPopup}
@@ -196,32 +231,88 @@ const DisputedAccountHandling = () => {
           onClose={() => setShowPopup(false)}
           onConfirm={handleAccountSave}
         >
-          <div className="space-y-4">
-            <input
-              type="text"
-              placeholder="Account Name"
-              value={accountName ?? ""}
-              name="fullname"
-              onChange={(e) => {
-                const value = e.target.value.replace(/[^A-Za-z\s]/g, "");
-                setDisputedHandling({ accountName: value });
-              }}
-              className="w-full border rounded-md p-2 text-sm"
-            />
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-medium text-gray-700">
+                Disputed Accounts
+              </h3>
 
-            <input
-              type="number"
-              placeholder="Account Number"
-              value={accountNumber ?? ""}
-              onChange={(e) =>
-                setDisputedHandling({ accountNumber: e.target.value })
-              }
-              className="w-full border rounded-md p-2 text-sm"
-            />
+              <button
+                type="button"
+                onClick={addRow}
+                className="text-blue-600 text-xs font-medium"
+              >
+                + Add
+              </button>
+            </div>
+            <div className="space-y-3 max-h-75 overflow-y-auto pr-1">
+              {accountRows.map((row, index) => (
+                <div
+                  key={index}
+                  className="border border-gray-200 rounded-xl p-4 bg-gray-50 space-y-3"
+                >
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-semibold text-gray-700">
+                      Account {index + 1}
+                    </h3>
+
+                    {accountRows.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removeRow(index)}
+                        className="text-red-500 text-xs font-medium"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="space-y-1">
+                      <label className="text-xs font-medium text-gray-600">
+                        Account Name
+                      </label>
+
+                      <input
+                        type="text"
+                        placeholder="Enter account name"
+                        value={row.accountName}
+                        onChange={(e) => {
+                          handleRowChange(
+                            index,
+                            "accountName",
+                            e.target.value.replace(/[^A-Za-z\s]/g, ""),
+                          );
+                        }}
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-100"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-xs font-medium text-gray-600">
+                        Account Number
+                      </label>
+
+                      <input
+                        type="text"
+                        placeholder="Enter account number"
+                        value={row.accountNumber}
+                        onChange={(e) =>
+                          handleRowChange(
+                            index,
+                            "accountNumber",
+                            e.target.value,
+                          )
+                        }
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-100"
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </PopUp>
-
-        {/* PROMPT 3A */}
 
         {showPrompt3a && (
           <div className="border rounded-xl p-6 bg-gray-50 space-y-6">
@@ -233,15 +324,21 @@ const DisputedAccountHandling = () => {
             />
 
             {supplementAvailable === "No" && (
-              <ConditionBanner
+              <EditableCondition
                 type="condition"
-                message={" Condition appears as per Branch 2."}
+                value={
+                  disputedCondition ||
+                  `Credit report reflects disputed account(s): ${accountText} and DU/LPA does not give ‘Approve/Eligible’/‘Accept/Eligible’ recommendation because of the disputed account hence, need to confirm if borrower is responsible for the accounts or if the account information is accurate or complete. Supporting documentation might be needed based on the explanation received.`
+                }
+                onChange={(value) =>
+                  setDisputedHandling({
+                    disputedCondition: value,
+                  })
+                }
               />
             )}
           </div>
         )}
-
-        {/* PROMPT 3B */}
 
         {showPrompt3b && (
           <div className="border rounded-xl p-6 bg-blue-50 space-y-6">
@@ -250,23 +347,37 @@ const DisputedAccountHandling = () => {
               Credit Supplement Validation
             </div>
 
-            {checklistItems.map((item) => (
-              <label key={item} className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={checklist?.includes(item)}
-                  onChange={() => toggleChecklist(item)}
-                />
-                <span className="text-sm">{item}</span>
-              </label>
-            ))}
-
-            {checklist?.length > 0 && (
-              <ConditionBanner
-                type="condition"
-                message={"Condition appear as per branch 3"}
+            <div className="space-y-4">
+              <DynamicChecklist
+                items={checklistItems}
+                selectedItems={checklist}
+                customItems={otherChecklist}
+                onToggle={toggleChecklist}
+                onCustomChange={setOtherChecklist}
               />
-            )}
+
+              {/* Preview condition */}
+              {(checklist?.length > 0 ||
+                otherChecklist.some((o) => o.trim())) && (
+                <EditableCondition
+                  type="condition"
+                  value={(() => {
+                    const allItems = [
+                      ...(checklist ?? []),
+                      ...otherChecklist.filter((o) => o.trim()),
+                    ];
+
+                    const lettered = allItems
+                      .map(
+                        (item, i) => `${String.fromCharCode(97 + i)}) ${item}`,
+                      )
+                      .join("\n");
+
+                    return `Credit report reflects disputed account(s): ${accountText} and DU/LPA does not give 'Approve/Eligible'/'Accept/Eligible' recommendation because of the disputed account and credit supplement reflects below issues:\n\n${lettered}\n\nUpdated credit supplement is required.`;
+                  })()}
+                />
+              )}
+            </div>
           </div>
         )}
       </div>

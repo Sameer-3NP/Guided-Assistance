@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from "react";
-import { useSectionStore } from "../../../store/SectionStore";
+import { useS2Store } from "../../../store/useS2Store";
 import { useFlowContext } from "../../../store/FlowContext";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
@@ -17,7 +17,7 @@ const CurrentAddressSummary = () => {
   const [copiedConditions, setCopiedConditions] = useState<string[]>([]);
 
   const { currentAddress, currentAddressSummary, setCurrentAddressSummary } =
-    useSectionStore();
+    useS2Store();
 
   const { addressMatch } = currentAddress;
 

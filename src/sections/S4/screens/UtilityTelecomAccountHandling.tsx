@@ -2,16 +2,17 @@ import { useEffect } from "react";
 import toast from "react-hot-toast";
 import { useFlowContext } from "../../../store/FlowContext";
 import { useNavigate } from "react-router-dom";
-import { useSectionStore } from "../../../store/SectionStore";
+import { useS4Store } from "../../../store/useS4Store";
 import PromptRadio from "../../../components/PromptRadio";
 
-import { Phone, AlertCircle } from "lucide-react";
+import { Phone } from "lucide-react";
+import EditableCondition from "../../../components/EditableCondition";
 
 const UtilityTelecomAccountHandling = () => {
   const { registerActions } = useFlowContext();
   const navigate = useNavigate();
 
-  const { utilityTelecomAccount, setUtilityTelecomAccount } = useSectionStore();
+  const { utilityTelecomAccount, setUtilityTelecomAccount } = useS4Store();
 
   const { hasUtilityAccount, paymentIncludedInDTI } = utilityTelecomAccount;
 
@@ -109,10 +110,10 @@ const UtilityTelecomAccountHandling = () => {
             )}
 
             {paymentIncludedInDTI === "Yes" && (
-              <div className="flex items-center gap-2 border border-yellow-400 bg-yellow-50 p-3 rounded-xl text-sm text-yellow-800">
-                <AlertCircle className="w-4 h-4" />
-                Update instruction appears as per Branch 1.
-              </div>
+              <EditableCondition
+                type="info"
+                value="[[Account Name_Number]] was included in VOL but it is a utility/self-reported/telecom account, therefore VOL is corrected and payment has been excluded from DTI."
+              />
             )}
           </div>
         )}
