@@ -5,7 +5,7 @@ import { useAuthStore } from "../store/useAuthStore";
 import { useAppStore } from "../store/useAppStore";
 import { sessionApi } from "../utils/sessionApi";
 import { metadataApi } from "../utils/metadataApi";
-import { restoreStoreData } from "../utils/sessionSync";
+// import { restoreStoreData } from "../utils/sessionSync";
 import { resetAllStores } from "../utils/resetAllStores";
 import toast from "react-hot-toast";
 

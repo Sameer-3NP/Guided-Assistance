@@ -5,12 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { useS4Store } from "../../../store/useS4Store";
 import PromptRadio from "../../../components/PromptRadio";
 
-import {
-  FileCheck,
-  CreditCard,
-  GraduationCap,
-  FileWarning,
-} from "lucide-react";
+import { FileCheck, GraduationCap, FileWarning } from "lucide-react";
 
 import PopUp from "../../../components/PopUp";
 import EditableCondition from "../../../components/EditableCondition";

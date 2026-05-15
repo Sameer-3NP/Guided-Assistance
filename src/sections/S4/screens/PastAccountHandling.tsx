@@ -17,27 +17,59 @@ const PastAccountHandling = () => {
 
   const { pastDueAccountHandling, setPastDueAccountHandling } = useS4Store();
 
-  const {
-    creditorName,
-    accountNumber,
-    pastDueAccount,
-    supportingDocument,
-    documentType,
-    discrepancies,
-  } = pastDueAccountHandling;
+  const { pastDueAccount, supportingDocument, documentType, discrepancies } =
+    pastDueAccountHandling;
 
-  const [showPopup, setShowPopup] = useState(true);
+  const [showPopup, setShowPopup] = useState(false);
+  const [accountRows, setAccountRows] = useState([
+    {
+      accountName: "",
+      accountNumber: "",
+    },
+  ]);
+
+  const handleRowChange = (
+    index: number,
+    field: "accountName" | "accountNumber",
+    value: string,
+  ) => {
+    const updated = [...accountRows];
+    updated[index][field] = value;
+    setAccountRows(updated);
+  };
+
+  const addRow = () => {
+    setAccountRows([...accountRows, { accountName: "", accountNumber: "" }]);
+  };
+
+  const removeRow = (index: number) => {
+    setAccountRows(accountRows.filter((_, i) => i !== index));
+  };
 
   /* ---------- POPUP SUBMIT ---------- */
 
-  const handleAccountSubmit = () => {
-    if (!creditorName || !accountNumber) {
-      toast.error("Please enter account details.");
+  const handleAccountSave = () => {
+    const validRows = accountRows.filter(
+      (r) => r.accountName.trim() && r.accountNumber.trim(),
+    );
+
+    if (validRows.length === 0) {
+      toast.error("Please add at least one account.");
       return;
     }
 
+    setPastDueAccountHandling({
+      accounts: validRows,
+    });
+
     setShowPopup(false);
   };
+
+  const accountText = pastDueAccountHandling.accounts?.length
+    ? pastDueAccountHandling.accounts
+        .map((a) => `${a.accountName}#${a.accountNumber}`)
+        .join(", ")
+    : "[Account Name_Number]";
 
   /* ---------- CONTINUE ---------- */
 
@@ -60,9 +92,7 @@ const PastAccountHandling = () => {
     if (!documentType) return toast.error("Please select document type.");
 
     if (discrepancies.length > 0) {
-      toast.error(
-        `Condition appears as per Branch 2 (${creditorName} / ${accountNumber})`,
-      );
+      toast.error(`Condition appears as per Branch 2 ${accountText} `);
     }
 
     navigate("/s4/liability-paid-off");
@@ -91,39 +121,76 @@ const PastAccountHandling = () => {
 
         <PopUp
           open={showPopup}
-          title="Past Due Account Details"
+          title="Update Mortgage Accounts"
           icon={<FileWarning className="w-5 h-5 text-blue-500" />}
-          onConfirm={handleAccountSubmit}
-          confirmText="Continue"
+          confirmText="Save"
+          onClose={() => setShowPopup(false)}
+          onConfirm={handleAccountSave}
         >
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium">Creditor name</label>
-              <input
-                type="text"
-                value={creditorName ?? ""}
-                onChange={(e) => {
-                  const value = e.target.value.replace(/[^A-Za-z\s]/g, "");
-                  setPastDueAccountHandling({
-                    creditorName: value,
-                  });
-                }}
-                className="w-full mt-1 border rounded-md p-2 text-sm"
-              />
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-medium text-gray-700">
+                Mortgage Accounts
+              </h3>
+
+              <button
+                type="button"
+                onClick={addRow}
+                className="text-blue-600 text-xs font-medium"
+              >
+                + Add
+              </button>
             </div>
 
-            <div>
-              <label className="text-sm font-medium">Account Number</label>
-              <input
-                type="number"
-                value={accountNumber ?? ""}
-                onChange={(e) =>
-                  setPastDueAccountHandling({
-                    accountNumber: e.target.value,
-                  })
-                }
-                className="w-full mt-1 border rounded-md p-2 text-sm"
-              />
+            <div className="space-y-3 max-h-75 overflow-y-auto pr-1">
+              {accountRows.map((row, index) => (
+                <div
+                  key={index}
+                  className="border border-gray-200 rounded-xl p-4 bg-gray-50 space-y-3"
+                >
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-semibold text-gray-700">
+                      Account {index + 1}
+                    </h3>
+
+                    {accountRows.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removeRow(index)}
+                        className="text-red-500 text-xs font-medium"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <input
+                      type="text"
+                      placeholder="Account name"
+                      value={row.accountName}
+                      onChange={(e) =>
+                        handleRowChange(
+                          index,
+                          "accountName",
+                          e.target.value.replace(/[^A-Za-z\s]/g, ""),
+                        )
+                      }
+                      className="w-full border rounded-lg px-3 py-2 text-sm"
+                    />
+
+                    <input
+                      type="text"
+                      placeholder="Account number"
+                      value={row.accountNumber}
+                      onChange={(e) =>
+                        handleRowChange(index, "accountNumber", e.target.value)
+                      }
+                      className="w-full border rounded-lg px-3 py-2 text-sm"
+                    />
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </PopUp>
@@ -135,11 +202,12 @@ const PastAccountHandling = () => {
             label="Does credit report reflect any account which has past due balance but not in collection or charged off?"
             value={pastDueAccount}
             options={["Yes", "No"]}
-            onChange={(v) =>
+            onChange={(v) => {
               setPastDueAccountHandling({
                 pastDueAccount: v,
-              })
-            }
+              });
+              if (v === "Yes") setShowPopup(true);
+            }}
           />
 
           {pastDueAccount === "No" && (
@@ -167,7 +235,7 @@ const PastAccountHandling = () => {
             {supportingDocument === "No" && (
               <EditableCondition
                 type="condition"
-                value="Tradeline [[Account name_Number]] is reflecting past due. Provide credit supplement to bring the past due account as current and also provide the source of funds."
+                value={`Tradeline ${accountText} is reflecting past due. Provide credit supplement to bring the past due account as current and also provide the source of funds.`}
               />
             )}
           </div>

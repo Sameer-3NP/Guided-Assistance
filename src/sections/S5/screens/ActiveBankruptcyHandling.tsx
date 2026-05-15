@@ -8,6 +8,8 @@ import PromptRadio from "../../../components/PromptRadio";
 import PopUp from "../../../components/PopUp";
 
 import { AlertTriangle, FileWarning } from "lucide-react";
+import EditableCondition from "../../../components/EditableCondition";
+import CheckboxGroup from "../../../components/CheckboxGroup";
 
 const ActiveBankruptcyHandling = () => {
   const { registerActions } = useFlowContext();
@@ -60,10 +62,6 @@ const ActiveBankruptcyHandling = () => {
       toast("Alert appears as per Branch 2. Escalate to management.", {
         icon: "⚠️",
       });
-    }
-
-    if (supportingDocument === "No") {
-      toast.error("Condition appears as per Branch 1.");
     }
 
     navigate("/s5/bankruptcy-waiting-period");
@@ -119,9 +117,9 @@ const ActiveBankruptcyHandling = () => {
 
         {hasActiveBankruptcy === "Yes" && (
           <div className="border rounded-xl p-6 bg-gray-50 space-y-6">
-            <PromptRadio
+            <CheckboxGroup
               label="Which bankruptcy is active on credit report?"
-              value={bankruptcyType}
+              values={bankruptcyType || []}
               options={[
                 "Chapter 7 Bankruptcy",
                 "Chapter 13 Bankruptcy",
@@ -131,7 +129,10 @@ const ActiveBankruptcyHandling = () => {
                 setActiveBankruptcyHandling({
                   bankruptcyType: v,
                 });
-                setShowPopup(true);
+
+                if (v.length > 0) {
+                  setShowPopup(true);
+                }
               }}
             />
           </div>
@@ -197,6 +198,20 @@ const ActiveBankruptcyHandling = () => {
                 })
               }
             />
+
+            {supportingDocument === "Yes" && (
+              <EditableCondition
+                type="alert"
+                value="Bankruptcy/other documents available should be reviewed by management to check if the loan is eligible to proceed further."
+              />
+            )}
+
+            {supportingDocument === "No" && (
+              <EditableCondition
+                type="condition"
+                value={`Credit Report and/ or Lien and Judgment Report reflects active [bankruptcy 7/13/11] with [Case Number and Bankruptcy date] in public record section. Hence, loan is ineligible as per the guidelines. Provide supporting document to validate that loan is eligible`}
+              />
+            )}
           </div>
         )}
       </div>

@@ -6,7 +6,12 @@ import { persist } from "zustand/middleware";
 
 type ActiveBankruptcyHandling = {
   hasActiveBankruptcy: string | null;
-  bankruptcyType: string | null;
+  bankruptcyType: string[];
+  bankruptcyDetails: {
+    type: string;
+    caseNumber: string;
+    bankruptcyDate: string;
+  }[];
   cases: {
     caseNumber: string;
     bankruptcyDate: string;
@@ -21,7 +26,7 @@ type ActiveBankruptcyHandling = {
 
 type BankruptcyWaitingValidation = {
   hasInactiveBankruptcy: string | null;
-  bankruptcyType: string | null;
+  bankruptcyType: string[];
   caseNumber: string;
   dischargedDate: string;
   waitingPeriod4Years: string | null;
@@ -29,7 +34,7 @@ type BankruptcyWaitingValidation = {
   lenderRequirement: string | null;
   bankruptcyDocumentAvailable: string | null;
   extenuatingDocuments: string | null;
-  dismissedOrDischarged: string | null;
+  dismissedOrDischarged: string[] | null;
   escalatedToManagement: boolean;
 };
 
@@ -43,6 +48,11 @@ type MortgageDerogatoryEventHandling = {
     creditorName: string;
     accountNumber: string;
   };
+
+  accountRows: {
+    creditorName: string;
+    accountNumber: string;
+  }[];
 
   foreclosureDocsAvailable: string | null;
   foreclosureDocTypes: string[];
@@ -161,16 +171,17 @@ const initialS5State: {
 } = {
   activeBankruptcyHandling: {
     hasActiveBankruptcy: null,
-    bankruptcyType: null,
-    cases: [],
+    bankruptcyType: [],
+    bankruptcyDetails: [],
     selectedCase: { caseNumber: "", bankruptcyDate: "" },
+    cases: [],
     supportingDocument: null,
     escalatedToManagement: false,
   },
 
   bankruptcyWaitingValidation: {
     hasInactiveBankruptcy: null,
-    bankruptcyType: null,
+    bankruptcyType: [],
     caseNumber: "",
     dischargedDate: "",
     waitingPeriod4Years: null,
@@ -178,7 +189,7 @@ const initialS5State: {
     lenderRequirement: null,
     bankruptcyDocumentAvailable: null,
     extenuatingDocuments: null,
-    dismissedOrDischarged: null,
+    dismissedOrDischarged: [],
     escalatedToManagement: false,
   },
 
@@ -186,6 +197,13 @@ const initialS5State: {
     derogatoryTypes: [],
     accounts: [],
     selectedAccount: { creditorName: "", accountNumber: "" },
+
+    accountRows: [
+      {
+        creditorName: "",
+        accountNumber: "",
+      },
+    ],
 
     foreclosureDocsAvailable: null,
     foreclosureDocTypes: [],

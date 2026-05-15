@@ -18,26 +18,63 @@ const DelinquencyLateHandling = () => {
   const { delinquencyLateHandling, setDelinquencyLateHandling } = useS4Store();
 
   const {
-    creditorName,
-    accountNumber,
     latePaymentLast12Months,
     lateAccountTypes,
     lenderRequireExplanation,
+    conditionMsg,
   } = delinquencyLateHandling;
 
-  const [showPopup, setShowPopup] = useState(true);
+  const [showPopup, setShowPopup] = useState(false);
+
+  const [accountRows, setAccountRows] = useState([
+    {
+      accountName: "",
+      accountNumber: "",
+    },
+  ]);
+
+  const handleRowChange = (
+    index: number,
+    field: "accountName" | "accountNumber",
+    value: string,
+  ) => {
+    const updated = [...accountRows];
+    updated[index][field] = value;
+    setAccountRows(updated);
+  };
+
+  const addRow = () => {
+    setAccountRows([...accountRows, { accountName: "", accountNumber: "" }]);
+  };
+
+  const removeRow = (index: number) => {
+    setAccountRows(accountRows.filter((_, i) => i !== index));
+  };
 
   /* ---------- POPUP SUBMIT ---------- */
 
-  const handleAccountSubmit = () => {
-    if (!creditorName || !accountNumber) {
-      toast.error("Please enter account details.");
+  const handleAccountSave = () => {
+    const validRows = accountRows.filter(
+      (r) => r.accountName.trim() && r.accountNumber.trim(),
+    );
+
+    if (validRows.length === 0) {
+      toast.error("Please add at least one account.");
       return;
     }
+
+    setDelinquencyLateHandling({
+      accounts: validRows,
+    });
 
     setShowPopup(false);
   };
 
+  const accountText = delinquencyLateHandling.accounts?.length
+    ? delinquencyLateHandling.accounts
+        .map((a) => `${a.accountName}_${a.accountNumber}`)
+        .join(", ")
+    : "[Account Name_Number]";
   /* ---------- CONTINUE ---------- */
 
   const handleContinue = () => {
@@ -83,43 +120,79 @@ const DelinquencyLateHandling = () => {
 
         <PopUp
           open={showPopup}
-          title="Delinquent Account Details"
+          title="Update Mortgage Accounts"
           icon={<FileWarning className="w-5 h-5 text-blue-500" />}
-          onConfirm={handleAccountSubmit}
-          confirmText="Continue"
+          confirmText="Save"
+          onClose={() => setShowPopup(false)}
+          onConfirm={handleAccountSave}
         >
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium">Creditor name</label>
-              <input
-                type="text"
-                value={creditorName ?? ""}
-                onChange={(e) => {
-                  const value = e.target.value.replace(/[^A-Za-z\s]/g, "");
-                  setDelinquencyLateHandling({
-                    creditorName: value,
-                  });
-                }}
-                className="w-full mt-1 border rounded-md p-2 text-sm"
-              />
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-medium text-gray-700">
+                Mortgage Accounts
+              </h3>
+
+              <button
+                type="button"
+                onClick={addRow}
+                className="text-blue-600 text-xs font-medium"
+              >
+                + Add
+              </button>
             </div>
 
-            <div>
-              <label className="text-sm font-medium">Account Number</label>
-              <input
-                type="number"
-                value={accountNumber ?? ""}
-                onChange={(e) =>
-                  setDelinquencyLateHandling({
-                    accountNumber: e.target.value,
-                  })
-                }
-                className="w-full mt-1 border rounded-md p-2 text-sm"
-              />
+            <div className="space-y-3 max-h-75 overflow-y-auto pr-1">
+              {accountRows.map((row, index) => (
+                <div
+                  key={index}
+                  className="border border-gray-200 rounded-xl p-4 bg-gray-50 space-y-3"
+                >
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-semibold text-gray-700">
+                      Account {index + 1}
+                    </h3>
+
+                    {accountRows.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removeRow(index)}
+                        className="text-red-500 text-xs font-medium"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <input
+                      type="text"
+                      placeholder="Account name"
+                      value={row.accountName}
+                      onChange={(e) =>
+                        handleRowChange(
+                          index,
+                          "accountName",
+                          e.target.value.replace(/[^A-Za-z\s]/g, ""),
+                        )
+                      }
+                      className="w-full border rounded-lg px-3 py-2 text-sm"
+                    />
+
+                    <input
+                      type="text"
+                      placeholder="Account number"
+                      value={row.accountNumber}
+                      onChange={(e) =>
+                        handleRowChange(index, "accountNumber", e.target.value)
+                      }
+                      className="w-full border rounded-lg px-3 py-2 text-sm"
+                    />
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </PopUp>
-
         {/* PROMPT 1 */}
 
         <div className="border rounded-xl p-6 bg-gray-50 space-y-6">
@@ -149,25 +222,19 @@ const DelinquencyLateHandling = () => {
               label="Does late payment reflect on Mortgage account or non-mortgage account? (select all that apply)"
               options={["Mortgage account", "Non-Mortgage account"]}
               values={lateAccountTypes}
-              onChange={(v) =>
+              onChange={(v) => {
                 setDelinquencyLateHandling({
                   lateAccountTypes: v,
-                })
-              }
+                });
+
+                // 👉 OPEN POPUP WHEN MORTGAGE IS SELECTED
+                if (v.includes("Mortgage account")) {
+                  setShowPopup(true);
+                }
+              }}
             />
-
-            {/* BRANCH ALERT */}
-
-            {lateAccountTypes.includes("Mortgage account") && (
-              <EditableCondition
-                type="alert"
-                value="Mortgage Lien [[Account Name_Number]] has more than 30 days lates reported. Please review the credit delinquencies as per client requirement and proceed accordingly."
-              />
-            )}
           </div>
         )}
-
-        {/* PROMPT 2a */}
 
         {lateAccountTypes.includes("Mortgage account") && (
           <div className="border rounded-xl p-6 bg-gray-50 space-y-6">
@@ -185,9 +252,29 @@ const DelinquencyLateHandling = () => {
             {lenderRequireExplanation === "Yes" && (
               <EditableCondition
                 type="condition"
-                value="Mortgage Lien [[Account Name_Number]] has more than 30 days lates reported and explanation from borrower is required for multiple lates noted in last 12 months."
+                value={
+                  conditionMsg ||
+                  `Mortgage Lien ${accountText} has more than 30 days lates reported and explanation from borrower is required for multiple lates noted in last 12 months.`
+                }
+                onChange={(v) =>
+                  setDelinquencyLateHandling({
+                    conditionMsg: v,
+                  })
+                }
               />
             )}
+
+            {lenderRequireExplanation === "No" && (
+              <div className="border border-green-400 bg-green-50 p-3 rounded-2xl text-sm text-green-700">
+                ✔ Proceed to next screen 4.9
+              </div>
+            )}
+          </div>
+        )}
+
+        {lateAccountTypes.includes("Non-Mortgage account") && (
+          <div className="border border-green-400 bg-green-50 p-3 rounded-2xl text-sm text-green-700">
+            ✔ Proceed to next screen 4.9
           </div>
         )}
       </div>

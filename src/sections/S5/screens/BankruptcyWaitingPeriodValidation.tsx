@@ -8,6 +8,7 @@ import PromptRadio from "../../../components/PromptRadio";
 import PopUp from "../../../components/PopUp";
 
 import { AlertTriangle, FileWarning } from "lucide-react";
+import CheckboxGroup from "../../../components/CheckboxGroup";
 
 const BankruptcyWaitingPeriodValidation = () => {
   const { registerActions } = useFlowContext();
@@ -101,9 +102,9 @@ const BankruptcyWaitingPeriodValidation = () => {
         {/* PROMPT 2 */}
         {hasInactiveBankruptcy === "Yes" && (
           <div className="border rounded-xl p-6 bg-gray-50 space-y-4 ">
-            <PromptRadio
+            <CheckboxGroup
               label="Select bankruptcy type reflected in credit report?"
-              value={bankruptcyType}
+              values={bankruptcyType || []}
               options={[
                 "Chapter 7 Bankruptcy",
                 "Chapter 13 Bankruptcy",
@@ -160,7 +161,7 @@ const BankruptcyWaitingPeriodValidation = () => {
           </div>
         </PopUp>
         {/* ---------------- CHAPTER 7 FLOW ---------------- */}
-        {bankruptcyType === "Chapter 7 Bankruptcy" && (
+        {bankruptcyType.includes("Chapter 7 Bankruptcy") && (
           <div className="border rounded-xl p-6 bg-gray-50 space-y-6">
             {/* Prompt 2a */}
 
@@ -209,8 +210,8 @@ const BankruptcyWaitingPeriodValidation = () => {
 
                 {bankruptcyDocumentAvailable === "Yes" && (
                   <div className="border border-yellow-400 bg-yellow-50 rounded-xl p-4 text-sm text-yellow-800">
-                    ⚠ Alert appears as per Branch 8. Escalate alert to
-                    management for review before proceeding.
+                    Management to review bankruptcy documents available in file
+                    to validate the acceptability of the documents.
                   </div>
                 )}
 
@@ -218,7 +219,11 @@ const BankruptcyWaitingPeriodValidation = () => {
 
                 {bankruptcyDocumentAvailable === "No" && (
                   <div className="border border-red-400 bg-red-50 rounded-xl p-4 text-sm text-red-700">
-                    ❗ Condition appears as per Branch 1.
+                    Chapter 7 Bankruptcy is noted in public records section on
+                    credit report and waiting period is met however, as per
+                    lender's requirement complete bankruptcy document is
+                    required on the loan. Please provide the complete bankruptcy
+                    document.
                   </div>
                 )}
               </div>
@@ -243,7 +248,9 @@ const BankruptcyWaitingPeriodValidation = () => {
 
                 {waitingPeriod2Years === "No" && (
                   <div className="border border-red-400 bg-red-50 rounded-xl p-4 text-sm text-red-700">
-                    ❗ Condition appears as per Branch 4.
+                    Credit report and/or Lien and Judgment Report reflects
+                    Chapter 7 bankruptcy and the required 4-year waiting period
+                    is not met. Loan is ineligible as per the guidelines.
                   </div>
                 )}
 
@@ -266,8 +273,9 @@ const BankruptcyWaitingPeriodValidation = () => {
 
                     {extenuatingDocuments === "Yes" && (
                       <div className="border border-yellow-400 bg-yellow-50 rounded-xl p-4 text-sm text-yellow-800">
-                        ⚠ Alert appears as per Branch 9. Escalate alert to
-                        management for review.
+                        Management to review extenuating circumstances documents
+                        available in file to validate the acceptability of the
+                        documents and see if loan is acceptable.
                       </div>
                     )}
 
@@ -275,7 +283,10 @@ const BankruptcyWaitingPeriodValidation = () => {
 
                     {extenuatingDocuments === "No" && (
                       <div className="border border-red-400 bg-red-50 rounded-xl p-4 text-sm text-red-700">
-                        ❗ Condition appears as per Branch 4.
+                        Credit report and/or Lien and Judgment Report reflects
+                        Chapter 7 bankruptcy and the required 4-year waiting
+                        period is not met. Loan is ineligible as per the
+                        guidelines.
                       </div>
                     )}
                   </div>
@@ -285,13 +296,13 @@ const BankruptcyWaitingPeriodValidation = () => {
           </div>
         )}
         {/* ---------------- CHAPTER 13 FLOW ---------------- */}
-        {bankruptcyType === "Chapter 13 Bankruptcy" && (
+        {bankruptcyType.includes("Chapter 13 Bankruptcy") && (
           <div className="border rounded-xl p-6 bg-gray-50 space-y-6">
             {/* Prompt 3a */}
 
-            <PromptRadio
+            <CheckboxGroup
               label="Is Chapter 13 bankruptcy discharged or dismissed?"
-              value={dismissedOrDischarged}
+              values={dismissedOrDischarged || []}
               options={["Dismissed", "Discharged"]}
               onChange={(v) =>
                 setBankruptcyWaitingValidation({
@@ -302,7 +313,7 @@ const BankruptcyWaitingPeriodValidation = () => {
 
             {/* ---------------- DISMISSED FLOW ---------------- */}
 
-            {dismissedOrDischarged === "Dismissed" && (
+            {dismissedOrDischarged?.includes("Dismissed") && (
               <div className="space-y-6">
                 {/* Prompt 3b */}
 
@@ -337,7 +348,11 @@ const BankruptcyWaitingPeriodValidation = () => {
                 {waitingPeriod4Years === "Yes" &&
                   lenderRequirement === "Yes" && (
                     <div className="border border-red-400 bg-red-50 rounded-xl p-4 text-sm text-red-700">
-                      ❗ Condition appears as per Branch 3
+                      Chapter 13 Bankruptcy is noted in public records section
+                      on credit report and waiting period is met however, as per
+                      lender's requirement complete bankruptcy document is
+                      required on the loan. Please provide the complete
+                      bankruptcy document.
                     </div>
                   )}
 
@@ -360,7 +375,9 @@ const BankruptcyWaitingPeriodValidation = () => {
 
                     {waitingPeriod2Years === "No" && (
                       <div className="border border-red-400 bg-red-50 rounded-xl p-4 text-sm text-red-700">
-                        ❗ Condition appears as per Branch 6
+                        Credit report reflects Chapter 13 dismissed bankruptcy
+                        and required 4-year waiting period is not met. Loan is
+                        ineligible as per the guidelines.
                       </div>
                     )}
 
@@ -383,8 +400,10 @@ const BankruptcyWaitingPeriodValidation = () => {
 
                         {extenuatingDocuments === "Yes" && (
                           <div className="border border-yellow-400 bg-yellow-50 rounded-xl p-4 text-sm text-yellow-800">
-                            ⚠ Alert appears as per Branch 9. Escalate to
-                            management for review.
+                            Management to review extenuating circumstances
+                            documents available in file to validate the
+                            acceptability of the documents and see if loan is
+                            acceptable.
                           </div>
                         )}
 
@@ -392,7 +411,9 @@ const BankruptcyWaitingPeriodValidation = () => {
 
                         {extenuatingDocuments === "No" && (
                           <div className="border border-red-400 bg-red-50 rounded-xl p-4 text-sm text-red-700">
-                            ❗ Condition appears as per Branch 6
+                            Credit report reflects Chapter 13 dismissed
+                            bankruptcy and required 4-year waiting period is not
+                            met. Loan is ineligible as per the guidelines.
                           </div>
                         )}
                       </div>
@@ -404,7 +425,7 @@ const BankruptcyWaitingPeriodValidation = () => {
 
             {/* ---------------- DISCHARGED FLOW ---------------- */}
 
-            {dismissedOrDischarged === "Discharged" && (
+            {dismissedOrDischarged?.includes("Discharged") && (
               <div className="space-y-6">
                 {/* Prompt 3f */}
 
@@ -423,7 +444,9 @@ const BankruptcyWaitingPeriodValidation = () => {
 
                 {waitingPeriod2Years === "No" && (
                   <div className="border border-red-400 bg-red-50 rounded-xl p-4 text-sm text-red-700">
-                    ❗ Condition appears as per Branch 5
+                    Credit report reflects Chapter 13 bankruptcy and required
+                    2-year waiting period is not met. Loan is ineligible as per
+                    the guidelines
                   </div>
                 )}
 
@@ -446,7 +469,11 @@ const BankruptcyWaitingPeriodValidation = () => {
 
                     {lenderRequirement === "Yes" && (
                       <div className="border border-red-400 bg-red-50 rounded-xl p-4 text-sm text-red-700">
-                        ❗ Condition appears as per Branch 2
+                        Chapter 13 Bankruptcy is noted in public records section
+                        on credit report and waiting period is met however, as
+                        per lender's requirement complete bankruptcy document is
+                        required on the loan. Please provide the complete
+                        bankruptcy document.
                       </div>
                     )}
                   </div>
@@ -457,7 +484,7 @@ const BankruptcyWaitingPeriodValidation = () => {
         )}
 
         {/* ---------------- CHAPTER 11 FLOW ---------------- */}
-        {bankruptcyType === "Chapter 11 Bankruptcy" && (
+        {bankruptcyType.includes("Chapter 11 Bankruptcy") && (
           <div className="border rounded-xl p-6 bg-gray-50 space-y-6">
             {/* Prompt 4a */}
 
@@ -508,8 +535,8 @@ const BankruptcyWaitingPeriodValidation = () => {
 
                 {bankruptcyDocumentAvailable === "Yes" && (
                   <div className="border border-yellow-400 bg-yellow-50 rounded-xl p-4 text-sm text-yellow-800">
-                    ⚠ Alert appears as per Branch 8. Escalate alert to
-                    management for review.
+                    Management to review bankruptcy documents available in file
+                    to validate the acceptability of the documents.
                   </div>
                 )}
 
@@ -517,7 +544,11 @@ const BankruptcyWaitingPeriodValidation = () => {
 
                 {bankruptcyDocumentAvailable === "No" && (
                   <div className="border border-red-400 bg-red-50 rounded-xl p-4 text-sm text-red-700">
-                    ❗ Condition appears as per Branch 10
+                    Chapter 11 Bankruptcy is noted in public records section on
+                    credit report and waiting period is met however, as per
+                    lender's requirement complete bankruptcy document is
+                    required on the loan. Please provide the complete bankruptcy
+                    document.
                   </div>
                 )}
               </div>
@@ -544,7 +575,9 @@ const BankruptcyWaitingPeriodValidation = () => {
 
                 {waitingPeriod2Years === "No" && (
                   <div className="border border-red-400 bg-red-50 rounded-xl p-4 text-sm text-red-700">
-                    ❗ Condition appears as per Branch 11
+                    Credit report and/or Lien and Judgment Report reflects
+                    Chapter 11 bankruptcy and required 4-year waiting period is
+                    not met. Loan is ineligible as per the guidelines.
                   </div>
                 )}
 
@@ -567,8 +600,9 @@ const BankruptcyWaitingPeriodValidation = () => {
 
                     {extenuatingDocuments === "Yes" && (
                       <div className="border border-yellow-400 bg-yellow-50 rounded-xl p-4 text-sm text-yellow-800">
-                        ⚠ Alert appears as per Branch 9. Escalate alert to
-                        management for review.
+                        Management to review extenuating circumstances documents
+                        available in file to validate the acceptability of the
+                        documents and see if loan is acceptable.
                       </div>
                     )}
 
@@ -576,7 +610,9 @@ const BankruptcyWaitingPeriodValidation = () => {
 
                     {extenuatingDocuments === "No" && (
                       <div className="border border-red-400 bg-red-50 rounded-xl p-4 text-sm text-red-700">
-                        ❗ Condition appears as per Branch 11
+                        Credit report and/or Lien and Judgment Report reflects
+                        Chapter 11 bankruptcy and required 4-year waiting period
+                        is not met. Loan is ineligible as per the guidelines.
                       </div>
                     )}
                   </div>

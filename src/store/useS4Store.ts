@@ -83,6 +83,7 @@ type PaymentHistoryRecencyValidation = {
     hasSupportingDocs: string | null;
     documents: string[];
     discrepancies: string[];
+    conditionText: string;
   };
   reoProperty: {
     dlaMoreThan45Days: string | null;
@@ -90,14 +91,19 @@ type PaymentHistoryRecencyValidation = {
   nonMortgageLien: {
     dlaMoreThan90Days: string | null;
   };
+
+  otherChecklist: string[];
 };
 
 type DelinquencyLateHandling = {
-  creditorName: string;
-  accountNumber: string;
+  accounts: {
+    accountName: string;
+    accountNumber: string;
+  }[];
   latePaymentLast12Months: string | null;
   lateAccountTypes: string[];
   lenderRequireExplanation: string | null;
+  conditionMsg: string;
 };
 
 type AuthorizedUserAccountHandling = {
@@ -113,17 +119,23 @@ type AuthorizedUserAccountHandling = {
 };
 
 type DuplicateTradelineHandling = {
-  creditorName: string;
-  accountNumber: string;
+  accounts: {
+    accountName: string;
+    accountNumber: string;
+  }[];
   duplicateAccount: string | null;
   qualifiesWithBothAccounts: string | null;
   creditSupplementAvailable: string | null;
   supplementFailures: string[];
+  otherSupplementFailures: string[];
+  supplementCondition: string;
 };
 
 type PastDueAccountHandling = {
-  creditorName: string;
-  accountNumber: string;
+  accounts: {
+    accountName: string;
+    accountNumber: string;
+  }[];
   pastDueAccount: string | null;
   supportingDocument: string | null;
   documentType: string[];
@@ -137,14 +149,32 @@ type LiabilityPaidOffHandling = {
   documentType: string[];
   discrepancies: string[];
   latestCreditReport: string | null;
+  conditionMsg: string;
+  revolvingAccountStatus: string;
+  checklist: string[];
+  otherChecklist: string[];
   accounts: {
     creditorName: string;
     accountNumber: string;
   }[];
+
+  // Account selected when supportingDocument = "Yes" (InstallmentHandling & RevolvingHandling)
   selectedAccount: {
     creditorName: string;
     accountNumber: string;
-  };
+  } | null;
+
+  // Account selected when supportingDocument = "No" → drives Condition 1 (InstallmentHandling)
+  noDocAccount: {
+    creditorName: string;
+    accountNumber: string;
+  } | null;
+
+  // Account selected for Condition 2 dropdown (InstallmentHandling)
+  condition2Account: {
+    creditorName: string;
+    accountNumber: string;
+  } | null;
 };
 
 type ChildSupportHandling = {
@@ -152,18 +182,27 @@ type ChildSupportHandling = {
   dlaLessThan7Years: string | null;
   supportingDocument: string | null;
   documentType: string[];
-  discrepancies: string[];
   lenderRequirement: string | null;
+
   accounts: {
     creditorName: string;
     accountNumber: string;
     balance: string;
   }[];
+
   selectedAccount?: {
     creditorName: string;
     accountNumber: string;
     balance: string;
   };
+
+  // ✅ FIX: separate checklist control
+  checklist: string[]; // fixed checklist
+  customAgreementChecklist: string[];
+  customDivorceChecklist: string[];
+  conditionMsg?: string | null;
+  agreementDiscrepancies: string[];
+  divorceDiscrepancies: string[];
 };
 
 type ChecklistItems = {
@@ -382,17 +421,19 @@ const initialS4State = {
       hasSupportingDocs: null,
       documents: [] as string[],
       discrepancies: [] as string[],
+      conditionText: "",
     },
     reoProperty: { dlaMoreThan45Days: null },
     nonMortgageLien: { dlaMoreThan90Days: null },
+    otherChecklist: [] as string[],
   },
 
   delinquencyLateHandling: {
-    creditorName: "",
-    accountNumber: "",
+    accounts: [],
     latePaymentLast12Months: null,
     lateAccountTypes: [] as string[],
     lenderRequireExplanation: null,
+    conditionMsg: "",
   },
 
   authorizedUserAccountHandling: {
@@ -408,17 +449,17 @@ const initialS4State = {
   },
 
   duplicateTradelineHandling: {
-    creditorName: "",
-    accountNumber: "",
+    accounts: [],
     duplicateAccount: null,
     qualifiesWithBothAccounts: null,
     creditSupplementAvailable: null,
     supplementFailures: [] as string[],
+    otherSupplementFailures: [] as string[],
+    supplementCondition: "",
   },
 
   pastDueAccountHandling: {
-    creditorName: "",
-    accountNumber: "",
+    accounts: [],
     pastDueAccount: null,
     supportingDocument: null,
     documentType: [] as string[],
@@ -432,8 +473,14 @@ const initialS4State = {
     documentType: [] as string[],
     discrepancies: [] as string[],
     latestCreditReport: null,
+    revolvingAccountStatus: "",
+    checklist: [] as string[],
+    otherChecklist: [] as string[],
+    conditionMsg: "",
     accounts: [] as { creditorName: string; accountNumber: string }[],
     selectedAccount: { creditorName: "", accountNumber: "" },
+    noDocAccount: { creditorName: "", accountNumber: "" },
+    condition2Account: { creditorName: "", accountNumber: "" },
   },
 
   childSupportHandling: {
@@ -441,10 +488,15 @@ const initialS4State = {
     dlaLessThan7Years: null,
     supportingDocument: null,
     documentType: [] as string[],
-    discrepancies: [] as string[],
+    agreementDiscrepancies: [] as string[],
+    divorceDiscrepancies: [] as string[],
     lenderRequirement: null,
     accounts: [],
     selectedAccount: undefined,
+    checklist: [] as string[],
+    customAgreementChecklist: [] as string[],
+    customDivorceChecklist: [] as string[],
+    conditionMsg: "",
   },
 
   excludedTradelineValidation: {

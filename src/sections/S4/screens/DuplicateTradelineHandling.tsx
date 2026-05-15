@@ -5,11 +5,11 @@ import { useNavigate } from "react-router-dom";
 import { useS4Store } from "../../../store/useS4Store";
 
 import PromptRadio from "../../../components/PromptRadio";
-import CheckboxGroup from "../../../components/CheckboxGroup";
 import PopUp from "../../../components/PopUp";
 
 import { AlertTriangle, FileWarning } from "lucide-react";
 import EditableCondition from "../../../components/EditableCondition";
+import DynamicChecklist from "../../../components/DynamicChecklist";
 
 const DuplicateTradelineHandling = () => {
   const { registerActions } = useFlowContext();
@@ -18,28 +18,77 @@ const DuplicateTradelineHandling = () => {
   const { duplicateTradelineHandling, setDuplicateTradelineHandling } =
     useS4Store();
 
+  const [accountRows, setAccountRows] = useState([
+    {
+      accountName: "",
+      accountNumber: "",
+    },
+  ]);
   const {
-    creditorName,
-    accountNumber,
     duplicateAccount,
     qualifiesWithBothAccounts,
     creditSupplementAvailable,
-    supplementFailures,
+    supplementFailures = [],
+    otherSupplementFailures = [],
   } = duplicateTradelineHandling;
 
-  const [showPopup, setShowPopup] = useState(true);
+  const [showPopup, setShowPopup] = useState(false);
+
+  const setOtherSupplementFailures = (
+    updater: string[] | ((prev: string[]) => string[]),
+  ) => {
+    const next =
+      typeof updater === "function"
+        ? updater(otherSupplementFailures)
+        : updater;
+
+    setDuplicateTradelineHandling({
+      otherSupplementFailures: next,
+    });
+  };
+
+  const handleRowChange = (
+    index: number,
+    field: "accountName" | "accountNumber",
+    value: string,
+  ) => {
+    const updated = [...accountRows];
+    updated[index][field] = value;
+    setAccountRows(updated);
+  };
+
+  const addRow = () => {
+    setAccountRows([...accountRows, { accountName: "", accountNumber: "" }]);
+  };
+
+  const removeRow = (index: number) => {
+    setAccountRows(accountRows.filter((_, i) => i !== index));
+  };
 
   /* ---------- POPUP SUBMIT ---------- */
 
-  const handleAccountSubmit = () => {
-    if (!creditorName || !accountNumber) {
-      toast.error("Please enter account details.");
+  const handleAccountSave = () => {
+    const validRows = accountRows.filter(
+      (r) => r.accountName.trim() && r.accountNumber.trim(),
+    );
+
+    if (validRows.length === 0) {
+      toast.error("Please add at least one account.");
       return;
     }
+
+    setDuplicateTradelineHandling({
+      accounts: validRows,
+    });
 
     setShowPopup(false);
   };
 
+  const accountText = duplicateTradelineHandling.accounts?.length
+    ? duplicateTradelineHandling.accounts
+        .map((a) => `${a.accountName}_${a.accountNumber}`)
+        .join(", ")
+    : "[Account Name_Number]";
   /* ---------- CONTINUE ---------- */
 
   const handleContinue = () => {
@@ -103,37 +152,73 @@ const DuplicateTradelineHandling = () => {
           open={showPopup}
           title="Duplicate Account Details"
           icon={<FileWarning className="w-5 h-5 text-blue-500" />}
-          onConfirm={handleAccountSubmit}
+          onConfirm={handleAccountSave}
           confirmText="Continue"
         >
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium">Creditor name</label>
-              <input
-                type="text"
-                value={creditorName ?? ""}
-                onChange={(e) => {
-                  const value = e.target.value.replace(/[^A-Za-z\s]/g, "");
-                  setDuplicateTradelineHandling({
-                    creditorName: value,
-                  });
-                }}
-                className="w-full mt-1 border rounded-md p-2 text-sm"
-              />
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-medium text-gray-700">
+                Mortgage Accounts
+              </h3>
+
+              <button
+                type="button"
+                onClick={addRow}
+                className="text-blue-600 text-xs font-medium"
+              >
+                + Add
+              </button>
             </div>
 
-            <div>
-              <label className="text-sm font-medium">Account Number</label>
-              <input
-                type="number"
-                value={accountNumber ?? ""}
-                onChange={(e) =>
-                  setDuplicateTradelineHandling({
-                    accountNumber: e.target.value,
-                  })
-                }
-                className="w-full mt-1 border rounded-md p-2 text-sm"
-              />
+            <div className="space-y-3 max-h-75 overflow-y-auto pr-1">
+              {accountRows.map((row, index) => (
+                <div
+                  key={index}
+                  className="border border-gray-200 rounded-xl p-4 bg-gray-50 space-y-3"
+                >
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-semibold text-gray-700">
+                      Account {index + 1}
+                    </h3>
+
+                    {accountRows.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removeRow(index)}
+                        className="text-red-500 text-xs font-medium"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <input
+                      type="text"
+                      placeholder="Account name"
+                      value={row.accountName}
+                      onChange={(e) =>
+                        handleRowChange(
+                          index,
+                          "accountName",
+                          e.target.value.replace(/[^A-Za-z\s]/g, ""),
+                        )
+                      }
+                      className="w-full border rounded-lg px-3 py-2 text-sm"
+                    />
+
+                    <input
+                      type="text"
+                      placeholder="Account number"
+                      value={row.accountNumber}
+                      onChange={(e) =>
+                        handleRowChange(index, "accountNumber", e.target.value)
+                      }
+                      className="w-full border rounded-lg px-3 py-2 text-sm"
+                    />
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </PopUp>
@@ -167,11 +252,14 @@ const DuplicateTradelineHandling = () => {
               label="Check if borrower qualifies after including both duplicate accounts in LOS?"
               value={qualifiesWithBothAccounts}
               options={["Yes", "No"]}
-              onChange={(v) =>
+              onChange={(v) => {
                 setDuplicateTradelineHandling({
                   qualifiesWithBothAccounts: v,
-                })
-              }
+                });
+                if (v === "No") {
+                  setShowPopup(true);
+                }
+              }}
             />
 
             {qualifiesWithBothAccounts === "Yes" && (
@@ -200,7 +288,7 @@ const DuplicateTradelineHandling = () => {
             {creditSupplementAvailable === "No" && (
               <EditableCondition
                 type="condition"
-                value="[[Account name_Number]] and [[Account name_Number]] seem to be duplicate and to qualify the borrower [[Account name_Number]] has been excluded from DTI. Provide credit supplement to confirm that both accounts are duplicate."
+                value={`${accountText} seem to be duplicate and to qualify the borrower ${accountText} has been excluded from DTI. Provide credit supplement to confirm that both accounts are duplicate.`}
               />
             )}
           </div>
@@ -210,31 +298,45 @@ const DuplicateTradelineHandling = () => {
 
         {creditSupplementAvailable === "Yes" && (
           <div className="border rounded-xl p-6 bg-blue-50 space-y-6">
-            <CheckboxGroup
-              label="If credit supplement is available, then check if any of the below points fails?"
-              options={[
+            <DynamicChecklist
+              items={[
                 "Credit supplement received reflects incorrect borrower name, SSN, DOB",
                 "Credit supplement provided does not verify that one of the duplicate accounts is deleted.",
                 "Credit supplement reflects another tradeline which was not reported on original credit report and after including this payment, ratios will exceed 50%",
               ]}
-              values={supplementFailures}
-              onChange={(v) =>
+              selectedItems={supplementFailures}
+              customItems={otherSupplementFailures}
+              onToggle={(item) => {
+                const updated = supplementFailures.includes(item)
+                  ? supplementFailures.filter((i) => i !== item)
+                  : [...supplementFailures, item];
+
                 setDuplicateTradelineHandling({
-                  supplementFailures: v,
-                })
-              }
+                  supplementFailures: updated,
+                });
+              }}
+              onCustomChange={setOtherSupplementFailures}
             />
 
-            {supplementFailures.length > 0 && (
+            {(supplementFailures.length > 0 ||
+              otherSupplementFailures.some((o) => o.trim())) && (
               <div className="border rounded-xl bg-white shadow-sm space-y-4 overflow-hidden">
                 <EditableCondition
                   type="condition"
-                  value={`[[Account name_Number]] and [[Account name_Number]] seem to be duplicate and to qualify the borrower [[Account name_Number]] has been excluded from DTI. Credit supplement received in file has below issues:\n\n${supplementFailures
-                    .map(
-                      (item, idx) =>
-                        `${String.fromCharCode(97 + idx)}) ${item}`,
-                    )
-                    .join("\n")}`}
+                  value={(() => {
+                    const allItems = [
+                      ...(supplementFailures ?? []),
+                      ...otherSupplementFailures.filter((o) => o.trim()),
+                    ];
+
+                    const lettered = allItems
+                      .map(
+                        (item, i) => `${String.fromCharCode(97 + i)}) ${item}`,
+                      )
+                      .join("\n");
+
+                    return `${accountText} seem to be duplicate and to qualify the borrower ${accountText} has been excluded from DTI. Credit supplement received in file has below issues:\n\n${lettered}`;
+                  })()}
                 />
               </div>
             )}

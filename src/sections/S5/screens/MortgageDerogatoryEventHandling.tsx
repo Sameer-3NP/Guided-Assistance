@@ -8,6 +8,7 @@ import PopUp from "../../../components/PopUp";
 
 import { AlertTriangle, FileWarning } from "lucide-react";
 import PromptRadio from "../../../components/PromptRadio";
+import EditableCondition from "../../../components/EditableCondition";
 
 const MortgageDerogatoryEventHandling = () => {
   const { registerActions } = useFlowContext();
@@ -54,10 +55,10 @@ const MortgageDerogatoryEventHandling = () => {
 
     /* ---------------- ACCOUNT CHECK (global) ---------------- */
 
-    if (!selectedAccount?.accountNumber) {
-      toast.error("Please add account number and name.");
-      return;
-    }
+    // if (!selectedAccount?.accountNumber) {
+    //   toast.error("Please add account number and name.");
+    //   return;
+    // }
 
     /* =======================================================
      FORECLOSURE FLOW (Decision Logic A)
@@ -247,6 +248,75 @@ const MortgageDerogatoryEventHandling = () => {
     if (updated.length > 0) setShowPopup(true);
   };
 
+  /* ---------------- ACCOUNT ROWS ---------------- */
+
+  const accountRows = mortgageDerogatoryEventHandling.accountRows || [];
+
+  const addRow = () => {
+    setMortgageDerogatoryEventHandling({
+      accountRows: [
+        ...accountRows,
+        {
+          creditorName: "",
+          accountNumber: "",
+        },
+      ],
+    });
+  };
+
+  const removeRow = (index: number) => {
+    const updated = accountRows.filter((_, i) => i !== index);
+
+    setMortgageDerogatoryEventHandling({
+      accountRows: updated,
+    });
+  };
+
+  const handleRowChange = (
+    index: number,
+    field: "creditorName" | "accountNumber",
+    value: string,
+  ) => {
+    const updated = [...accountRows];
+
+    updated[index] = {
+      ...updated[index],
+      [field]: value,
+    };
+
+    setMortgageDerogatoryEventHandling({
+      accountRows: updated,
+    });
+  };
+
+  const handleAccountSave = () => {
+    const invalid = accountRows.some(
+      (row) => !row.creditorName || !row.accountNumber,
+    );
+
+    if (invalid) {
+      toast.error("Please fill all account details.");
+      return;
+    }
+
+    setMortgageDerogatoryEventHandling({
+      accounts: accountRows,
+      selectedAccount: accountRows[0],
+    });
+
+    setShowPopup(false);
+  };
+
+  const accountText =
+    accounts.length > 0
+      ? accounts
+          .map(
+            (acc, index) =>
+              `${index + 1}. ${acc.creditorName} (${acc.accountNumber})`,
+          )
+          .join("\n")
+      : "[Creditor Name] ([Account Number])";
+
   return (
     <div className="flex justify-center w-full px-6">
       <div className="w-full max-w-4xl bg-white p-8 rounded-2xl shadow-sm border border-gray-200 space-y-8">
@@ -306,9 +376,12 @@ const MortgageDerogatoryEventHandling = () => {
             />
 
             {foreclosureDocsAvailable === "No" && (
-              <div className="border border-red-400 bg-red-50 p-3 rounded-xl text-sm text-red-700">
-                Condition appears as per Branch 4 of decision logic A
-              </div>
+              <EditableCondition
+                type="condition"
+                value={`Credit report reflects foreclosure against tradeline:
+                ${accountText}
+                however, foreclosure documentation (Trustee’s Deed / Property Profile / supporting documentation) is not available in file.Please provide foreclosure documents to verify disposition date and confirm waiting period eligibility.`}
+              />
             )}
           </div>
         )}
@@ -375,8 +448,9 @@ const MortgageDerogatoryEventHandling = () => {
 
               {foreclosureDocTypes.length === 0 && (
                 <div className="border border-yellow-400 bg-yellow-50 p-3 rounded-xl text-sm text-yellow-700">
-                  Alert appears as per Branch 5 and alert will have the option
-                  to escalate it to management review.
+                  Document received in file is different than the Trustee’s
+                  deed/Property Profile. Management to review the document for
+                  its acceptability.
                 </div>
               )}
             </div>
@@ -938,42 +1012,90 @@ const MortgageDerogatoryEventHandling = () => {
           open={showPopup}
           title="Account Details"
           icon={<FileWarning className="w-5 h-5 text-blue-500" />}
-          confirmText="Continue"
-          onConfirm={() => setShowPopup(false)}
+          confirmText="Save"
+          onClose={() => setShowPopup(false)}
+          onConfirm={handleAccountSave}
         >
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium">Creditor Name</label>
-              <input
-                type="text"
-                value={selectedAccount?.creditorName ?? ""}
-                onChange={(e) =>
-                  setMortgageDerogatoryEventHandling({
-                    selectedAccount: {
-                      ...selectedAccount,
-                      creditorName: e.target.value,
-                    },
-                  })
-                }
-                className="w-full border rounded-md p-2 text-sm"
-              />
+          <div className="space-y-3">
+            <div className="flex items-center justify-between">
+              <h3 className="text-sm font-medium text-gray-700">
+                Mortgage Accounts
+              </h3>
+
+              <button
+                type="button"
+                onClick={addRow}
+                className="text-blue-600 text-xs font-medium"
+              >
+                + Add
+              </button>
             </div>
 
-            <div>
-              <label className="text-sm font-medium">Account Number</label>
-              <input
-                type="text"
-                value={selectedAccount?.accountNumber ?? ""}
-                onChange={(e) =>
-                  setMortgageDerogatoryEventHandling({
-                    selectedAccount: {
-                      ...selectedAccount,
-                      accountNumber: e.target.value,
-                    },
-                  })
-                }
-                className="w-full border rounded-md p-2 text-sm"
-              />
+            <div className="space-y-3 max-h-80 overflow-y-auto pr-1">
+              {accountRows.map((row, index) => (
+                <div
+                  key={index}
+                  className="border border-gray-200 rounded-xl p-4 bg-gray-50 space-y-3"
+                >
+                  <div className="flex items-center justify-between">
+                    <h3 className="text-sm font-semibold text-gray-700">
+                      Account {index + 1}
+                    </h3>
+
+                    {accountRows.length > 1 && (
+                      <button
+                        type="button"
+                        onClick={() => removeRow(index)}
+                        className="text-red-500 text-xs font-medium"
+                      >
+                        Remove
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    {/* Creditor Name */}
+
+                    <div className="space-y-1">
+                      <label className="text-xs font-medium text-gray-600">
+                        Creditor Name
+                      </label>
+
+                      <input
+                        type="text"
+                        placeholder="Enter creditor name"
+                        value={row.creditorName}
+                        onChange={(e) =>
+                          handleRowChange(index, "creditorName", e.target.value)
+                        }
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-100"
+                      />
+                    </div>
+
+                    {/* Account Number */}
+
+                    <div className="space-y-1">
+                      <label className="text-xs font-medium text-gray-600">
+                        Account Number
+                      </label>
+
+                      <input
+                        type="text"
+                        placeholder="Enter account number"
+                        value={row.accountNumber}
+                        onChange={(e) =>
+                          handleRowChange(
+                            index,
+                            "accountNumber",
+                            e.target.value,
+                          )
+                        }
+                        className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-blue-100"
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </PopUp>

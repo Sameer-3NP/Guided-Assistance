@@ -9,6 +9,28 @@ import CheckboxGroup from "../../../components/CheckboxGroup";
 import PopUp from "../../../components/PopUp";
 import { AlertTriangle, FileWarning } from "lucide-react";
 import { useS1Store } from "../../../store/useS1Store";
+import EditableCondition from "../../../components/EditableCondition";
+import DynamicChecklist from "../../../components/DynamicChecklist";
+
+const agreementChecklistItems = [
+  "Child support document reflects case# and creditor name which does not match with the tradeline reflected on credit report",
+  "Child support document reflects different monthly payment than the one reflected on credit report",
+  "Child support payment is active as per child support document however, tradeline on credit report is inactive.",
+  "Child support document is not executed/notarized completely.",
+  "Child support reflects missing pages.",
+  "Child support tradeline reflects account is in collection, but child support document provided does not reflect any delinquent information. Clarification is required for the same.",
+];
+
+const divorceChecklistItems = [
+  "Divorce decree reflects case# and creditor name which does not match with the tradeline reflected on credit report",
+  "Divorce decree reflects different monthly payment than the one reflected on credit report",
+  "Child support payment is active as per Divorce decree; however, tradeline on credit report is inactive.",
+  "Divorce decree is not executed/notarized completely.",
+  "Divorce decree reflects missing pages.",
+  "Divorce decree tradeline reflects account is in collection, but child support document provided does not reflect any delinquent information. Clarification is required for the same purpose.",
+  "Divorce decree reflects that additional debt is assigned to the borrower which is not included in DTI, and divorce is recent. After including the payment in DTI ratios will exceed the limit of 50%",
+  "Divorce decree reflects additional real estate assigned to borrowers and PITIA hit for the same is not included in LOS. Need clarification on the current disposition of the property.",
+];
 
 const ChildSupportHandling = () => {
   const { registerActions } = useFlowContext();
@@ -21,11 +43,15 @@ const ChildSupportHandling = () => {
     hasChildSupportTradeline,
     supportingDocument,
     documentType,
-    discrepancies,
+    agreementDiscrepancies = [],
+    divorceDiscrepancies = [],
     lenderRequirement,
     accounts,
     selectedAccount,
     dlaLessThan7Years,
+    conditionMsg,
+    customAgreementChecklist = [],
+    customDivorceChecklist = [],
   } = childSupportHandling;
 
   /* ---------- LOCAL STATE ---------- */
@@ -47,6 +73,43 @@ const ChildSupportHandling = () => {
     }));
     navigate(path);
   };
+
+  const setCustomAgreementChecklist = (
+    value: string[] | ((prev: string[]) => string[]),
+  ) => {
+    const next =
+      typeof value === "function" ? value(customAgreementChecklist) : value;
+
+    setChildSupportHandling({
+      customAgreementChecklist: next,
+    });
+  };
+
+  const setCustomDivorceChecklist = (
+    value: string[] | ((prev: string[]) => string[]),
+  ) => {
+    const next =
+      typeof value === "function" ? value(customDivorceChecklist) : value;
+
+    setChildSupportHandling({
+      customDivorceChecklist: next,
+    });
+  };
+
+  const finalAgreementDiscrepancies = [
+    ...(agreementDiscrepancies || []),
+    ...(customAgreementChecklist || []),
+  ];
+
+  const finalDivorceDiscrepancies = [
+    ...(divorceDiscrepancies || []),
+    ...(customDivorceChecklist || []),
+  ];
+
+  const accountText =
+    selectedAccount?.creditorName && selectedAccount?.accountNumber
+      ? `${selectedAccount.creditorName}#${selectedAccount.accountNumber}`
+      : "[Account Name_Number]";
 
   /* ---------- POPUP SUBMIT ---------- */
 
@@ -106,11 +169,6 @@ const ChildSupportHandling = () => {
         "No document selected. Escalate documentation for manager review.",
       );
 
-    if (discrepancies.length > 0)
-      toast.error(
-        `Condition appears as per Branch 4 (${selectedAccount.creditorName} / ${selectedAccount.accountNumber})`,
-      );
-
     completeS4AndNavigate();
   };
 
@@ -133,7 +191,8 @@ const ChildSupportHandling = () => {
     dlaLessThan7Years,
     supportingDocument,
     documentType,
-    discrepancies,
+    agreementDiscrepancies,
+    divorceDiscrepancies,
     lenderRequirement,
     selectedAccount,
     accounts,
@@ -244,45 +303,93 @@ const ChildSupportHandling = () => {
           </div>
         )}
 
-        {/* CHILD SUPPORT AGREEMENT CHECKLIST */}
         {documentType.includes("Child support agreement") && (
           <div className="border rounded-xl p-6 bg-blue-50 space-y-6">
-            <CheckboxGroup
-              label="Child support agreement checklist"
-              options={[
-                "Case# and creditor name does not match with tradeline",
-                "Monthly payment different from credit report",
-                "Payment active in document but inactive on credit report",
-                "Document not executed/notarized",
-                "Missing pages",
-                "Account in collection but document shows no delinquency",
-              ]}
-              values={discrepancies}
-              onChange={(v) => setChildSupportHandling({ discrepancies: v })}
+            <DynamicChecklist
+              items={agreementChecklistItems}
+              selectedItems={agreementDiscrepancies ?? []}
+              customItems={customAgreementChecklist ?? []}
+              onToggle={(item) => {
+                const updated = agreementDiscrepancies?.includes(item)
+                  ? agreementDiscrepancies.filter((i) => i !== item)
+                  : [...(agreementDiscrepancies || []), item];
+
+                setChildSupportHandling({ agreementDiscrepancies: updated });
+              }}
+              onCustomChange={setCustomAgreementChecklist}
             />
           </div>
         )}
 
-        {/* DIVORCE DECREE CHECKLIST */}
         {documentType.includes("Divorce decree") && (
           <div className="border rounded-xl p-6 bg-blue-50 space-y-6">
-            <CheckboxGroup
-              label="Divorce decree checklist"
-              options={[
-                "Case# and creditor name does not match with tradeline",
-                "Monthly payment different from credit report",
-                "Payment active in document but inactive on credit report",
-                "Document not executed/notarized",
-                "Missing pages",
-                "Account in collection but document shows no delinquency",
-                "Additional debt assigned not included in DTI",
-                "Additional real estate assigned not included in PITIA",
-              ]}
-              values={discrepancies}
-              onChange={(v) => setChildSupportHandling({ discrepancies: v })}
+            <DynamicChecklist
+              items={divorceChecklistItems}
+              selectedItems={divorceDiscrepancies ?? []}
+              customItems={customDivorceChecklist ?? []}
+              onToggle={(item) => {
+                const updated = divorceDiscrepancies?.includes(item)
+                  ? divorceDiscrepancies.filter((i) => i !== item)
+                  : [...(divorceDiscrepancies || []), item];
+
+                setChildSupportHandling({ divorceDiscrepancies: updated });
+              }}
+              onCustomChange={setCustomDivorceChecklist}
             />
           </div>
         )}
+
+        {documentType.includes("Child support agreement") &&
+          finalAgreementDiscrepancies.length > 0 && (
+            <div className="border border-red-400 bg-red-50 p-3 rounded-xl text-sm text-red-700 space-y-2">
+              <div className="font-semibold">
+                Child Support Agreement Issues
+              </div>
+
+              <div className="mt-2">
+                {`Credit report reflects account ${accountText} which is a
+                child support account and child support/divorce decree document
+                is available in file which has inconsistent information as
+                mentioned below:`}
+              </div>
+
+              {finalAgreementDiscrepancies.map((item, i) => (
+                <div key={i}>
+                  {String.fromCharCode(97 + i)}){item}
+                </div>
+              ))}
+
+              <div className="mt-2">
+                Please provide clarification and updated documentation for
+                validation.
+              </div>
+            </div>
+          )}
+
+        {documentType.includes("Divorce decree") &&
+          finalDivorceDiscrepancies.length > 0 && (
+            <div className="border border-red-400 bg-red-50 p-3 rounded-xl text-sm text-red-700 space-y-2">
+              <div className="font-semibold">Divorce Decree Issues</div>
+
+              <div className="mt-2">
+                {`Credit report reflects account ${accountText} which is a
+                child support account and child support/divorce decree document
+                is available in file which has inconsistent information as
+                mentioned below:`}
+              </div>
+
+              {finalDivorceDiscrepancies.map((item, i) => (
+                <div key={i}>
+                  {String.fromCharCode(97 + i)}) {item}
+                </div>
+              ))}
+
+              <div className="mt-2">
+                Please provide clarification and updated documentation for
+                validation.
+              </div>
+            </div>
+          )}
 
         {/* PROMPT 4 */}
         {supportingDocument === "No" && (
@@ -296,9 +403,14 @@ const ChildSupportHandling = () => {
               }
             />
             {lenderRequirement === "Yes" && (
-              <div className="border border-red-400 bg-red-50 p-3 rounded text-sm text-red-700">
-                Condition appears as per Branch 3
-              </div>
+              <EditableCondition
+                type="condition"
+                value={
+                  conditionMsg ||
+                  `Credit report reflects account ${accountText} which is a child support account and no other document is available in file. However, as per lender’s requirement, we require either a child support agreement or divorce decree to validate the actual payment.`
+                }
+                onChange={(v) => setChildSupportHandling({ conditionMsg: v })}
+              />
             )}
           </div>
         )}

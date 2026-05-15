@@ -347,7 +347,7 @@ const DisputedAccountHandling = () => {
               Credit Supplement Validation
             </div>
 
-            <div className="space-y-4">
+            <div className="space-y-4"> 
               <DynamicChecklist
                 items={checklistItems}
                 selectedItems={checklist}
